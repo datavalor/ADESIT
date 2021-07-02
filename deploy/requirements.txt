@@ -1,0 +1,16 @@
+wheel==0.36.2
+dash==1.20.0
+dash-bootstrap-components==0.12.2
+dash-tabulator==0.4.2
+flask_caching==1.10.1
+pandas==1.2.5
+pydataset==0.2.0
+scikit-learn==0.24.2
+
+numpy==1.21.0
+cython==0.29.23
+
+# sortedcontainers==2.4.0
+# networkx==2.5
+# recordlinkage==0.14
+# scikit-learn==0.24.1

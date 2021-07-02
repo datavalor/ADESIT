@@ -1,0 +1,37 @@
+version: '3'
+services:
+  back:
+    restart: always
+    build: datavalor/adesit-back
+    container_name: adesit-back
+    build:
+      context: .
+      dockerfile: Dockerfile.back
+    ports:
+      - "8050:8050"
+    environment:
+      - FLASK_APP=server
+    volumes:
+      - ../dash:/dash
+    working_dir: /dash
+    command: python app.py
+    network_mode: "bridge"
+  nginx:
+    restart: always
+    image: nginx
+    container_name: adesit-nginx
+    volumes:
+      - ./nginx-default.conf:/etc/nginx/conf.d/default.conf
+      - ./doc:/doc
+    depends_on:
+      - back
+    links:
+      - back:back
+    ports:
+      - "8008:80"
+    environment:
+      - HTTPS_METHOD=redirect
+    env_file:
+      - nginx-proxy.env
+    network_mode: "bridge"
+
