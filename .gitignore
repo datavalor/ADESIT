@@ -2,7 +2,6 @@
 .vscode/
 cache-directory/
 *.p
-*.png
 tmp/
 venv/
 

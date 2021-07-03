@@ -12,17 +12,14 @@ logging.basicConfig()
 import pandas as pd
 pd.options.mode.chained_assignment = None 
 import numpy as np
-import base64
-import io
 import math
-
-import pydataset
 
 # Personnal imports
 import fastg3.crisp as g3crisp
 import fastg3.ncrisp as g3ncrisp
 import figure_generator as fig_gen
-from utils import parse_attributes_settings, num_or_cat
+from utils.data_utils import parse_attributes_settings, num_or_cat
+from utils.cache_utils import *
 
 # Constants definition
 G12_COLUMN_NAME = "_violating_tuple"
@@ -34,96 +31,9 @@ TSNE_AXES = ['__t-SNE1', '__t-SNE2']
 PCA_AXES = ['__PCA1', '__PCA2']
 VIZ_PROJ = PCA_AXES+TSNE_AXES
 
-dataset_names={
-    'iris':'iris',
-    'housing': 'Housing',
-    'tobacco': 'Tobacco',
-    'kidney': 'kidney'
-}
-
-def register_callbacks(app, cache, logging_level=logging.INFO):
+def register_callbacks(app, logging_level=logging.INFO):
     logger=logging.getLogger('adesit_callbacks')
     logger.setLevel(logging_level)
-
-    def get_data(session_id, pydata=False, clear=False, filename=None, contents=None, copy=None):    
-        @cache.memoize()
-        def handle_data(session_id):
-            if not copy is None: 
-                logger.debug("/!\ replacing stored data /!\\")
-                return copy
-            logger.debug(f"/!\ full data loading of {filename} /!\\")
-            if pydata:
-                df = pydataset.data(dataset_names[filename])
-                data_holder = {
-                    "data": df
-                }
-            elif not filename is None:
-                _, content_string = contents.split(',')
-                decoded = base64.b64decode(content_string)
-                try:
-                    if 'csv' in filename:
-                        # Assume that the user uploaded a CSV file
-                        df = pd.read_csv(
-                            io.StringIO(decoded.decode('utf-8')))
-                    elif 'xls' in filename:
-                        # Assume that the user uploaded an excel file
-                        df = pd.read_excel(io.BytesIO(decoded))
-                except Exception as e:
-                    logger.error(e)
-                    data_holder = None
-                data_holder = {
-                    "data": df,
-                    "graph": None
-                }
-            else:
-                data_holder = None
-
-            return {
-                "data_holder": data_holder,
-                "graphs": {},
-                "thresolds_settings": {},
-                "table_data": None,
-                "selected_point": None
-            }
-
-        if clear: 
-            cache.delete_memoized(handle_data, session_id)
-            return None
-        else:
-            return handle_data(session_id)
-
-    def clear_session(session_id):
-        get_data(session_id, clear=True)
-
-    def overwrite_session_data_holder(session_id, dh=None):
-        session_data=get_data(session_id)
-        session_data["data_holder"]=dh
-        clear_session(session_id)
-        get_data(session_id, copy=session_data)
-
-    def overwrite_session_graphs(session_id, graphs={}):
-        session_data=get_data(session_id)
-        session_data["graphs"]=graphs
-        clear_session(session_id)
-        get_data(session_id, copy=session_data)
-
-    def overwrite_session_settings(session_id, thresolds_settings={}):
-        session_data=get_data(session_id)
-        session_data["thresolds_settings"]=thresolds_settings
-        clear_session(session_id)
-        get_data(session_id, copy=session_data)
-
-    def overwrite_tabledata(session_id, table=None):
-        session_data=get_data(session_id)
-        session_data["table_data"]=table
-        clear_session(session_id)
-        get_data(session_id, copy=session_data)
-    
-    def overwrite_selected_point(session_id, selection=None):
-        session_data=get_data(session_id)
-        session_data["selected_point"]=selection
-        clear_session(session_id)
-        get_data(session_id, copy=session_data)
 
     @app.callback([Output('data-loaded','children'),
                 Output('dataset_confirm', 'children'),
@@ -245,7 +155,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
                     dh["data"]=df_calc
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
-                    overwrite_selected_point(session_id)
+                    overwrite_session_selected_point(session_id)
                     return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, False, False
                 else:
                     is_open=True
@@ -255,7 +165,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
             default_g2 = fig_gen.bullet_indicator(reference=g2_indicator['data'][0]['value'])
             default_g1 = fig_gen.bullet_indicator(reference=g1_indicator['data'][0]['value'])
             default_ncounterexample = ""
-            overwrite_selected_point(session_id)
+            overwrite_session_selected_point(session_id)
             return True, is_open, "Done", default_g3, default_g2, default_g1, default_ncounterexample, False, True, True
         else:
             raise PreventUpdate
@@ -305,7 +215,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
             attributes_settings = get_data(session_id)["thresolds_settings"]
             if new_attributes_settings is not None:
                 for attr in new_attributes_settings.keys(): attributes_settings[attr] = new_attributes_settings[attr]
-                overwrite_session_settings(session_id, attributes_settings)            
+                overwrite_session_thresolds_settings(session_id, attributes_settings)            
             
             outuput_thresolds = []
             for attr in inputattr:
@@ -395,7 +305,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
 
         if changed_id == 'clear-selection.n_clicks': 
-            overwrite_selected_point(session_id, selection=None)
+            overwrite_session_selected_point(session_id, selection=None)
         
         dh=get_data(session_id)["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
@@ -430,7 +340,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
                             hovered_point=points[0]
                             hovered_point_conflicts=dh["graph"][hovered_point]
                             highlighted_points=[hovered_point]+hovered_point_conflicts
-                            overwrite_selected_point(session_id, selection=highlighted_points)
+                            overwrite_session_selected_point(session_id, selection=highlighted_points)
                     else:
                         highlighted_points = get_data(session_id)["selected_point"]
                         
@@ -533,7 +443,7 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
             columns = [{"name": column, "id": column} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME]]
 
             output_df = data[[c["name"] for c in columns]].copy()
-            overwrite_tabledata(session_id, output_df)
+            overwrite_session_table_data(session_id, output_df)
 
             n_rows=len(output_df.index)
             rows_per_page = 15
@@ -561,4 +471,3 @@ def register_callbacks(app, cache, logging_level=logging.INFO):
             return table_data.iloc[
                 page_current*page_size:(page_current+ 1)*page_size
             ].to_dict('records')
-# %%

@@ -10,6 +10,7 @@ import logging
 # Personnal imports
 from layout import index_string, serve_layout
 from callbacks import register_callbacks
+import utils.cache_utils as cache_utils
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='ADESIT')
@@ -30,12 +31,13 @@ if __name__ == '__main__':
         'CACHE_THRESHOLD': 100
     }
     if not args.timeout: cache_config['CACHE_DEFAULT_TIMEOUT']=500
-    cache = Cache(app.server, config=cache_config)
+    cache_utils.cache = Cache(app.server, config=cache_config)
 
     if args.debug:
-        register_callbacks(app, cache, logging_level=logging.DEBUG)
+        cache_utils.logger.setLevel(logging.DEBUG)
+        register_callbacks(app, logging_level=logging.DEBUG)
         app.run_server(debug=True)
     else:
-        register_callbacks(app, cache)
+        register_callbacks(app)
         app.run_server(debug=False, host='0.0.0.0')
         

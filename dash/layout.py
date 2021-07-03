@@ -1,14 +1,13 @@
 
 import dash_bootstrap_components as dbc
-import dash_tabulator
 import dash_core_components as dcc
 import dash_html_components as html
 
 import dash_table
-
 import figure_generator as fig_gen
-
 import uuid
+
+from utils.dash_utils import hr_tooltip, Tooltip, Modal
 
 index_string = '''
         <!DOCTYPE html>
@@ -46,13 +45,6 @@ index_string = '''
         </body>
         </html>
     '''
-
-hr_tooltip = html.Hr(style={'border': 'none', 'height': '2px', 'backgroundColor': '#FFF', 'marginTop': '2px', 'marginBottom': '2px'})
-
-def Tooltip(**kwargs):
-    #style = kwargs.pop('style')
-    style_with_defaults = {'font-size': '14px'}
-    return dbc.Tooltip(style=style_with_defaults, **kwargs)
 
 def serve_layout(banner, app):
     session_id = str(uuid.uuid4())
@@ -105,6 +97,19 @@ def serve_layout(banner, app):
 
                                 *This is only a preview so bear in mind that you may be limited in computation resources (we will let you know) and that some bugs may remain.*
                             '''),
+                            dbc.Button(
+                                'User guide', 
+                                color="light", 
+                                id='user_guide_btn', 
+                                # style={'width' : '100%'}
+                            ),
+                            Modal(id='user_guide_modal'),
+                            dbc.Button(
+                                'About', 
+                                color="light",
+                                id='about_btn', 
+                                style={'marginLeft' : '5px'}
+                            )
                         ], 
                         style={'paddingLeft': '2%', 'borderLeft': '1px solid', 'width': '80%', 'display' : 'inline-block', 'paddingRight': '2%', 'textAlign':'justify'}
                     ),

@@ -1,10 +1,9 @@
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
-from utils import calc_percentage, calc_vertical_percentage
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 import dash_html_components as html
+
+from utils.data_utils import calc_percentage, calc_vertical_percentage
 
 def dataset_infos(name, ntuples, nattributes):
     return f'''
