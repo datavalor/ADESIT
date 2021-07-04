@@ -6,11 +6,22 @@ import argparse, functools
 # Handling cache and sessions
 from flask_caching import Cache
 import logging
+logging.basicConfig()
 
 # Personnal imports
 from layout import index_string, serve_layout
-from callbacks import register_callbacks
+from callbacks.viz_callbacks import register_viz_callbacks
+from callbacks.fd_settings_callbacks import register_fd_settings_callbacks
+from callbacks.table_callbacks import register_table_callbacks
+from callbacks.data_callbacks import register_data_callbacks
 import utils.cache_utils as cache_utils
+
+callbacks = [
+    register_viz_callbacks,
+    register_fd_settings_callbacks,
+    register_table_callbacks,
+    register_data_callbacks
+]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='ADESIT')
@@ -33,11 +44,15 @@ if __name__ == '__main__':
     if not args.timeout: cache_config['CACHE_DEFAULT_TIMEOUT']=500
     cache_utils.cache = Cache(app.server, config=cache_config)
 
-    if args.debug:
-        cache_utils.logger.setLevel(logging.DEBUG)
-        register_callbacks(app, logging_level=logging.DEBUG)
-        app.run_server(debug=True)
-    else:
-        register_callbacks(app)
-        app.run_server(debug=False, host='0.0.0.0')
+
+    
+    logging_level = logging.DEBUG if args.debug else logging.INFO
+
+    logger=logging.getLogger('adesit_callbacks')
+    cache_utils.logger.setLevel(logging_level)
+    logger.setLevel(logging_level)
+    for callback in callbacks: callback(app, plogger=logger)
+
+    if args.debug: app.run_server(debug=True)
+    else: app.run_server(debug=False, host='0.0.0.0')
         
