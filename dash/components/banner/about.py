@@ -16,5 +16,7 @@ about_content = [
         We thank Matteo Dumont and Antoine Mandin for their help on the initial development of ADESIT. We also thank Benjamin Bertin and Vincent Barellon for testing the application and their help for its deployment. Finally, we thank the Datavalor initiative at INSA Lyon for funding a part of this work.
     
         Sources are available on [GitHub](https://github.com/datavalor/adesit).
+
+        Copyright (c) 2021, DataValor. All rights reserved.
     ''')
 ]
