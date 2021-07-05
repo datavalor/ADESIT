@@ -19,7 +19,7 @@ concepts_content = [
         #### What is a counterexample?
         ADESIT proposes a **counterexample analysis** of your dataset. Imagine a researcher R who needs to predict the specie of an *iris* (pure coincidence...) in function of multiple characteristics of the flower. 
         Notably, R knows that the *sepal length* and the *sepal width* of irises are very disctinctive features. 
-        Therefore, R measures those two characteristics for 3 species of 150 flowers and takes a look at the result to evaluate the feasability of the problem.
+        Therefore, R measures those two characteristics for 3 species of 150 flowers and takes a look at the results to evaluate the feasability of the prediction task.
         R notably observes the following pair of tuples:
 
         | id   | sepal_length | sepal_width | specie |
@@ -27,24 +27,23 @@ concepts_content = [
         | t50 | 5.1 | 3.5 | setosa |
         | t80 | 5.1 | 3.5 | versicolor |
 
-        It is from there very clear that something is missing as no model can predict t50 and t80 at the same time! **(t50, t80) forms a counterexample.**
-
-        More formally, R was trying to assess the veracity of the following function: *specie=f(sepal_length, sepal_width)*. It is possible to express this function as a functionnal dependency (FD) in the form:
+        It appears very clear that something is missing as no model can predict t50 and t80 at the same time!
+        
+        More formally, R is trying to assess the veracity of the following function: *specie=f(sepal_length, sepal_width)*. It is possible to express this function as a functionnal dependency (FD) in the form:
 
         φ: sepal_length, sepal_width → specie
 
-        From there, we say that (t50, t80) violate φ. From there, R might go talk with specialist biologist researchers who might indicate to her why such counterexample might be happening. 
+        We say that the pair (t50, t80) violates φ: **(t50, t80) forms a counterexample.**. From there, R might go talk with specialist biologist researchers who might indicate to her why such counterexample might be happening. 
         Should R also measure the *petal length* and the *petal width* of the flower, who knows?
 
         #### About counterexample indicators
         In 1995, Kivinen introduces 3 counterexample indicators to measure the veracity of a FD in a relation:
-        * g1 measures the proportion of violating pairs
-        * g2 measures the proportion of tuples of involved in a violating pair
-        * g3 gives the minimum proportion of tuples to remove from the relation for the FD to be satisfied
+        * g1 measures the proportion of counterexamples
+        * g2 measures the proportion of tuples of involved in a counterexample
+        * g3 gives the minimum proportion of tuples to remove from the relation such that no counterexample remains
 
         In addition to the close inspection of the counterexamples in the dataset, those 3 indicators also bring valuable informations on the problem at hand. 
         Notably, g3 provides an upper bound on the accuracy reachable with any model. 
         Intuitively, this makes sense as a model, being nothing other than a function, cannot predict both tuples of a counterexample correctly (eg. t50 and t80).
-
     ''')
 ]

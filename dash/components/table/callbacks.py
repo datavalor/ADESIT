@@ -38,7 +38,7 @@ def register_callbacks(app, plogger):
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
         
-            columns = [{"name": column, "id": column} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME]]
+            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME]]
 
             output_df = data[[c["name"] for c in columns]].copy()
             overwrite_session_table_data(session_id, output_df)

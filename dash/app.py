@@ -17,13 +17,15 @@ from components import fd_settings as fd_settings_component
 from components import stats as stats_component
 from components import viz as viz_component
 from components import table as table_component
+from components import ce_viz as ce_viz_component
 
 components = [
     banner_component,
     fd_settings_component,
     stats_component,
     viz_component,
-    table_component
+    table_component,
+    ce_viz_component
 ]
 
 if __name__ == '__main__':

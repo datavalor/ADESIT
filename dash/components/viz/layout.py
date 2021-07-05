@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from components import table as table_component
+from components import ce_viz as ce_viz_component
 
 def render():
     return dbc.Collapse(
@@ -77,9 +78,10 @@ def render():
                 'display': 'inline-block',
                 'verticalAlign': 'top'
             }),
-    
-
-            table_component.render()
+            dbc.Tabs([
+                dbc.Tab(table_component.render(), label="Full dataset"),
+                dbc.Tab(ce_viz_component.render(), label="Interactive graph")
+            ])
         ], style={
             'marginLeft' : '0%', 
             'marginRight' : '0%'

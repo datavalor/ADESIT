@@ -22,5 +22,5 @@ def gen_modal(id, title="Modal header", content="This is content"):
             ],
             id=id,
             is_open=False,
-            size="lg",
+            size="xl",
     )

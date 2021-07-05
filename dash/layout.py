@@ -18,7 +18,7 @@ index_string = '''
         {%favicon%}
         <script src="https://kit.fontawesome.com/f5e0d5a64c.js" crossorigin="anonymous"></script>
         <meta charset="utf-8">
-        <title>ADESIT</title>
+        <title>ADƎSIT</title>
         <style type="text/css">
         .collapsing {
             -webkit-transition: none !important;
@@ -83,7 +83,11 @@ def serve_layout(banner, app):
             banner_component.render(app, banner=banner),
             fd_settings_component.render(),
             stats_component.render(),
-            viz_component.render()
+            viz_component.render(),
+
+            html.Div([
+                ""
+            ], style={"width": "100%", "height": "10px"})
     ], 
     style={
         'width' : '90%', 

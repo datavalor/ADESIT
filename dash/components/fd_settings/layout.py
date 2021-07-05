@@ -126,8 +126,8 @@ def render():
                 dcc.Dropdown(
                     id = "g3_computation",
                     options=[
-                        {'label': 'G3 Approximation', 'value': 'approx'},
-                        {'label': 'G3 Exact', 'value': 'exact'}
+                        {'label': 'g3 approximation', 'value': 'approx'},
+                        {'label': 'g3 exact', 'value': 'exact'}
                     ],
                     value='approx',
                     disabled=True,
