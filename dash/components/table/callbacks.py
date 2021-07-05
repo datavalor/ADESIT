@@ -1,18 +1,18 @@
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+
 import dash_table
 
 # Miscellaneous
 import pandas as pd
-pd.options.mode.chained_assignment = None 
 import numpy as np
 import math
+pd.options.mode.chained_assignment = None
 
-# Personnal imports
+from constants import *
 from utils.cache_utils import *
-from callbacks.constants import *
 
-def register_table_callbacks(app, plogger):
+def register_callbacks(app, plogger):
     logger = plogger
 
     # Callback for Table Output (b,c,d,e,f,g->h) 

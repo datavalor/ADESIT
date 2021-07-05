@@ -8,23 +8,52 @@ pd.options.mode.chained_assignment = None
 import numpy as np
 
 # Personnal imports
-import fastg3.crisp as g3crisp
 import fastg3.ncrisp as g3ncrisp
-import figure_generator as fig_gen
+import utils.figure_utils as fig_gen
 from utils.data_utils import parse_attributes_settings, num_or_cat
 from utils.cache_utils import *
-from callbacks.constants import *
+from constants import *
 
-def register_fd_settings_callbacks(app, plogger):
+def register_callbacks(app, plogger):
     logger = plogger
+
+    @app.callback([Output('data-loaded','children'),
+        Output('dataset_confirm', 'children'),
+        Output('left-attrs', 'disabled'),
+        Output('right-attrs', 'disabled'),
+        Output('collapse-viz', 'is_open')],
+        [Input('toy-dataset-iris','n_clicks'),
+        Input('toy-dataset-housing','n_clicks'),
+        Input('toy-dataset-tobacco','n_clicks'),
+        Input('toy-dataset-kidney','n_clicks'),
+        Input('upload-form', 'contents')],
+        [State('upload-form', 'filename'),
+        State('session-id', 'children')])
+    def handle_data(iris, housing, tobacco, kidney, contents, filename, session_id):
+        logger.debug('handle_data callback')
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        clear_session(session_id)
+        if "toy-dataset" in changed_id:
+            toy_dataset = changed_id.split(".")[0].split("-")[-1]
+            clear_session(session_id)
+            dh = get_data(session_id, filename=toy_dataset, pydata=True)["data_holder"]
+            n = len(dh["data"].index) if dh is not None else 0
+            return toy_dataset, fig_gen.dataset_infos(toy_dataset, n, len(dh["data"].columns)), False, False, True
+        elif filename is not None: 
+            clear_session(session_id)
+            dh = get_data(session_id, filename=filename, contents=contents)["data_holder"]
+            n = len(dh["data"].index) if dh is not None else 0
+            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False, True
+        else:
+            raise PreventUpdate
 
     # Callback for Dimensions (attribute) options in dropdowns (b->c,d,f)
     @app.callback([Output('right-attrs', 'options'),
-                Output('left-attrs', 'options'),
-                Output('right-attrs', 'value'),
-                Output('left-attrs', 'value')],
-                [Input('data-loaded','children')],
-                [State('session-id', 'children')])
+        Output('left-attrs', 'options'),
+        Output('right-attrs', 'value'),
+        Output('left-attrs', 'value')],
+        [Input('data-loaded','children')],
+        [State('session-id', 'children')])
     def update_options(data_loaded, session_id):
         logger.debug("update_options")
         dh=get_data(session_id)["data_holder"]
@@ -37,13 +66,13 @@ def register_fd_settings_callbacks(app, plogger):
 
         # Callback for Left Tolerances Output ()
     @app.callback([Output('thresold_table_features', 'data'),
-                Output('thresold_table_target', 'data')],
-                [Input('data-loaded','children'),
-                Input('left-attrs','value'),
-                Input('right-attrs','value')],
-                [State('thresold_table_features', 'data'),
-                State('thresold_table_target', 'data'),
-                State('session-id', 'children')])
+        Output('thresold_table_target', 'data')],
+        [Input('data-loaded','children'),
+        Input('left-attrs','value'),
+        Input('right-attrs','value')],
+        [State('thresold_table_features', 'data'),
+        State('thresold_table_target', 'data'),
+        State('session-id', 'children')])
     def handle_thresolds(data_loaded, left_attrs, right_attrs, fthresolds, tthresolds, session_id):
         logger.debug("handle_thresolds callback")
 
@@ -86,9 +115,9 @@ def register_fd_settings_callbacks(app, plogger):
 
     # Callback for Analyse button state
     @app.callback([Output('analyse_btn', 'disabled'),
-                Output('g3_computation', 'disabled')],
-                [Input('left-attrs','value'),
-                Input('right-attrs','value')])
+        Output('g3_computation', 'disabled')],
+        [Input('left-attrs','value'),
+        Input('right-attrs','value')])
     def handle_analyse_btn_state(left_attrs, right_attrs):
         logger.debug("analyse_btn_state callback")
         if left_attrs and right_attrs: return False, False
@@ -96,27 +125,27 @@ def register_fd_settings_callbacks(app, plogger):
 
     # Callback for data update and calculations ()
     @app.callback([Output('loading_screen','fullscreen'),
-                Output('alert-timeout', 'is_open'),
-                Output('data-analysed', 'children'),
-                Output('learnability_indicator', 'figure'),
-                Output('g2_indicator', 'figure'),
-                Output('g1_indicator', 'figure'),
-                Output('ntuples_involved', 'children'),
-                Output('collapse-stats', 'is_open'),
-                Output('mode', 'disabled'),
-                Output('view', 'disabled')],
-                [Input('data-loaded','children'),
-                Input('analyse_btn','n_clicks')],
-                [State('left-attrs','value'),
-                State('right-attrs','value'),
-                State('thresold_table_features', 'data'),
-                State('thresold_table_target', 'data'),
-                State('g3_computation','value'),
-                State('learnability_indicator', 'figure'),
-                State('g2_indicator', 'figure'),
-                State('g1_indicator', 'figure'),
-                State('ntuples_involved', 'children'),
-                State('session-id', 'children')])
+        Output('alert-timeout', 'is_open'),
+        Output('data-analysed', 'children'),
+        Output('learnability_indicator', 'figure'),
+        Output('g2_indicator', 'figure'),
+        Output('g1_indicator', 'figure'),
+        Output('ntuples_involved', 'children'),
+        Output('collapse-stats', 'is_open'),
+        Output('mode', 'disabled'),
+        Output('view', 'disabled')],
+        [Input('data-loaded','children'),
+        Input('analyse_btn','n_clicks')],
+        [State('left-attrs','value'),
+        State('right-attrs','value'),
+        State('thresold_table_features', 'data'),
+        State('thresold_table_target', 'data'),
+        State('g3_computation','value'),
+        State('learnability_indicator', 'figure'),
+        State('g2_indicator', 'figure'),
+        State('g1_indicator', 'figure'),
+        State('ntuples_involved', 'children'),
+        State('session-id', 'children')])
     def handle_analysis(data_updated, n_clicks, left_attrs, right_attrs, left_tols, right_tols, g3_computation, learnability_indicator, g2_indicator, g1_indicator, ncountexample_indicator, session_id):
         logger.debug("handle_analysis callback")
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]

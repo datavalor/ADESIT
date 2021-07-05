@@ -1,19 +1,16 @@
 import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
 
 # Miscellaneous
 import pandas as pd
-pd.options.mode.chained_assignment = None 
+pd.options.mode.chained_assignment = None
 
-# Personnal imports
-import figure_generator as fig_gen
+from constants import *
 from utils.cache_utils import *
-from callbacks.constants import *
+import utils.figure_utils as fig_gen
 
-def register_viz_callbacks(app, plogger):
+def register_callbacks(app, plogger):
     logger = plogger
 
     @app.callback([Output('x-axis', 'options'),
@@ -76,7 +73,7 @@ def register_viz_callbacks(app, plogger):
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
 
         if changed_id == 'clear-selection.n_clicks': 
-            overwrite_session_selected_point(session_id, selection=None)
+            overwrite_session_selected_point(session_id, None)
         
         dh=get_data(session_id)["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
@@ -111,7 +108,7 @@ def register_viz_callbacks(app, plogger):
                             hovered_point=points[0]
                             hovered_point_conflicts=dh["graph"][hovered_point]
                             highlighted_points=[hovered_point]+hovered_point_conflicts
-                            overwrite_session_selected_point(session_id, selection=highlighted_points)
+                            overwrite_session_selected_point(session_id, highlighted_points)
                     else:
                         highlighted_points = get_data(session_id)["selected_point"]
                         
