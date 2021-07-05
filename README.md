@@ -1,13 +1,22 @@
-ADESIT is a web application allowing to explore
+Suppose you are facing a new supervised learning (SL) challenge: a domain expert asks you if it is possible to predict a **target C** from a set of **features X** by learning on a **dataset r**. 
+To answer this question, it is common for a data scientist to directly jump into the learning step by training a model and  then evaluate it against a testing set to obtain an accuracy.
+If this approach might work, the interpretability of the result is generally rather low: *Why such accuracy, where the errors come from? Could you obtain a better one with a different model or settings?*
+Moreover, it can also be very costly as answering such questions might require many trainings.
+
+With ADESIT, we propose a tool to better understand your data beforehand in view of that SL problem, allowing to avoid many costly training and to obtain a deeper insight on your data. We target questions such as:
+* What areas of my data might present a problem?
+    * How the domain expert could explain those issues and provide potential solutions?
+    * How incorporating domain knowledge such as accuracies changes my results?
+* What maximum accuracy should I excpect from my trainings?
+* What features are the most discriminant?
+
+## Starting guide
 
 It is coded in Python (>=3.7) based on the Dash framework.
-The computation of g3 is powered by the [fastg3 python library](https://github.com/datavalor/fastg3).
+Counterexample analysis is powered by the [fastg3](https://github.com/datavalor/fastg3) python library.
+Once it is launched, ADESIT is available on port 8050.
 
-# Starting guide
-
-On it is launched, ADESIT is available on port 8050.
-
-## Regular
+### Regular
 
 ```
 pip install -r deploy/requirements.txt
@@ -19,14 +28,14 @@ python app.py -d -t -b
 * -b: no banner
 * -t: no time limit
 
-## Docker
+### Docker
 
 ```
 cd deploy/
 docker-compose up
 ```
 
-# Authors and developers
+## Authors and developers
 
 The demonstration paper associated with ADESIT is named *"ADESIT: Visualize the Limits of your Data in a Machine Learning Process"* and is in proceeding of VLDB 21 (International Conference on Very Large Data Bases). 
 Full version of this paper is available [here](https://pastel.archives-ouvertes.fr/LIRIS/hal-03242380v1).
