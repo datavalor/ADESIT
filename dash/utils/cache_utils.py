@@ -9,6 +9,8 @@ pd.options.mode.chained_assignment = None
 import base64
 import io
 
+from constants import *
+
 import pydataset
 dataset_names={
     'iris':'iris',
@@ -38,6 +40,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
         if pydata:
             df = pydataset.data(dataset_names[filename])
             if filename=="diamonds": df=df.sample(n=10000)
+            df[ADESIT_INDEX] = df.index
             data_holder = {
                 "data": df
             }
@@ -55,6 +58,8 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
             except Exception as e:
                 logger.error(e)
                 data_holder = None
+            
+            df[ADESIT_INDEX] = df.index
             data_holder = {
                 "data": df,
                 "graph": None

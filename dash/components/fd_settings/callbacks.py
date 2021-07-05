@@ -221,6 +221,8 @@ def register_callbacks(app, plogger):
                     # Merging
                     df_calc[G3_COLUMN_NAME][cover] = 1
                     dh["data"]=df_calc
+                    dh["X"]=list(xparams.keys())
+                    dh["Y"]=list(yparams.keys())
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)

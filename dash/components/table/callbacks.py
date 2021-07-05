@@ -16,7 +16,7 @@ def register_callbacks(app, plogger):
     logger = plogger
 
     # Callback for Table Output (b,c,d,e,f,g->h) 
-    @app.callback(Output('table-container', 'children'),
+    @app.callback(Output('viz_table_container', 'children'),
                 [Input('data-loaded','children'),
                 Input('main-graph','selectedData'),
                 Input('view','value'),
@@ -38,29 +38,37 @@ def register_callbacks(app, plogger):
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
         
-            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME]]
+            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME, ADESIT_INDEX]]
+            columns = [{"name": ADESIT_INDEX, "id": ADESIT_INDEX, "hideable":False}]+columns
 
             output_df = data[[c["name"] for c in columns]].copy()
             overwrite_session_table_data(session_id, output_df)
 
             n_rows=len(output_df.index)
-            rows_per_page = 15
             table = dash_table.DataTable(
-                id="dataTable",
+                id="viz_datatable",
                 export_format='csv',
                 columns=columns,
                 page_current=0,
-                page_size=rows_per_page,
-                page_count=math.ceil(n_rows/rows_per_page),
-                page_action='custom')
+                page_size=TABLE_MAX_ROWS,
+                page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
+                page_action='custom',
+                style_data_conditional=[
+                    {
+                        'if': { 'column_id': ADESIT_INDEX },
+                        'fontStyle': 'italic'
+                    },
+                ],
+                style_as_list_view=True
+            )
             return table
         else:
             raise PreventUpdate
     
     @app.callback(
-    Output('dataTable', 'data'),
-    [Input('dataTable', "page_current"),
-    Input('dataTable', "page_size")],
+    Output('viz_datatable', 'data'),
+    [Input('viz_datatable', "page_current"),
+    Input('viz_datatable', "page_size")],
     [State('session-id', 'children')])
     def update_table(page_current, page_size, session_id):
         logger.debug("update_table callback")

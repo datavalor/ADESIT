@@ -7,12 +7,11 @@ def render():
         html.Div("", style={'width': "100%", 'height': "10px"}),
         html.Div(
             [
-                
                 dash_table.DataTable(
-                    id="dataTable",
+                    id="viz_datatable",
                     page_size=15
                 )
             ], 
-            id="table-container"
+            id="viz_table_container"
         )
     ]

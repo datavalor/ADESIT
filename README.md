@@ -10,6 +10,8 @@ With ADESIT, we propose a tool to better understand your data beforehand in view
 * What maximum accuracy should I excpect from my trainings?
 * What features are the most discriminant?
 
+In practice, ADESIT is a visual tool which proposes multiple counterexample indicators as well as an interactive visual counterexample exploration to better understand the potential strengths and weaknesses of the project. A demonstration version of ADESIT is available at [adesit.datavalor.com](https://adesit.datavalor.com/).
+
 ## Starting guide
 
 It is coded in Python (>=3.7) based on the Dash framework.

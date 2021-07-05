@@ -1,4 +1,4 @@
-#dataTable button {
+#viz_datatable button, #ceviz_datatable button {
     font-size: 14px;
     padding: 6px 12px;
     margin-bottom: 0;
@@ -20,18 +20,18 @@
     margin-bottom: 5px;
     outline: none !important;
 }
-#dataTable button:focus,
-#dataTable button {
+#viz_datatable button:focus, #ceviz_datatable  button:focus,
+#viz_datatable button, #ceviz_datatable  button {
     outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px;
 }
-#dataTable button:hover,
-#dataTable button:focus {
+#viz_datatable button:hover, #ceviz_datatable  button:hover,
+#viz_datatable button:focus, #ceviz_datatable  button:focus {
     color: #333;
     text-decoration: none;
 }
-#dataTable button:active {
+#viz_datatable button:active, #ceviz_datatable  button:active {
     background-image: none;
     outline: 0;
     -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
