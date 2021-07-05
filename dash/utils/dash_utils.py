@@ -9,17 +9,18 @@ def Tooltip(**kwargs):
     style_with_defaults = {'font-size': '14px'}
     return dbc.Tooltip(style=style_with_defaults, **kwargs)
 
-def Modal(id):
+def gen_modal(id, title="Modal header", content="This is content"):
     return dbc.Modal(
             [
-                dbc.ModalHeader("Header"),
-                dbc.ModalBody("This is the content of the modal"),
+                dbc.ModalHeader(title),
+                dbc.ModalBody(content),
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="close", className="ml-auto", n_clicks=0
+                        "Close", id=f"{id}_close", className="ml-auto", n_clicks=0
                     )
                 ),
             ],
             id=id,
             is_open=False,
+            size="lg",
     )

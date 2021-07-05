@@ -13,7 +13,7 @@ import pydataset
 dataset_names={
     'iris':'iris',
     'housing': 'Housing',
-    'tobacco': 'Tobacco',
+    'diamonds': 'diamonds',
     'kidney': 'kidney'
 }
 
@@ -37,6 +37,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
         logger.debug(f"/!\ full data loading of {filename} /!\\")
         if pydata:
             df = pydataset.data(dataset_names[filename])
+            if filename=="diamonds": df=df.sample(n=10000)
             data_holder = {
                 "data": df
             }

@@ -17,19 +17,21 @@ from constants import *
 def register_callbacks(app, plogger):
     logger = plogger
 
-    @app.callback([Output('data-loaded','children'),
+    @app.callback(
+        [Output('data-loaded','children'),
         Output('dataset_confirm', 'children'),
         Output('left-attrs', 'disabled'),
         Output('right-attrs', 'disabled'),
         Output('collapse-viz', 'is_open')],
         [Input('toy-dataset-iris','n_clicks'),
         Input('toy-dataset-housing','n_clicks'),
-        Input('toy-dataset-tobacco','n_clicks'),
+        Input('toy-dataset-diamonds','n_clicks'),
         Input('toy-dataset-kidney','n_clicks'),
         Input('upload-form', 'contents')],
         [State('upload-form', 'filename'),
-        State('session-id', 'children')])
-    def handle_data(iris, housing, tobacco, kidney, contents, filename, session_id):
+        State('session-id', 'children')]
+    )
+    def handle_data(iris, housing, diamonds, kidney, contents, filename, session_id):
         logger.debug('handle_data callback')
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         clear_session(session_id)
@@ -48,12 +50,14 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     # Callback for Dimensions (attribute) options in dropdowns (b->c,d,f)
-    @app.callback([Output('right-attrs', 'options'),
+    @app.callback(
+        [Output('right-attrs', 'options'),
         Output('left-attrs', 'options'),
         Output('right-attrs', 'value'),
         Output('left-attrs', 'value')],
         [Input('data-loaded','children')],
-        [State('session-id', 'children')])
+        [State('session-id', 'children')]
+    )
     def update_options(data_loaded, session_id):
         logger.debug("update_options")
         dh=get_data(session_id)["data_holder"]
@@ -64,15 +68,17 @@ def register_callbacks(app, plogger):
         else:
             return [], [], None, None
 
-        # Callback for Left Tolerances Output ()
-    @app.callback([Output('thresold_table_features', 'data'),
+    # Callback for Left Tolerances Output ()
+    @app.callback(
+        [Output('thresold_table_features', 'data'),
         Output('thresold_table_target', 'data')],
         [Input('data-loaded','children'),
         Input('left-attrs','value'),
         Input('right-attrs','value')],
         [State('thresold_table_features', 'data'),
         State('thresold_table_target', 'data'),
-        State('session-id', 'children')])
+        State('session-id', 'children')]
+    )
     def handle_thresolds(data_loaded, left_attrs, right_attrs, fthresolds, tthresolds, session_id):
         logger.debug("handle_thresolds callback")
 
@@ -114,17 +120,20 @@ def register_callbacks(app, plogger):
 
 
     # Callback for Analyse button state
-    @app.callback([Output('analyse_btn', 'disabled'),
+    @app.callback(
+        [Output('analyse_btn', 'disabled'),
         Output('g3_computation', 'disabled')],
         [Input('left-attrs','value'),
-        Input('right-attrs','value')])
+        Input('right-attrs','value')]
+    )
     def handle_analyse_btn_state(left_attrs, right_attrs):
         logger.debug("analyse_btn_state callback")
         if left_attrs and right_attrs: return False, False
         else: return True, True
 
     # Callback for data update and calculations ()
-    @app.callback([Output('loading_screen','fullscreen'),
+    @app.callback(
+        [Output('loading_screen','fullscreen'),
         Output('alert-timeout', 'is_open'),
         Output('data-analysed', 'children'),
         Output('learnability_indicator', 'figure'),
@@ -145,7 +154,8 @@ def register_callbacks(app, plogger):
         State('g2_indicator', 'figure'),
         State('g1_indicator', 'figure'),
         State('ntuples_involved', 'children'),
-        State('session-id', 'children')])
+        State('session-id', 'children')]
+    )
     def handle_analysis(data_updated, n_clicks, left_attrs, right_attrs, left_tols, right_tols, g3_computation, learnability_indicator, g2_indicator, g1_indicator, ncountexample_indicator, session_id):
         logger.debug("handle_analysis callback")
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -217,13 +227,9 @@ def register_callbacks(app, plogger):
                     return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, False, False
                 else:
                     is_open=True
-            overwrite_session_data_holder(session_id, dh)
-            overwrite_session_graphs(session_id)
             default_g3 = fig_gen.gauge_indicator(reference=learnability_indicator['data'][0]['value'])
             default_g2 = fig_gen.bullet_indicator(reference=g2_indicator['data'][0]['value'])
             default_g1 = fig_gen.bullet_indicator(reference=g1_indicator['data'][0]['value'])
-            default_ncounterexample = ""
-            overwrite_session_selected_point(session_id)
-            return True, is_open, "Done", default_g3, default_g2, default_g1, default_ncounterexample, False, True, True
+            return True, is_open, "Done", default_g3, default_g2, default_g1, " ", False, True, True
         else:
             raise PreventUpdate

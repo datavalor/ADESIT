@@ -28,7 +28,7 @@ def render():
                     children=[
                         dbc.DropdownMenuItem("Iris", id="toy-dataset-iris"),
                         dbc.DropdownMenuItem("Housing", id="toy-dataset-housing"),
-                        dbc.DropdownMenuItem("Tobacco", id="toy-dataset-tobacco"),
+                        dbc.DropdownMenuItem("Diamonds", id="toy-dataset-diamonds"),
                         dbc.DropdownMenuItem("Kidney", id="toy-dataset-kidney"),
                     ],
                     direction="down",

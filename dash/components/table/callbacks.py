@@ -62,10 +62,12 @@ def register_callbacks(app, plogger):
     [Input('dataTable', "page_current"),
     Input('dataTable', "page_size")],
     [State('session-id', 'children')])
-    def update_table(page_current,page_size, session_id):
+    def update_table(page_current, page_size, session_id):
         logger.debug("update_table callback")
         table_data=get_data(session_id)["table_data"]
-        if table_data is not None:
+        if table_data is not None and page_current is not None:
             return table_data.iloc[
                 page_current*page_size:(page_current+ 1)*page_size
             ].to_dict('records')
+        else:
+            raise PreventUpdate

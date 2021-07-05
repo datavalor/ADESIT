@@ -2,7 +2,10 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from utils.dash_utils import Modal
+from utils.dash_utils import gen_modal
+from .about import about_content
+from .concepts import concepts_content
+from .user_guide import user_guide_content
 
 def render(app, banner=True):
     return dbc.Collapse(
@@ -22,18 +25,25 @@ def render(app, banner=True):
                         *This is only a preview so bear in mind that you may be limited in computation resources (we will let you know) and that some bugs may remain.*
                     '''),
                     dbc.Button(
+                        'Context and Concepts', 
+                        color="light", 
+                        id='concepts_open', 
+                    ),
+                    gen_modal(id='concepts_modal', title='Context and Concepts', content=concepts_content),
+                    dbc.Button(
                         'User guide', 
                         color="light", 
-                        id='user_guide_btn', 
-                        # style={'width' : '100%'}
+                        id='user_guide_open', 
+                        style={'marginLeft' : '5px'}
                     ),
-                    Modal(id='user_guide_modal'),
+                    gen_modal(id='user_guide_modal', title='User guide', content=user_guide_content),
                     dbc.Button(
                         'About', 
                         color="light",
-                        id='about_btn', 
+                        id='about_open', 
                         style={'marginLeft' : '5px'}
-                    )
+                    ),
+                    gen_modal(id='about_modal', title='About', content=about_content),
                 ], 
                 style={'paddingLeft': '2%', 'borderLeft': '1px solid', 'width': '80%', 'display' : 'inline-block', 'paddingRight': '2%', 'textAlign':'justify'}
             ),
