@@ -63,7 +63,8 @@ def register_callbacks(app, plogger):
         dh=get_data(session_id)["data_holder"]
         if dh is not None:
             df_parsed=dh["data"]
-            options=[{'label': str(col), 'title' : str(df_parsed.dtypes[str(col)]) ,'value': str(col)} for col in df_parsed.columns]
+            user_cols=dh["user_columns"]
+            options=[{'label': str(col), 'title' : str(df_parsed.dtypes[str(col)]), 'value': str(col)} for col in user_cols]
             return options, options, None, None
         else:
             return [], [], None, None
@@ -112,11 +113,11 @@ def register_callbacks(app, plogger):
                             'relative': attributes_settings.get(attr, {"params":[0,0]})["params"][1]
                         })
             
-            if changed_id=='left-attrs.value': return outuput_thresolds, tthresolds
-            else: return fthresolds, outuput_thresolds
+            if changed_id=='left-attrs.value': return outuput_thresolds, dash.no_update
+            else: return dash.no_update, outuput_thresolds
         else:
-            if changed_id=='left-attrs.value': return [], tthresolds
-            else: return fthresolds, []
+            if changed_id=='left-attrs.value': return [], dash.no_update
+            else: return dash.no_update, []
 
 
     # Callback for Analyse button state
@@ -229,9 +230,9 @@ def register_callbacks(app, plogger):
                     return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, False, False
                 else:
                     is_open=True
-            default_g3 = fig_gen.gauge_indicator(reference=learnability_indicator['data'][0]['value'])
-            default_g2 = fig_gen.bullet_indicator(reference=g2_indicator['data'][0]['value'])
-            default_g1 = fig_gen.bullet_indicator(reference=g1_indicator['data'][0]['value'])
-            return True, is_open, "Done", default_g3, default_g2, default_g1, " ", False, True, True
+            # default_g3 = fig_gen.gauge_indicator(reference=learnability_indicator['data'][0]['value'])
+            # default_g2 = fig_gen.bullet_indicator(reference=g2_indicator['data'][0]['value'])
+            # default_g1 = fig_gen.bullet_indicator(reference=g1_indicator['data'][0]['value'])
+            return True, is_open, "Done", dash.no_update, dash.no_update, dash.no_update, " ", False, True, True
         else:
             raise PreventUpdate

@@ -11,7 +11,6 @@ def render():
             html.H5("Interactive counterexample visualization and selection"),       
             # Graph (e)
             html.Div([
-                    #dcc.Loading(id="loading-graph", children=[html.Div(dcc.Graph(id='main-graph'))], type="circle"),
                     html.Div(dcc.Graph(id='main-graph', clear_on_unhover=True))
                 ], 
                 style={

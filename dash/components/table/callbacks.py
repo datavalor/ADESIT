@@ -1,3 +1,4 @@
+import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
@@ -79,3 +80,15 @@ def register_callbacks(app, plogger):
             ].to_dict('records')
         else:
             raise PreventUpdate
+
+    @app.callback(
+        Output("viz_datatable", "style_data_conditional"),
+        Input("viz_datatable", "active_cell")
+    )
+    def style_selected_rows(active_cell):
+        if active_cell is None:                                                                                                                                                                                                                      
+            raise PreventUpdate
+        val = [
+            {"if": {"filter_query": "{{id}} ={}".format(active_cell['row_id'])}, "backgroundColor": SELECTED_COLOR,}
+        ]   
+        return val

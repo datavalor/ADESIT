@@ -72,8 +72,7 @@ def register_callbacks(app, plogger):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
 
-        if changed_id == 'clear-selection.n_clicks': 
-            overwrite_session_selected_point(session_id, None)
+        if changed_id == 'clear-selection.n_clicks': overwrite_session_selected_point(session_id, None)
         
         dh=get_data(session_id)["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          

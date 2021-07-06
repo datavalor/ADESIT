@@ -30,6 +30,21 @@ default_data = {
     "selected_point": None
 }
 
+def gen_data_holder(df):
+    for c in df.columns:
+        if c in ['id', 'Id', 'ID']:
+            df = df.drop(columns=c)
+    cols = list(df.columns)
+    df[ADESIT_INDEX] = df.index
+    
+    return {
+        "data": df,
+        "graph": None,
+        "user_columns": cols,
+        "X": [],
+        "Y": []
+    }
+
 def get_data(session_id, pydata=False, clear=False, filename=None, contents=None, copy=None):    
     @cache.memoize()
     def handle_data(session_id):
@@ -40,10 +55,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
         if pydata:
             df = pydataset.data(dataset_names[filename])
             if filename=="diamonds": df=df.sample(n=10000)
-            df[ADESIT_INDEX] = df.index
-            data_holder = {
-                "data": df
-            }
+            data_holder = gen_data_holder(df)
         elif not filename is None:
             _, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
@@ -58,12 +70,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
             except Exception as e:
                 logger.error(e)
                 data_holder = None
-            
-            df[ADESIT_INDEX] = df.index
-            data_holder = {
-                "data": df,
-                "graph": None
-            }
+            data_holder = gen_data_holder(df)
         else:
             data_holder = None
 
