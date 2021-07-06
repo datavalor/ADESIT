@@ -15,17 +15,19 @@ import utils.cache_utils as cache_utils
 from components import banner as banner_component
 from components import fd_settings as fd_settings_component
 from components import stats as stats_component
-from components import viz as viz_component
 from components import table as table_component
 from components import ce_viz as ce_viz_component
+from components import central_comp as central_comp_component
+from components import scatter_view as scatter_view_component
 
 components = [
     banner_component,
     fd_settings_component,
     stats_component,
-    viz_component,
     table_component,
-    ce_viz_component
+    # ce_viz_component,
+    central_comp_component,
+    scatter_view_component
 ]
 
 if __name__ == '__main__':

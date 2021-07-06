@@ -21,9 +21,10 @@ def register_callbacks(app, plogger):
                 [Input('data-loaded','children'),
                 Input('main-graph','selectedData'),
                 Input('view','value'),
-                Input('mode','value')],
+                Input('mode','value'),
+                Input('data-analysed', 'children')],
                 [State('session-id', 'children')])
-    def handle_table(data_updated, selected_data, view, mode, session_id):
+    def handle_table(data_updated, selected_data, view, mode, analysed, session_id):
         logger.debug("handle_table callback")
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
@@ -38,11 +39,12 @@ def register_callbacks(app, plogger):
             if SELECTION_COLUMN_NAME in data.columns and len(np.unique(data[SELECTION_COLUMN_NAME]))!=1:
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
-        
-            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column not in [G12_COLUMN_NAME, G3_COLUMN_NAME, SELECTION_COLUMN_NAME, ADESIT_INDEX]]
+            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column in dh["user_columns"]]
+            if G12_COLUMN_NAME in data.columns:
+                columns = [{"name": G12_COLUMN_NAME, "id": G12_COLUMN_NAME}]+columns
             columns = [{"name": ADESIT_INDEX, "id": ADESIT_INDEX, "hideable":False}]+columns
-
-            output_df = data[[c["name"] for c in columns]].copy()
+            
+            output_df = data[[c["name"] for c in columns]]
             overwrite_session_table_data(session_id, output_df)
 
             n_rows=len(output_df.index)
@@ -59,6 +61,22 @@ def register_callbacks(app, plogger):
                         'if': { 'column_id': ADESIT_INDEX },
                         'fontStyle': 'italic'
                     },
+                    {
+                        'if': { 'filter_query': '{_violating_tuple} = 1' },
+                        'backgroundColor': CE_COLOR,
+                        'color': 'white'
+                    },
+                    # {
+                    #     'if': {
+                    #         'state': 'active'  # 'active' | 'selected'
+                    #     },
+                    #     'backgroundColor': SELECTED_COLOR,
+                    #     'color': 'black',
+                    #     'border': '3px solid black'
+                    # }
+                ],
+                style_cell_conditional=[
+                    {'if': {'column_id': G12_COLUMN_NAME,}, 'display': 'None',}
                 ],
                 style_as_list_view=True
             )
@@ -83,12 +101,26 @@ def register_callbacks(app, plogger):
 
     @app.callback(
         Output("viz_datatable", "style_data_conditional"),
-        Input("viz_datatable", "active_cell")
+        Input('selection_changed', 'children'),
+        [State("viz_datatable", "style_data_conditional"),
+        State('session-id', 'children')]
     )
-    def style_selected_rows(active_cell):
-        if active_cell is None:                                                                                                                                                                                                                      
+    def style_selected_rows(selection_changed, previous_style, session_id):
+        if previous_style is None:                                                                                                                                                                                                                      
             raise PreventUpdate
-        val = [
-            {"if": {"filter_query": "{{id}} ={}".format(active_cell['row_id'])}, "backgroundColor": SELECTED_COLOR,}
-        ]   
-        return val
+        
+        if len(previous_style)>2:
+            previous_style = previous_style[:-1]
+        selection_infos = get_data(session_id)["selected_point"]
+        if selection_infos["point"] is not None:
+            selection_color = (SELECTED_COLOR_BAD, "black") if selection_infos["in_violation_with"] else (SELECTED_COLOR_GOOD, "white")
+            style_data_conditional = previous_style+[
+                {
+                    "if": {
+                        "filter_query": "{{id}} = {}".format(selection_infos["point"])
+                    }, 
+                    "backgroundColor": selection_color[0],
+                    "color": selection_color[1]
+                }
+            ]   
+        return style_data_conditional

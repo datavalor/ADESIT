@@ -7,7 +7,8 @@ import uuid
 from components import banner as banner_component
 from components import fd_settings as fd_settings_component
 from components import stats as stats_component
-from components import viz as viz_component
+from components import central_comp as central_comp_component
+from components import ce_viz as ce_viz_component
 
 index_string = '''
         <!DOCTYPE html>
@@ -55,6 +56,7 @@ def serve_layout(banner, app):
             html.Span("", id='data-loaded', style={'display': 'none'}),
             html.Span("", id='data-updated', style={'display': 'none'}),
             html.Span("", id='data-analysed', style={'display': 'none'}),
+            html.Span("", id="selection_changed", style={"display": "none"}),
             dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
             html.Span("", id='test-callback', style={'display': 'none'}),
 
@@ -83,7 +85,8 @@ def serve_layout(banner, app):
             banner_component.render(app, banner=banner),
             fd_settings_component.render(),
             stats_component.render(),
-            viz_component.render(),
+            central_comp_component.render(),
+            ce_viz_component.render(),
 
             html.Div([
                 ""

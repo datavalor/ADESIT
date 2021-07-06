@@ -142,6 +142,7 @@ def register_callbacks(app, plogger):
         Output('g1_indicator', 'figure'),
         Output('ntuples_involved', 'children'),
         Output('collapse-stats', 'is_open'),
+        Output('collapse-ceviz', 'is_open'),
         Output('mode', 'disabled'),
         Output('view', 'disabled')],
         [Input('data-loaded','children'),
@@ -227,12 +228,9 @@ def register_callbacks(app, plogger):
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)
-                    return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, False, False
+                    return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, True, False, False
                 else:
                     is_open=True
-            # default_g3 = fig_gen.gauge_indicator(reference=learnability_indicator['data'][0]['value'])
-            # default_g2 = fig_gen.bullet_indicator(reference=g2_indicator['data'][0]['value'])
-            # default_g1 = fig_gen.bullet_indicator(reference=g1_indicator['data'][0]['value'])
-            return True, is_open, "Done", dash.no_update, dash.no_update, dash.no_update, " ", False, True, True
+            return True, is_open, "Done", dash.no_update, dash.no_update, dash.no_update, " ", False, False, True, True
         else:
             raise PreventUpdate

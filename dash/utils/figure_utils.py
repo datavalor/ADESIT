@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 from utils.data_utils import calc_percentage, calc_vertical_percentage
+from constants import *
 
 def dataset_infos(name, ntuples, nattributes):
     return f'''
@@ -195,10 +196,14 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
     _class = str(right_attrs[0])
     if selected is not None:
         selected_point=graph_df.loc[[selected[0]]]
-        involved_points=graph_df.loc[selected[1:]]
-        selected_scatter=scatter_basic_bloc(involved_points, 0.9, '#EF553B', xaxis_column_name, yaxis_column_name, _class, marker_size=12, marker_line_width=2)
-        selected_point=scatter_basic_bloc(selected_point, 0.9, '#eff22c', xaxis_column_name, yaxis_column_name, _class, marker_size=14, marker_line_width=2)
-        fig.add_trace(selected_scatter, row=2, col=1)
+        if len(selected)>1:
+            selection_color = SELECTED_COLOR_BAD
+            involved_points=graph_df.loc[selected[1:]]
+            selected_scatter=scatter_basic_bloc(involved_points, 0.9, '#EF553B', xaxis_column_name, yaxis_column_name, _class, marker_size=12, marker_line_width=2)
+            fig.add_trace(selected_scatter, row=2, col=1)
+        else:
+            selection_color = SELECTED_COLOR_GOOD
+        selected_point=scatter_basic_bloc(selected_point, 0.9, selection_color, xaxis_column_name, yaxis_column_name, _class, marker_size=14, marker_line_width=2)
         fig.add_trace(selected_point, row=2, col=1)
         return fig
     else:

@@ -27,7 +27,10 @@ default_data = {
     "graphs": {},
     "thresolds_settings": {},
     "table_data": None,
-    "selected_point": None
+    "selected_point": {
+        "point": None,
+        "in_violation_with": []
+    }
 }
 
 def gen_data_holder(df):

@@ -62,17 +62,14 @@ def register_callbacks(app, plogger):
                 Input('y-axis', 'value'),
                 Input('view','value'),
                 Input('mode','value'),
-                Input('main-graph','clickData'),
-                Input('clear-selection','n_clicks')],
+                Input('selection_changed', 'children')],
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, xaxis_column_name, yaxis_column_name, view, mode, clickData, clear_selection, left_attrs, right_attrs, session_id):
+    def handle_graph(data_updated, data_analysed, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
         logger.debug("handle_graph callback")
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
-
-        if changed_id == 'clear-selection.n_clicks': overwrite_session_selected_point(session_id, None)
         
         dh=get_data(session_id)["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
@@ -95,26 +92,12 @@ def register_callbacks(app, plogger):
             # if calculations have been made
             if label_column in graph_df.columns :
                 # data has been hovered
-                if get_data(session_id)["selected_point"] is not None or (changed_id == 'main-graph.clickData' and clickData is not None):
-                    highlighted_points = None
-                    if changed_id == 'main-graph.clickData' and clickData is not None:
-                        if 'points' not in clickData: raise PreventUpdate
-                        clickData=clickData['points'][0]
-                        points=graph_df.loc[(graph_df[xaxis_column_name]==clickData['x']) & (graph_df[yaxis_column_name]==clickData['y'])]
-                        points=list(points.index)
-                        points=[point for point in points if point in dh["graph"]]
-                        if points:
-                            hovered_point=points[0]
-                            hovered_point_conflicts=dh["graph"][hovered_point]
-                            highlighted_points=[hovered_point]+hovered_point_conflicts
-                            overwrite_session_selected_point(session_id, highlighted_points)
-                    else:
-                        highlighted_points = get_data(session_id)["selected_point"]
-                        
-                    if highlighted_points is not None:
-                        fig_base=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True)  
-                        fig = fig_gen.add_selection_to_scatter(fig_base, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
-                        return fig, False
+                if get_data(session_id)["selected_point"]["point"] is not None:
+                    selection_infos = get_data(session_id)["selected_point"]
+                    highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
+                    fig_base=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True)  
+                    fig = fig_gen.add_selection_to_scatter(fig_base, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
+                    return fig, False
 
                 # data has been analysed
                 fig=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view)  

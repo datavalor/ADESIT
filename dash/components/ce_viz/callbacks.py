@@ -26,7 +26,7 @@ def register_callbacks(app, plogger):
                 ],
                 [State('session-id', 'children')])
     def handle_ceviz_table(clear_selection_disabled, clear_selection, session_id):
-        logger.debug("handle_table callback")
+        logger.debug("handle_ceviz_table callback")
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
@@ -90,7 +90,7 @@ def register_callbacks(app, plogger):
                 style_data_conditional=style_data_conditional,
                 # style_as_list_view=True,
                 merge_duplicate_headers=True
-            ),
+            )
                
             return table
         else:
@@ -102,7 +102,7 @@ def register_callbacks(app, plogger):
         [State('session-id', 'children')]
     )
     def handle_ceviz_cyto(clear_selection_disabled, session_id):
-        logger.debug("handle_table callback")
+        logger.debug("handle_ceviz_cyto callback")
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
