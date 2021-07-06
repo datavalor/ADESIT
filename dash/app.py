@@ -25,7 +25,7 @@ components = [
     fd_settings_component,
     stats_component,
     table_component,
-    # ce_viz_component,
+    ce_viz_component,
     central_comp_component,
     scatter_view_component
 ]

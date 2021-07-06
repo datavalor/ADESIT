@@ -16,6 +16,26 @@ from utils.cache_utils import *
 def register_callbacks(app, plogger):
     logger = plogger
 
+    default_style_data_conditional = [
+        {
+            'if': { 'column_id': ADESIT_INDEX },
+            'fontStyle': 'italic'
+        },
+        {
+            'if': { 'filter_query': '{_violating_tuple} = 1' },
+            'backgroundColor': CE_COLOR,
+            'color': 'white'
+        },
+        # {
+        #     'if': {
+        #         'state': 'active'  # 'active' | 'selected'
+        #     },
+        #     'backgroundColor': SELECTED_COLOR,
+        #     'color': 'black',
+        #     'border': '3px solid black'
+        # }
+    ]
+
     # Callback for Table Output (b,c,d,e,f,g->h) 
     @app.callback(Output('viz_table_container', 'children'),
                 [Input('data-loaded','children'),
@@ -56,29 +76,11 @@ def register_callbacks(app, plogger):
                 page_size=TABLE_MAX_ROWS,
                 page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
                 page_action='custom',
-                style_data_conditional=[
-                    {
-                        'if': { 'column_id': ADESIT_INDEX },
-                        'fontStyle': 'italic'
-                    },
-                    {
-                        'if': { 'filter_query': '{_violating_tuple} = 1' },
-                        'backgroundColor': CE_COLOR,
-                        'color': 'white'
-                    },
-                    # {
-                    #     'if': {
-                    #         'state': 'active'  # 'active' | 'selected'
-                    #     },
-                    #     'backgroundColor': SELECTED_COLOR,
-                    #     'color': 'black',
-                    #     'border': '3px solid black'
-                    # }
-                ],
+                style_data_conditional=default_style_data_conditional,
                 style_cell_conditional=[
                     {'if': {'column_id': G12_COLUMN_NAME,}, 'display': 'None',}
                 ],
-                style_as_list_view=True
+                # style_as_list_view=True
             )
             return table
         else:
@@ -102,19 +104,13 @@ def register_callbacks(app, plogger):
     @app.callback(
         Output("viz_datatable", "style_data_conditional"),
         Input('selection_changed', 'children'),
-        [State("viz_datatable", "style_data_conditional"),
-        State('session-id', 'children')]
+        [State('session-id', 'children')]
     )
-    def style_selected_rows(selection_changed, previous_style, session_id):
-        if previous_style is None:                                                                                                                                                                                                                      
-            raise PreventUpdate
-        
-        if len(previous_style)>2:
-            previous_style = previous_style[:-1]
+    def style_selected_rows(selection_changed, session_id):
         selection_infos = get_data(session_id)["selected_point"]
         if selection_infos["point"] is not None:
             selection_color = (SELECTED_COLOR_BAD, "black") if selection_infos["in_violation_with"] else (SELECTED_COLOR_GOOD, "white")
-            style_data_conditional = previous_style+[
+            style_data_conditional = default_style_data_conditional+[
                 {
                     "if": {
                         "filter_query": "{{id}} = {}".format(selection_infos["point"])
@@ -122,5 +118,16 @@ def register_callbacks(app, plogger):
                     "backgroundColor": selection_color[0],
                     "color": selection_color[1]
                 }
-            ]   
-        return style_data_conditional
+            ] 
+            for p in selection_infos["in_violation_with"]:
+                style_data_conditional.append({
+                    "if": {
+                        "filter_query": "{{id}} = {}".format(p)
+                    },
+                    "backgroundColor": CE_COLOR,
+                    "color": "white",
+                    'border': '4px solid black'
+                })
+            return style_data_conditional
+        else:
+            return default_style_data_conditional

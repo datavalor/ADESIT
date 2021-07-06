@@ -21,18 +21,16 @@ def register_callbacks(app, plogger):
     logger = plogger
 
     @app.callback(Output('ceviz_table_container', 'children'),
-                [Input('clear-selection', 'disabled'),
-                Input('clear-selection','n_clicks')
-                ],
+                Input('selection_changed', 'children'),
                 [State('session-id', 'children')])
-    def handle_ceviz_table(clear_selection_disabled, clear_selection, session_id):
+    def handle_ceviz_table(selection_changed, session_id):
         logger.debug("handle_ceviz_table callback")
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
-        selected_points = session_data["selected_point"]
+        selection_info = session_data["selected_point"]
         
-        if dh is not None and dh["data"] is not None and selected_points is not None:
+        if dh is not None and dh["data"] is not None and selection_info["point"] is not None:
             df=dh["data"]
             user_cols=dh["user_columns"]
             for c in dh["X"]+dh["Y"]: user_cols.remove(c)
@@ -53,14 +51,16 @@ def register_callbacks(app, plogger):
                     'color': 'black'
                 })
 
-            if clear_selection_disabled:
+            if selection_info["point"] is None:
                 output_df = None
                 style_data_conditional = None
                 n_rows = 0
             else:
+                selected_points = [selection_info["point"]] + selection_info["in_violation_with"]
                 output_df = df.loc[selected_points][[c["name"][1] for c in columns]]
                 n_rows=len(output_df.index)
                 output_df = output_df.to_dict('records')
+                selection_color = SELECTED_COLOR_BAD if selection_info["in_violation_with"] else SELECTED_COLOR_GOOD
                 style_data_conditional=[
                     {
                         'if': {'column_editable': False},
@@ -69,7 +69,7 @@ def register_callbacks(app, plogger):
                     },
                     {
                         'if': { 'row_index': 0 },
-                        'backgroundColor': SELECTED_COLOR,
+                        'backgroundColor': selection_color,
                         'color': 'black'
                     },
                     {
@@ -96,62 +96,62 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
 
-    @app.callback(
-        Output('cytoscape_ce_graph', 'elements'),
-        [Input('clear-selection', 'disabled')],
-        [State('session-id', 'children')]
-    )
-    def handle_ceviz_cyto(clear_selection_disabled, session_id):
-        logger.debug("handle_ceviz_cyto callback")
+    # @app.callback(
+    #     Output('cytoscape_ce_graph', 'elements'),
+    #     [Input('clear-selection', 'disabled')],
+    #     [State('session-id', 'children')]
+    # )
+    # def handle_ceviz_cyto(clear_selection_disabled, session_id):
+    #     logger.debug("handle_ceviz_cyto callback")
 
-        session_data = get_data(session_id)
-        dh = session_data["data_holder"]
-        selected_points = session_data["selected_point"]
+    #     session_data = get_data(session_id)
+    #     dh = session_data["data_holder"]
+    #     selected_points = session_data["selected_point"]
         
-        if dh is not None and dh["graph"] is not None and selected_points is not None:
-            graph=dh["graph"]
+    #     if dh is not None and dh["graph"] is not None and selected_points is not None:
+    #         graph=dh["graph"]
 
-            root=selected_points[0]
-            elements = [{
-                'data': {
-                    'id': root, 
-                    'label': f"{root}",
-                },
-                # 'position': {'x': 75, 'y': 75},
-                # 'locked': True,
-                'classes': 'selected_node'
-            }]
+    #         root=selected_points[0]
+    #         elements = [{
+    #             'data': {
+    #                 'id': root, 
+    #                 'label': f"{root}",
+    #             },
+    #             # 'position': {'x': 75, 'y': 75},
+    #             # 'locked': True,
+    #             'classes': 'selected_node'
+    #         }]
 
-            # Creates graph in a BFS fashion
-            max_depth = 3
-            explored_list = {}
-            q = queue.LifoQueue()
-            # explored_list[root]=True
-            q.put((root, 0))
-            while not q.empty() and max_depth>0:
-                v, depth = q.get()
-                if v not in explored_list:
-                    explored_list[v]=True
-                    for w in graph[v]:
-                        elements.append({
-                            'data': {
-                                'id': w, 
-                                'label': w
-                            },
-                            'classes': 'ce_node'
-                        })
-                        edge = {
-                            'data': {
-                                'source': v, 
-                                'target': w
-                            }
-                        }
-                        if depth>0: edge['classes'] = 'undirect_edges'
-                        elements.append(edge)
+    #         # Creates graph in a BFS fashion
+    #         max_depth = 3
+    #         explored_list = {}
+    #         q = queue.LifoQueue()
+    #         # explored_list[root]=True
+    #         q.put((root, 0))
+    #         while not q.empty() and max_depth>0:
+    #             v, depth = q.get()
+    #             if v not in explored_list:
+    #                 explored_list[v]=True
+    #                 for w in graph[v]:
+    #                     elements.append({
+    #                         'data': {
+    #                             'id': w, 
+    #                             'label': w
+    #                         },
+    #                         'classes': 'ce_node'
+    #                     })
+    #                     edge = {
+    #                         'data': {
+    #                             'source': v, 
+    #                             'target': w
+    #                         }
+    #                     }
+    #                     if depth>0: edge['classes'] = 'undirect_edges'
+    #                     elements.append(edge)
 
-                        if depth+1 <= max_depth:
-                            q.put((w, depth+1))
+    #                     if depth+1 <= max_depth:
+    #                         q.put((w, depth+1))
 
-            return elements
-        else:
-            raise PreventUpdate
+    #         return elements
+    #     else:
+    #         raise PreventUpdate

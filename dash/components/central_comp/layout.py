@@ -8,6 +8,7 @@ from components import scatter_view as scatter_view_component
 def render():
     return dbc.Collapse(
         [
+            html.H5("Dataset exploration"),
             dbc.Tabs([
                 dbc.Tab(scatter_view_component.render(), label="Scatter view"),
                 dbc.Tab(table_component.render(), label="Table view")

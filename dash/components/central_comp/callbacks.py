@@ -16,11 +16,12 @@ def register_callbacks(app, plogger):
     @app.callback(Output("selection_changed", "children"),
                 [Input('main-graph','clickData'),
                 Input('clear-selection','n_clicks'),
-                Input("viz_datatable", "active_cell")],
+                Input("viz_datatable", "active_cell"),
+                Input("ceviz_datatable", "active_cell")],
                 [State('x-axis', 'value'),
                 State('y-axis', 'value'),
                 State('session-id', 'children')])
-    def handle_selection(clickData, clear_session_ncliks, active_cell, xaxis_column_name, yaxis_column_name, session_id):
+    def handle_selection(clickData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
         logger.debug("update_selection_from_graph callback")
         
         dh = get_data(session_id).get("data_holder", None)
@@ -34,6 +35,8 @@ def register_callbacks(app, plogger):
                     selected_point_id = None
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None:
                     selected_point_id = active_cell['row_id']
+                elif changed_id == 'ceviz_datatable.active_cell' and active_cell_ce is not None:
+                    selected_point_id = active_cell_ce['row_id']
                 elif changed_id == 'main-graph.clickData' and clickData is not None:
                     clickData=clickData['points'][0]
                     points=df.loc[(df[xaxis_column_name]==clickData['x']) & (df[yaxis_column_name]==clickData['y'])]
