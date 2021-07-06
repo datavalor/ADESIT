@@ -50,17 +50,9 @@ def render():
                 disabled=True,
                 clearable=False
             ),
-            html.Div([
-                dbc.Button('Clear selected points', 
-                    color="secondary", 
-                    id='clear-selection', 
-                    disabled=True,
-                    style={'display':'inline-block'}
-                ),
-            ], style= {'margin' : '0 auto', "marginTop": "5px"}),
 
             html.Div([
-                html.H5("Selection infos"),
+                html.H5("Box select infos"),
                 html.Ul([
                     html.Li(["Number of tuples: ", html.Span("0", id="ntuples-selection")]),
                     html.Li(["Number of violating tuples: ", html.Span("0", id="nviolating-selection")]),
@@ -69,7 +61,7 @@ def render():
                         dcc.Textarea(id='sql-query', value="", style={'width':'100%', 'height': 90,'color':'#A3A3A3'})
                     ],id='sql-div',style={'width':'100%'})
                 ], style={'width':'100%', 'display' : 'inline-block', 'verticalAlign': 'top'}),
-            ])
+            ], style={"marginTop": "10px"})
         ], style={
             'width': '29%',
             'display': 'inline-block',

@@ -17,7 +17,7 @@ def render():
         style={
             'marginLeft' : '0%', 
             'marginRight' : '0%',
-            'height': '650px'
+            'height': '700px'
         },
         id="collapse-viz",
         is_open=False

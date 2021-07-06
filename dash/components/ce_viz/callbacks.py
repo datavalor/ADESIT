@@ -30,7 +30,7 @@ def register_callbacks(app, plogger):
         dh = session_data["data_holder"]
         selection_info = session_data["selected_point"]
         
-        if dh is not None and dh["data"] is not None and selection_info["point"] is not None:
+        if dh is not None and dh["data"] is not None:
             df=dh["data"]
             user_cols=dh["user_columns"]
             for c in dh["X"]+dh["Y"]: user_cols.remove(c)
@@ -52,14 +52,13 @@ def register_callbacks(app, plogger):
                 })
 
             if selection_info["point"] is None:
-                output_df = None
+                output_df = pd.DataFrame(columns=[c["name"][1] for c in columns])
                 style_data_conditional = None
                 n_rows = 0
             else:
                 selected_points = [selection_info["point"]] + selection_info["in_violation_with"]
                 output_df = df.loc[selected_points][[c["name"][1] for c in columns]]
                 n_rows=len(output_df.index)
-                output_df = output_df.to_dict('records')
                 selection_color = SELECTED_COLOR_BAD if selection_info["in_violation_with"] else SELECTED_COLOR_GOOD
                 style_data_conditional=[
                     {
@@ -81,7 +80,7 @@ def register_callbacks(app, plogger):
                 ]+white_back
 
             table = dash_table.DataTable(
-                data=output_df,
+                data=output_df.to_dict('records'),
                 id="ceviz_datatable",
                 columns=columns,
                 page_current=0,

@@ -14,14 +14,15 @@ def register_callbacks(app, plogger):
     logger = plogger
 
     @app.callback(Output("selection_changed", "children"),
-                [Input('main-graph','clickData'),
+                [Input('data-analysed', 'children'),
+                Input('main-graph','clickData'),
                 Input('clear-selection','n_clicks'),
                 Input("viz_datatable", "active_cell"),
                 Input("ceviz_datatable", "active_cell")],
                 [State('x-axis', 'value'),
                 State('y-axis', 'value'),
                 State('session-id', 'children')])
-    def handle_selection(clickData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
+    def handle_selection(data_analysed, clickData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
         logger.debug("update_selection_from_graph callback")
         
         dh = get_data(session_id).get("data_holder", None)
@@ -31,7 +32,7 @@ def register_callbacks(app, plogger):
             if df is not None and graph is not None:
                 changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-                if changed_id == 'clear-selection.n_clicks': 
+                if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children': 
                     selected_point_id = None
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None:
                     selected_point_id = active_cell['row_id']
