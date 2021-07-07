@@ -1,4 +1,4 @@
-# <img alt="ADESIT" src="branding/logo_github_dark.png" height="100">
+# <img alt="ADESIT" src="branding/logo_github_dark.png" height="120">
 
 Suppose you are facing a new supervised learning (SL) challenge: a domain expert asks you if it is possible to predict a **target C** from a set of **features X** by learning on a **dataset r**. 
 To answer this question, it is common for a data scientist to directly jump into the learning step by training a model and  then evaluate it against a testing set to obtain an accuracy.

@@ -95,9 +95,25 @@ def number_indicator(value=0, reference=0):
                         }
             )).update_layout(autosize = True, margin=dict(b=0, t=0, l=0, r=0))
 
-def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name, _class, marker_size=7, marker_line_width=0, hovertemplate=True, custom_data=False):
-    if custom_data: cdata=df.index
-    else: cdata=None
+def gen_hovertemplate(df, session_infos):
+    col_pos = {col: i for i, col in enumerate(df.columns)}
+    # Fetching and grouping column names
+    features = session_infos["X"]
+    target = session_infos["Y"]
+    other = []
+    # print(features, target, other)
+    for col in session_infos["user_columns"]: 
+        if col not in features and col not in target:
+            other.append(col)
+    # Constructing hovertemplate
+    hovertemplate = f'[id]: %{{customdata[{col_pos[ADESIT_INDEX]}]}} <br>'
+    for col in features: hovertemplate+=f"[F] {col}: %{{customdata[{col_pos[col]}]}} <br>"
+    for col in target: hovertemplate+=f"[T] {col}: %{{customdata[{col_pos[col]}]}} <br>"
+    for col in other: hovertemplate+=f"{col}: %{{customdata[{col_pos[col]}]}} <br>"
+    hovertemplate+="<extra></extra>"
+    return hovertemplate
+
+def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name, _class, marker_size=7, marker_line_width=0, hovertemplate=True, session_infos=None):
     marker=dict(
         opacity=opacity, 
         size=marker_size, 
@@ -106,13 +122,11 @@ def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name,
             width=marker_line_width
         )
     )
-    if hovertemplate:
-        return go.Scattergl(x = df[str(xaxis_column_name)], y = df[str(yaxis_column_name)], customdata=cdata,
-            mode = 'markers', marker_color=color, marker=marker,
-            text=df[_class], hovertemplate=str(xaxis_column_name)+ ' : %{x} <br>'+str(yaxis_column_name)+' : %{y} <br>'+ "Class" +' : %{text}')
+    if hovertemplate and session_infos is not None:
+        return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], customdata=df.to_numpy(),
+            mode = 'markers', marker_color=color, marker=marker, hovertemplate=gen_hovertemplate(df, session_infos))
     else:
-        return go.Scattergl(x = df[str(xaxis_column_name)], y = df[str(yaxis_column_name)], customdata=cdata,
-            mode = 'markers', marker_color=color, marker=marker)
+        return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], mode = 'markers', marker_color=color, marker=marker)
 
 def basic_scatter(df, xaxis_column_name, yaxis_column_name):
     fig = go.Figure(scatter_basic_bloc(df, 0.6, '#000000', xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
@@ -130,7 +144,7 @@ def basic_scatter(df, xaxis_column_name, yaxis_column_name):
 
     return fig
 
-def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view='ALL', selection=False):
+def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view='ALL', selection=False, session_infos=None):
     _class = str(right_attrs[0])
     fig = make_subplots(
         rows=2, cols=2,
@@ -155,8 +169,16 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         elif view == 'P': prob_opacity, nprob_opacity = 0.7, 0.1
         else: prob_opacity, nprob_opacity = 0.7, 0.7
     
-    fig.add_trace(scatter_basic_bloc(non_problematics_df, nprob_opacity, '#636EFA', xaxis_column_name, yaxis_column_name, _class, custom_data=True), row=2, col=1)   
-    fig.add_trace(scatter_basic_bloc(problematics_df, prob_opacity, '#EF553B', xaxis_column_name, yaxis_column_name, _class, custom_data=True), row=2, col=1)
+    fig.add_trace(
+        scatter_basic_bloc(non_problematics_df, nprob_opacity, '#636EFA', xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        row=2, 
+        col=1
+    )   
+    fig.add_trace(
+        scatter_basic_bloc(problematics_df, prob_opacity, '#EF553B', xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        row=2, 
+        col=1
+    )
 
     if graph_df.dtypes[xaxis_column_name] == 'object':
         fig.update_xaxes(type='category', categoryorder='category ascending', row=2, col=1)
@@ -173,8 +195,8 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
     else:
         start=None
         bin_size = None
-    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color='#636EFA',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False,)
-    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color='#EF553B',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False,)
+    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color='#636EFA',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
+    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color='#EF553B',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
     
     # y axis histograms (and ratio line if not categorial)
     if str(graph_df.dtypes[str(yaxis_column_name)]) != "object":

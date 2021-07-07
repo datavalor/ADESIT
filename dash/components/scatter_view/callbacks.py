@@ -95,12 +95,12 @@ def register_callbacks(app, plogger):
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
-                    fig_base=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True)  
+                    fig_base=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
                     fig = fig_gen.add_selection_to_scatter(fig_base, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed
-                fig=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view)  
+                fig=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh)  
                 return fig, True
             # if showing raw data
             else :
