@@ -14,7 +14,7 @@ In practice, ADESIT is a visual tool which proposes multiple counterexample indi
 
 ## Starting guide
 
-It is coded in Python (>=3.7) based on the Dash framework.
+ADESIT is coded in Python (>=3.7) based on the Dash framework.
 Counterexample analysis is powered by the [fastg3](https://github.com/datavalor/fastg3) python library.
 Once it is launched, ADESIT is available on port 8050.
 
@@ -39,7 +39,7 @@ docker-compose up
 
 ## Authors and developers
 
-The demonstration paper associated with ADESIT is named *"ADESIT: Visualize the Limits of your Data in a Machine Learning Process"* and is in proceeding of VLDB 21 (International Conference on Very Large Data Bases). 
+The demonstration paper associated with ADESIT is named *"ADESIT: Visualize the Limits of your Data in a Machine Learning Process"* and is in proceedings of VLDB 21 (International Conference on Very Large Data Bases). 
 Full version of this paper is available [here](https://pastel.archives-ouvertes.fr/LIRIS/hal-03242380v1).
 
 * Pierre Faure--Giovagnoli (pierre.faure--giovagnoli@insa-lyon.fr)
