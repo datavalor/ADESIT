@@ -96,7 +96,8 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     @app.callback(
-        Output('cytoscape_ce_graph', 'elements'),
+        [Output('cytoscape_ce_graph', 'elements'),
+        Output('cytoscape_ce_graph', 'layout')],
         Input('selection_changed', 'children'),
         [State('session-id', 'children')]
     )
@@ -119,7 +120,8 @@ def register_callbacks(app, plogger):
                 },
                 # 'position': {'x': 75, 'y': 75},
                 # 'locked': True,
-                'classes': selected_class
+                'classes': selected_class,
+                'size':5
             }]
 
             if selected_points["in_violation_with"]:
@@ -139,7 +141,8 @@ def register_callbacks(app, plogger):
                                     'id': w, 
                                     'label': w
                                 },
-                                'classes': 'ce_node'
+                                'classes': 'ce_node',
+                                'size':5
                             })
                             edge = {
                                 'data': {
@@ -153,6 +156,6 @@ def register_callbacks(app, plogger):
                             if depth+1 <= max_depth:
                                 q.put((w, depth+1))
 
-            return elements
+            return elements, {'name': 'breadthfirst', 'roots': f'[id = "{root}"]'}
         else:
             raise PreventUpdate

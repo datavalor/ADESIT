@@ -23,8 +23,10 @@ def render():
             html.Div("", style={'width': "100%", 'height': "10px"}),
             cyto.Cytoscape(
                 id='cytoscape_ce_graph',
-                layout={'name': 'cose'},
-                style={'width': '100%', 'height': '400px', 'backgroundColor': '#F5F5F5'},
+                layout={
+                    'name': 'breadthfirst'
+                },
+                style={'width': '40%', 'height': '350px', 'backgroundColor': '#F5F5F5', 'margin':'0 auto'},
                 stylesheet=[
                     {
                         'selector': 'node',
