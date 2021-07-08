@@ -117,7 +117,8 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     @app.callback(
-        Output("viz_datatable", "style_data_conditional"),
+        [Output("viz_datatable", "style_data_conditional"),
+        Output("viz_datatable", "page_current")],
         Input('selection_changed', 'children'),
         [State('session-id', 'children')]
     )
@@ -143,6 +144,7 @@ def register_callbacks(app, plogger):
                     "color": "white",
                     'border': '4px solid black'
                 })
-            return style_data_conditional
+            page = math.floor((selection_infos["point"]-1)/TABLE_MAX_ROWS)
+            return style_data_conditional, page
         else:
-            return default_style_data_conditional
+            return default_style_data_conditional, dash.no_update

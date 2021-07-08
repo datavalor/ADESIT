@@ -49,7 +49,6 @@ def register_callbacks(app, plogger):
                     raise PreventUpdate
 
                 # Getting and saving selected points
-                
                 selection_infos = {
                     "point": selected_point_id,
                     "in_violation_with": []
