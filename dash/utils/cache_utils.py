@@ -10,6 +10,7 @@ import base64
 import io
 
 from constants import *
+from utils.data_utils import num_or_cat
 
 import pydataset
 dataset_names={
@@ -34,16 +35,23 @@ default_data = {
 }
 
 def gen_data_holder(df):
+    # Proprocessing dataframe
+    df = df.dropna()
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
-    cols = list(df.columns)
+    cols_type = {col: num_or_cat(col, df) for col in list(df.columns) if num_or_cat(col, df) is not None}
+    cols = list(cols_type.keys())
+    df = df[cols]
+    df = df.reset_index(drop=True)
     df[ADESIT_INDEX] = df.index
+
     
     return {
         "data": df,
         "graph": None,
         "user_columns": cols,
+        "user_columns_type": cols_type,
         "X": [],
         "Y": []
     }

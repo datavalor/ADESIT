@@ -129,7 +129,7 @@ def register_callbacks(app, plogger):
             style_data_conditional = default_style_data_conditional+[
                 {
                     "if": {
-                        "filter_query": "{{id}} = {}".format(selection_infos["point"])
+                        "filter_query": f'{{id}} = {selection_infos["point"]}'
                     }, 
                     "backgroundColor": selection_color[0],
                     "color": selection_color[1]
@@ -138,7 +138,7 @@ def register_callbacks(app, plogger):
             for p in selection_infos["in_violation_with"]:
                 style_data_conditional.append({
                     "if": {
-                        "filter_query": "{{id}} = {}".format(p)
+                        "filter_query": f"{{id}} = {p}"
                     },
                     "backgroundColor": CE_COLOR,
                     "color": "white",

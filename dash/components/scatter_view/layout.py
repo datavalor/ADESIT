@@ -1,9 +1,5 @@
-import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-
-from components import table as table_component
-from components import ce_viz as ce_viz_component
 
 def render():
     return [

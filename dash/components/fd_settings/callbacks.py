@@ -10,7 +10,7 @@ import numpy as np
 # Personnal imports
 import fastg3.ncrisp as g3ncrisp
 import utils.figure_utils as fig_gen
-from utils.data_utils import parse_attributes_settings, num_or_cat
+from utils.data_utils import parse_attributes_settings
 from utils.cache_utils import *
 from constants import *
 
@@ -92,9 +92,10 @@ def register_callbacks(app, plogger):
         dh=get_data(session_id)["data_holder"]
         if inputattr is not None and dh is not None:
             df=dh["data"]
+            ctypes = dh["user_columns_type"]
 
             # Retrieve previous settings
-            new_attributes_settings = parse_attributes_settings(inputtols, df)
+            new_attributes_settings = parse_attributes_settings(inputtols, ctypes)
             attributes_settings = get_data(session_id)["thresolds_settings"]
             if new_attributes_settings is not None:
                 for attr in new_attributes_settings.keys(): attributes_settings[attr] = new_attributes_settings[attr]
@@ -102,7 +103,7 @@ def register_callbacks(app, plogger):
             
             outuput_thresolds = []
             for attr in inputattr:
-                attr_type = num_or_cat(attr, df)
+                attr_type = ctypes[attr]
                 if attr_type is not None:
                     if attr_type == "categorical":
                         outuput_thresolds.append({'attribute': attr, 'absolute': 'is', 'relative': 'categorical...'})
@@ -162,6 +163,7 @@ def register_callbacks(app, plogger):
         dh=get_data(session_id)["data_holder"]
         if dh is not None:
             df = dh["data"]
+            ctypes = dh["user_columns_type"]
             # API Calculations if requested
             if changed_id=='analyse_btn.n_clicks' and left_attrs and right_attrs:
                 # Init calc df
@@ -171,8 +173,8 @@ def register_callbacks(app, plogger):
                 df_calc[G3_COLUMN_NAME] = 0                
                 
                 # Setting left and right tolerances
-                xparams=parse_attributes_settings(left_tols, df)
-                yparams=parse_attributes_settings(right_tols, df)
+                xparams=parse_attributes_settings(left_tols, ctypes)
+                yparams=parse_attributes_settings(right_tols, ctypes)
 
                 # Setting up solver
                 VPE = g3ncrisp.create_vpe_instance(

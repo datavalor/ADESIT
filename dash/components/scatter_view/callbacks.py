@@ -2,8 +2,9 @@ import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from sklearn.manifold import TSNE
+# Projection tools
 from sklearn.decomposition import PCA
+import prince
 
 # Miscellaneous
 import pandas as pd
@@ -12,6 +13,7 @@ pd.options.mode.chained_assignment = None
 from constants import *
 from utils.cache_utils import *
 import utils.figure_utils as fig_gen
+from utils.data_utils import which_proj_type
 
 def register_callbacks(app, plogger):
     logger = plogger
@@ -24,14 +26,16 @@ def register_callbacks(app, plogger):
         logger.debug("update_viz_options")
         dh=get_data(session_id)["data_holder"]
         if dh is not None:
-            df_parsed=dh["data"]
-            options=[{'label': str(col), 'title' : str(df_parsed.dtypes[str(col)]) ,'value': str(col)} for col in df_parsed.columns if col not in ADESIT_COLUMNS]
+            ctypes=dh["user_columns_type"]
+            options=[{'label': col, 'title' : col, 'value': col} for col in dh["user_columns"]]
             if left_attrs:
-                for proj_name in VIZ_PROJ:
+                for proj_name in PROJ_AXES:
                     disabled=False
                     if '1' in proj_name and len(left_attrs)<2: disabled=True
-                    elif '2' in proj_name and len(left_attrs)<3: disabled=True
-                    options.append({'label': proj_name, 'title' : proj_name ,'value': proj_name, 'disabled': disabled})
+                    else: ext="1"
+                    if '2' in proj_name and len(left_attrs)<3: disabled=True
+                    else: ext="2"
+                    options.append({'label': f"__proj:{which_proj_type(left_attrs, ctypes)}_{ext}", 'title' : proj_name ,'value': proj_name, 'disabled': disabled})
             return options, options
         else:
             raise PreventUpdate
@@ -76,38 +80,60 @@ def register_callbacks(app, plogger):
         
         dh=get_data(session_id)["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
-            graph_df=dh["data"]
+            df=dh["data"]
+            ctypes = dh["user_columns_type"]
             
-            # handling projections
-            if left_attrs:
-                join_axes = [xaxis_column_name, yaxis_column_name]
-                if len(left_attrs)<3 and ('__PCA2' in join_axes or  '__t-SNE2' in join_axes):
+            # handling projections if needed
+            join_axes = [xaxis_column_name, yaxis_column_name]
+            if changed_id!='selection_changed.children' and (PROJ_AXES[0] in join_axes or PROJ_AXES[1] in join_axes):
+                if len(left_attrs)<2 and PROJ_AXES[0] in join_axes:
                     raise PreventUpdate
-                if len(left_attrs)<2 and ('__PCA1' in join_axes or  '__t-SNE1' in join_axes):
+                if len(left_attrs)<3 and PROJ_AXES[1] in join_axes:
                     raise PreventUpdate
-                if "PCA" in "".join(join_axes):
-                    proj = PCA(n_components=2).fit_transform(graph_df[left_attrs])
-                    graph_df[PCA_AXES]=proj
-                if "t-SNE" in "".join([xaxis_column_name, yaxis_column_name]):
-                    proj = TSNE(n_components=2, random_state=27).fit_transform(graph_df[left_attrs])
-                    graph_df[TSNE_AXES]=proj
+
+                proj_type = which_proj_type(left_attrs, ctypes)
+                if proj_type=="PCA": # only numerical => PCA
+                    proj = PCA(n_components=2).fit_transform(df[left_attrs])
+                elif proj_type=="MCA": # only categorical => MCA
+                    mca = prince.MCA(
+                        n_components=2,
+                        n_iter=3,
+                        copy=True,
+                        check_input=True,
+                        engine='auto',
+                        random_state=42
+                    )
+                    proj = mca.fit_transform(df[left_attrs])
+                else: # mixed types => FAMD
+                    famd = prince.FAMD(
+                        n_components=2,
+                        n_iter=3,
+                        copy=True,
+                        check_input=True,
+                        engine='auto',
+                        random_state=27
+                    )
+                    proj = famd.fit_transform(df[left_attrs])
+                df[PROJ_AXES]=proj
+                dh["data"]=df
+                overwrite_session_data_holder(session_id, dh)
             
             # if calculations have been made
-            if label_column in graph_df.columns :
+            if label_column in df.columns :
                 # data has been hovered
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
-                    fig_base=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
-                    fig = fig_gen.add_selection_to_scatter(fig_base, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
+                    fig_base=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
+                    fig = fig_gen.add_selection_to_scatter(fig_base, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed
-                fig=fig_gen.advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh)  
+                fig=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh)  
                 return fig, True
             # if showing raw data
             else :
-                return fig_gen.basic_scatter(graph_df, xaxis_column_name, yaxis_column_name), True
+                return fig_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:
@@ -132,8 +158,7 @@ def register_callbacks(app, plogger):
                 query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y4')[0]) + " AND "+ str(selection_range.get('y4')[1])
             return query, None
         else:
-            style = {}
-            return "", style
+            return "", {}
         
     #Callback for Selection Info
     @app.callback([Output('ntuples-selection', 'children'),
