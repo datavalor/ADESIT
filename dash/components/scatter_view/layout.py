@@ -29,27 +29,6 @@ def render():
             dcc.Dropdown(id='y-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
             
             html.Hr(),
-            html.Div("Color in red:"),
-            dcc.Dropdown(id='mode', 
-                options=[
-                    {'label': 'Tuples involved in a violating pair', 'value': 'color_involved'},
-                    {'label': 'Tuples to suppress to remove violating pairs (G3)', 'value': 'color_g3'}
-                ],
-                value='color_involved',
-                clearable=False,
-                disabled=True
-            ),
-            html.Div("Select:"),
-            dcc.Dropdown(id='view', 
-                options=[
-                    {'label': 'All', 'value': 'ALL'},
-                    {'label': 'Blue Only', 'value': 'NP'},
-                    {'label': 'Red Only', 'value': 'P'},
-                ],
-                value='ALL',
-                disabled=True,
-                clearable=False
-            ),
 
             html.Div([
                 html.H5("Box select infos"),

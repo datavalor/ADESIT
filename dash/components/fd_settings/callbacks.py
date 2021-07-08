@@ -21,8 +21,7 @@ def register_callbacks(app, plogger):
         [Output('data-loaded','children'),
         Output('dataset_confirm', 'children'),
         Output('left-attrs', 'disabled'),
-        Output('right-attrs', 'disabled'),
-        Output('collapse-viz', 'is_open')],
+        Output('right-attrs', 'disabled')],
         [Input('toy-dataset-iris','n_clicks'),
         Input('toy-dataset-housing','n_clicks'),
         Input('toy-dataset-diamonds','n_clicks'),
@@ -40,12 +39,12 @@ def register_callbacks(app, plogger):
             clear_session(session_id)
             dh = get_data(session_id, filename=toy_dataset, pydata=True)["data_holder"]
             n = len(dh["data"].index) if dh is not None else 0
-            return toy_dataset, fig_gen.dataset_infos(toy_dataset, n, len(dh["data"].columns)), False, False, True
+            return toy_dataset, fig_gen.dataset_infos(toy_dataset, n, len(dh["data"].columns)), False, False
         elif filename is not None: 
             clear_session(session_id)
             dh = get_data(session_id, filename=filename, contents=contents)["data_holder"]
             n = len(dh["data"].index) if dh is not None else 0
-            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False, True
+            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False
         else:
             raise PreventUpdate
 
@@ -141,8 +140,6 @@ def register_callbacks(app, plogger):
         Output('g2_indicator', 'figure'),
         Output('g1_indicator', 'figure'),
         Output('ntuples_involved', 'children'),
-        Output('collapse-stats', 'is_open'),
-        Output('collapse-ceviz', 'is_open'),
         Output('mode', 'disabled'),
         Output('view', 'disabled')],
         [Input('data-loaded','children'),
@@ -228,9 +225,26 @@ def register_callbacks(app, plogger):
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)
-                    return True, is_open, "Done", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, True, True, False, False
+                    return True, is_open, "True", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, False, False
                 else:
                     is_open=True
-            return True, is_open, "Done", dash.no_update, dash.no_update, dash.no_update, " ", False, False, True, True
+            return True, is_open, "False", dash.no_update, dash.no_update, dash.no_update, " ", True, True
         else:
             raise PreventUpdate
+
+    @app.callback(
+        [Output('collapse-viz', 'is_open'),
+        Output('collapse-stats', 'is_open'),
+        Output('collapse-ceviz', 'is_open'),
+        Output('collapse-legend', 'is_open')],
+        [Input('data-loaded','children'),
+        Input('data-analysed','children')]
+    )
+    def update_collapses(data_loaded, data_analysed):
+        logger.debug("update_collapses callback")
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        if changed_id == 'data-loaded.children':
+            return True, False, False, False
+        else:
+            return True, True, True, True

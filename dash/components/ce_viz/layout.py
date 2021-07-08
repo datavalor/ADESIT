@@ -12,21 +12,13 @@ def render():
         [
             html.Hr(),
             html.H5("Selection infos"),
-            html.Div([
-                dbc.Button('Clear selected points', 
-                    color="secondary", 
-                    id='clear-selection', 
-                    disabled=True,
-                    style={'display':'inline-block'}
-                ),
-            ], style= {'margin' : '0 auto', "marginTop": "5px"}),
             html.Div("", style={'width': "100%", 'height': "10px"}),
             cyto.Cytoscape(
                 id='cytoscape_ce_graph',
                 layout={
                     'name': 'breadthfirst'
                 },
-                style={'width': '40%', 'height': '350px', 'backgroundColor': '#F5F5F5', 'margin':'0 auto'},
+                style={'width': '40%', 'height': '350px', 'backgroundColor': GRAPHS_BACKGROUND, 'margin':'0 auto'},
                 stylesheet=[
                     {
                         'selector': 'node',

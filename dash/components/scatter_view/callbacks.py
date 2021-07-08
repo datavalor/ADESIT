@@ -2,6 +2,9 @@ import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+
 # Miscellaneous
 import pandas as pd
 pd.options.mode.chained_assignment = None

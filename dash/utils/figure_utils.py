@@ -129,7 +129,7 @@ def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name,
         return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], mode = 'markers', marker_color=color, marker=marker)
 
 def basic_scatter(df, xaxis_column_name, yaxis_column_name):
-    fig = go.Figure(scatter_basic_bloc(df, 0.6, '#000000', xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
+    fig = go.Figure(scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
     fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
 
     fig.update_layout(
@@ -170,12 +170,12 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         else: prob_opacity, nprob_opacity = 0.7, 0.7
     
     fig.add_trace(
-        scatter_basic_bloc(non_problematics_df, nprob_opacity, '#636EFA', xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        scatter_basic_bloc(non_problematics_df, nprob_opacity, FREE_COLOR, xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
         row=2, 
         col=1
     )   
     fig.add_trace(
-        scatter_basic_bloc(problematics_df, prob_opacity, '#EF553B', xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        scatter_basic_bloc(problematics_df, prob_opacity, CE_COLOR, xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
         row=2, 
         col=1
     )
@@ -195,8 +195,8 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
     else:
         start=None
         bin_size = None
-    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color='#636EFA',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
-    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color='#EF553B',bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
+    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color=FREE_COLOR,bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
+    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color=CE_COLOR,bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
     
     # y axis histograms (and ratio line if not categorial)
     if str(graph_df.dtypes[str(yaxis_column_name)]) != "object":
@@ -207,8 +207,8 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
     else:
         start=None
         bin_size = None
-    fig.add_trace(go.Histogram(y = graph_df[str(yaxis_column_name)], marker_color='#636EFA',bingroup=2, ybins=dict(size=bin_size, start=start)), row=2, col=2,)
-    fig.add_trace(go.Histogram(y = problematics_df[str(yaxis_column_name)], marker_color='#EF553B',bingroup=2,  ybins=dict(size=bin_size, start=start)), row=2, col=2,)
+    fig.add_trace(go.Histogram(y = graph_df[str(yaxis_column_name)], marker_color=FREE_COLOR,bingroup=2, ybins=dict(size=bin_size, start=start)), row=2, col=2,)
+    fig.add_trace(go.Histogram(y = problematics_df[str(yaxis_column_name)], marker_color=CE_COLOR,bingroup=2,  ybins=dict(size=bin_size, start=start)), row=2, col=2,)
     
     fig.update_layout(barmode='overlay',showlegend=False)
     fig.update_traces(opacity=0.9)
@@ -221,7 +221,7 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
         if len(selected)>1:
             selection_color = SELECTED_COLOR_BAD
             involved_points=graph_df.loc[selected[1:]]
-            selected_scatter=scatter_basic_bloc(involved_points, 0.9, '#EF553B', xaxis_column_name, yaxis_column_name, _class, marker_size=12, marker_line_width=2)
+            selected_scatter=scatter_basic_bloc(involved_points, 0.9, CE_COLOR, xaxis_column_name, yaxis_column_name, _class, marker_size=12, marker_line_width=2)
             fig.add_trace(selected_scatter, row=2, col=1)
         else:
             selection_color = SELECTED_COLOR_GOOD

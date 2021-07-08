@@ -26,14 +26,29 @@ def register_callbacks(app, plogger):
             'backgroundColor': CE_COLOR,
             'color': 'white'
         },
-        # {
-        #     'if': {
-        #         'state': 'active'  # 'active' | 'selected'
-        #     },
-        #     'backgroundColor': SELECTED_COLOR,
-        #     'color': 'black',
-        #     'border': '3px solid black'
-        # }
+        {
+            'if': { 'filter_query': '{_violating_tuple} = 0' },
+            'backgroundColor': FREE_COLOR,
+            'color': 'white'
+        },
+        {
+            'if': {
+                'state': 'active',
+                'filter_query': '{_violating_tuple} = 0' 
+            },
+            'backgroundColor': SELECTED_COLOR_GOOD,
+            'color': 'white',
+            'border': '3px solid black'
+        },
+        {
+            'if': {
+                'state': 'active',
+                'filter_query': '{_violating_tuple} = 1' 
+            },
+            'backgroundColor': SELECTED_COLOR_BAD,
+            'color': 'white',
+            'border': '3px solid black'
+        }
     ]
 
     # Callback for Table Output (b,c,d,e,f,g->h) 

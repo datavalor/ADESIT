@@ -6,7 +6,7 @@ hr_tooltip = html.Hr(style={'border': 'none', 'height': '2px', 'backgroundColor'
 
 def Tooltip(**kwargs):
     #style = kwargs.pop('style')
-    style_with_defaults = {'font-size': '14px'}
+    style_with_defaults = {'fontSize': '14px'}
     return dbc.Tooltip(style=style_with_defaults, **kwargs)
 
 def gen_modal(id, title="Modal header", content="This is content"):

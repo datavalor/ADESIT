@@ -9,7 +9,6 @@ import dash_table
 # Miscellaneous
 import pandas as pd
 import math
-import numpy as np
 pd.options.mode.chained_assignment = None
 
 from constants import *
@@ -108,9 +107,11 @@ def register_callbacks(app, plogger):
         dh = session_data["data_holder"]
         selected_points = session_data["selected_point"]
         
-        if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
-            graph=dh["graph"]
+        if dh is not None and dh["graph"] is not None and selected_points is not None:
+            if selected_points['point'] is None:
+                return [], {'name': 'breadthfirst'}
 
+            graph=dh["graph"]
             root=selected_points['point']
             selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
             elements = [{
@@ -118,12 +119,10 @@ def register_callbacks(app, plogger):
                     'id': root, 
                     'label': f"{root}",
                 },
-                # 'position': {'x': 75, 'y': 75},
-                # 'locked': True,
                 'classes': selected_class,
                 'size':5
             }]
-
+        
             if selected_points["in_violation_with"]:
                 # Creates graph in a BFS fashion
                 max_depth = 3
