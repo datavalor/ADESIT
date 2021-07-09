@@ -24,12 +24,22 @@ def render():
                                 'selector': 'node',
                                 'style': {
                                     'content': 'data(label)',
-                                    'border': '2px lightgrey black'
+                                    'borderColor': 'black',
+                                    'borderOpacity': '1',
+                                    'borderWidth': '2px',
                                 }
                             },
                             {
                                 'selector': '.selected_node_bad',
                                 'style': {'background-color': SELECTED_COLOR_BAD}
+                            },
+                            {
+                                'selector': '.hovered',
+                                'style': {
+                                    'borderColor': 'black',
+                                    'borderOpacity': '1',
+                                    'borderWidth': '6px',
+                                }
                             },
                             {
                                 'selector': '.selected_node_good',
@@ -54,20 +64,30 @@ def render():
                     html.Div(
                         [   
                             html.Div("No tuple seclected.", id="ceviz_selection_infos"),
-                            html.Hr(),
-                            html.Strong("Graph depth"),
-                            html.Div(
-                                dcc.Slider(
-                                    id='graph_depth_slider',
-                                    min=1,
-                                    max=10,
-                                    step=1,
-                                    value=2,
-                                    marks={n:str(n) for n in list(range(1, 11))}
+                            html.Strong("Hovered node content:"),
+                            html.Div(id="ceviz_hovered_node"),
+                            html.Div([
+                                html.Hr(),
+                                html.Strong("Graph depth"),
+                                html.Div(
+                                    dcc.Slider(
+                                        id='graph_depth_slider',
+                                        min=1,
+                                        max=5,
+                                        step=1,
+                                        value=2,
+                                        marks={n:str(n) for n in list(range(1, 6))}
+                                    )
                                 )
-                            )
+                            ], style={"display" : "table-row", "vertical-align" : "bottom", "height" : "1px"})
                         ],
-                        style={'width': '50%', "paddingLeft": "20px", "float": "right", "height": "100%"}
+                        style= {
+                                'width': '50%', 
+                                "paddingLeft": "20px", 
+                                "float": "right", 
+                                "height": "100%",
+                                "display": "table"
+                            }
                     ),
                 ],
                 style={'width': "100%", 'height': "350px", "marginTop": "10px", "marginBottom": "10px"}

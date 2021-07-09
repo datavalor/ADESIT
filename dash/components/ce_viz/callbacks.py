@@ -1,4 +1,5 @@
 import dash
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
@@ -98,16 +99,31 @@ def register_callbacks(app, plogger):
         [Output('cytoscape_ce_graph', 'elements'),
         Output('cytoscape_ce_graph', 'layout')],
         [Input('selection_changed', 'children'),
-        Input('graph_depth_slider', 'value')],
-        [State('session-id', 'children')]
+        Input('graph_depth_slider', 'value'),
+        Input('cytoscape_ce_graph', 'mouseoverNodeData')],
+        [State('cytoscape_ce_graph', 'elements'),
+        State('session-id', 'children')]
     )
-    def handle_ceviz_cyto(selection_changed, max_depth, session_id):
+    def handle_ceviz_cyto(selection_changed, max_depth, hovered_data, previous_elements, session_id):
         logger.debug("handle_ceviz_cyto callback")
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        if changed_id=='cytoscape_ce_graph.mouseoverNodeData':
+            if hovered_data is not None:
+                hovered_id = str(hovered_data["id"])
+                for i, el in enumerate(previous_elements):
+                    if str(el["data"].get("id", "NO"))==hovered_id:
+                        previous_elements[i]["classes"] = f'{el["classes"]} hovered'
+                    else:
+                        previous_elements[i]["classes"] = el["classes"].split(" ")[0]
+                return previous_elements, dash.no_update
+            else:
+                raise PreventUpdate
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
         selected_points = session_data["selected_point"]
-        
+
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
             graph=dh["graph"]
             root=selected_points['point']
@@ -160,3 +176,36 @@ def register_callbacks(app, plogger):
             return elements, {'name': 'breadthfirst', 'roots': f'[id = "{root}"]'}
         else:
             return [], {'name': 'breadthfirst'}
+
+    @app.callback(Output('ceviz_hovered_node', 'children'),
+                  [Input('cytoscape_ce_graph', 'mouseoverNodeData'),
+                  Input('selection_changed', 'children')],
+                  [State('session-id', 'children')])
+    def displayHoveredNodeData(data, selec, session_id):
+        def gen_content(tuple, id, features=[], target=[], other=[]):
+            content = []
+            content.append(html.Div(f"[id]: {id}"))
+            for f in features:
+                val = tuple[f]
+                content.append(html.Div(f"[F] {f}: {val}"))
+            for t in target:
+                val = tuple[t]
+                content.append(html.Div(f"[T] {t}: {val}"))
+            for o in other:
+                val = tuple[o]
+                content.append(html.Div(f"{o}: {val}"))
+            return content
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        if changed_id=='cytoscape_ce_graph.mouseoverNodeData' and data is not None:
+            hovered_id = data['id']
+            dh = get_data(session_id)["data_holder"]
+            df = dh["data"]
+            features = dh["X"]
+            target = dh["Y"]
+            other = dh["user_columns"]
+            for f in features: other.remove(f)
+            for t in target: other.remove(t)
+            return gen_content(df.loc[int(hovered_id)], hovered_id, features, target, other)
+        else:
+            return ""
