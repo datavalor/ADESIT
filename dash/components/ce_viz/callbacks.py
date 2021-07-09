@@ -97,20 +97,18 @@ def register_callbacks(app, plogger):
     @app.callback(
         [Output('cytoscape_ce_graph', 'elements'),
         Output('cytoscape_ce_graph', 'layout')],
-        Input('selection_changed', 'children'),
+        [Input('selection_changed', 'children'),
+        Input('graph_depth_slider', 'value')],
         [State('session-id', 'children')]
     )
-    def handle_ceviz_cyto(selection_changed, session_id):
+    def handle_ceviz_cyto(selection_changed, max_depth, session_id):
         logger.debug("handle_ceviz_cyto callback")
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
         selected_points = session_data["selected_point"]
         
-        if dh is not None and dh["graph"] is not None and selected_points is not None:
-            if selected_points['point'] is None:
-                return [], {'name': 'breadthfirst'}
-
+        if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
             graph=dh["graph"]
             root=selected_points['point']
             selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
@@ -120,41 +118,45 @@ def register_callbacks(app, plogger):
                     'label': f"{root}",
                 },
                 'classes': selected_class,
-                'size':5
             }]
         
             if selected_points["in_violation_with"]:
-                # Creates graph in a BFS fashion
-                max_depth = 3
+                # Creates graph in a DFS fashion
                 explored_list = {}
                 q = queue.LifoQueue()
-                # explored_list[root]=True
-                q.put((root, 0))
-                while not q.empty() and max_depth>0:
-                    v, depth = q.get()
+                q.put(root)
+                nodes = {}
+                edges = {}
+                nodes[root] = 0
+                while not q.empty():
+                    v = q.get()
+                    depth = nodes[v]
                     if v not in explored_list:
                         explored_list[v]=True
                         for w in graph[v]:
-                            elements.append({
-                                'data': {
-                                    'id': w, 
-                                    'label': w
-                                },
-                                'classes': 'ce_node',
-                                'size':5
-                            })
-                            edge = {
-                                'data': {
-                                    'source': v, 
-                                    'target': w
-                                }
-                            }
-                            if depth>0: edge['classes'] = 'undirect_edges'
-                            elements.append(edge)
-
                             if depth+1 <= max_depth:
-                                q.put((w, depth+1))
-
+                                if w not in nodes: nodes[w]=depth+1
+                                norm_edge = tuple(sorted([v,w]))
+                                if norm_edge not in edges: edges[norm_edge]=depth+1
+                                q.put(w)
+            for node, depth in nodes.items():
+                elements.append({
+                    'data': {
+                        'id': node, 
+                        'label': f"{node}"
+                    },
+                    'classes': 'ce_node'
+                })
+            for edge, depth in edges.items():
+                if depth>1: edge_class = 'undirect_edges'
+                else: edge_class = 'direct_edges'
+                elements.append({
+                    'data': {
+                        'source': edge[0], 
+                        'target': edge[1]
+                    },
+                    'classes': edge_class
+                })
             return elements, {'name': 'breadthfirst', 'roots': f'[id = "{root}"]'}
         else:
-            raise PreventUpdate
+            return [], {'name': 'breadthfirst'}

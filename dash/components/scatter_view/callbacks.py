@@ -31,10 +31,12 @@ def register_callbacks(app, plogger):
             if left_attrs:
                 for proj_name in PROJ_AXES:
                     disabled=False
-                    if '1' in proj_name and len(left_attrs)<2: disabled=True
-                    else: ext="1"
-                    if '2' in proj_name and len(left_attrs)<3: disabled=True
-                    else: ext="2"
+                    if '1' in proj_name:
+                        ext="1"
+                        if len(left_attrs)<2: disabled=True
+                    if '2' in proj_name:
+                        ext="2"
+                        if len(left_attrs)<3: disabled=True
                     options.append({'label': f"__proj:{which_proj_type(left_attrs, ctypes)}_{ext}", 'title' : proj_name ,'value': proj_name, 'disabled': disabled})
             return options, options
         else:

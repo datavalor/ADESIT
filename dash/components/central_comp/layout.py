@@ -54,7 +54,7 @@ def render():
                     "marginRight": "10px", 
                     "verticalAlign": "top",
                 }),
-                dcc.Dropdown(id='view', 
+                dbc.Select(id='view', 
                     options=[
                         {'label': 'All', 'value': 'ALL'},
                         {'label': 'Blue Only', 'value': 'NP'},
@@ -62,7 +62,6 @@ def render():
                     ],
                     value='ALL',
                     disabled=True,
-                    clearable=False,
                     style={
                         'display': 'inline-block',
                         'width': '100px',
@@ -73,22 +72,26 @@ def render():
                     "marginRight": "10px", 
                     "verticalAlign": "top",
                 }),
-                dcc.Dropdown(id='mode', 
+                dbc.Select(id='mode', 
                     options=[
                         {'label': 'Tuples involved in a counterexample', 'value': 'color_involved'},
                         {'label': 'Tuples to suppress to remove all counterexamples', 'value': 'color_g3'}
                     ],
                     value='color_involved',
-                    clearable=False,
+                    # clearable=False,
                     disabled=True,
-                    style={'display': 'inline-block', 'width': '330px'}
+                    style={
+                        'display': 'inline-block', 
+                        'width': '350px'
+                    }
                 ),
                 html.Div([
-                    dbc.Button('Clear selected points', 
+                    html.Span("Click on a point/line to analyse a specific tuple!"),
+                    dbc.Button('CLEAR SELECTION', 
                         color="primary", 
                         id='clear-selection', 
                         disabled=True,
-                        style={'display':'inline-block'}
+                        style={'display':'inline-block', 'marginLeft': '10px'}
                     ),
                 ], style= {'margin' : '0 auto', "marginTop": "5px"}),
             ])),

@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 import dash_cytoscape as cyto
+from dash_html_components.Hr import Hr
 import dash_table
 
 from constants import *
@@ -12,41 +13,65 @@ def render():
         [
             html.Hr(),
             html.H5("Selection infos"),
-            html.Div("", style={'width': "100%", 'height': "10px"}),
-            cyto.Cytoscape(
-                id='cytoscape_ce_graph',
-                layout={
-                    'name': 'breadthfirst'
-                },
-                style={'width': '40%', 'height': '350px', 'backgroundColor': GRAPHS_BACKGROUND, 'margin':'0 auto'},
-                stylesheet=[
-                    {
-                        'selector': 'node',
-                        'style': {
-                            'content': 'data(label)',
-                            'border': 'thin lightgrey solid'
-                        }
-                    },
-                    {
-                        'selector': '.selected_node_bad',
-                        'style': {'background-color': SELECTED_COLOR_BAD}
-                    },
-                    {
-                        'selector': '.selected_node_good',
-                        'style': {'background-color': SELECTED_COLOR_GOOD}
-                    },
-                    {
-                        'selector': '.ce_node',
-                        'style': {'background-color': CE_COLOR}
-                    },
-                    {
-                        'selector': '.undirect_edges',
-                        'style': {'line-style': 'dashed'}
-                    }
+            html.Div([
+                    cyto.Cytoscape(
+                        id='cytoscape_ce_graph',
+                        layout={
+                            'name': 'breadthfirst'
+                        },
+                        stylesheet=[
+                            {
+                                'selector': 'node',
+                                'style': {
+                                    'content': 'data(label)',
+                                    'border': '2px lightgrey black'
+                                }
+                            },
+                            {
+                                'selector': '.selected_node_bad',
+                                'style': {'background-color': SELECTED_COLOR_BAD}
+                            },
+                            {
+                                'selector': '.selected_node_good',
+                                'style': {'background-color': SELECTED_COLOR_GOOD}
+                            },
+                            {
+                                'selector': '.ce_node',
+                                'style': {'background-color': CE_COLOR}
+                            },
+                            {
+                                'selector': '.undirect_edges',
+                                'style': {'line-color': 'lightgray'}
+                            },
+                            {
+                                'selector': '.direct_edges',
+                                'style': {'line-color': 'darkgray'}
+                            }
+                        ],
+                        elements=[],
+                        style={'width': '50%', 'height': '100%', "float": "left", 'backgroundColor': GRAPHS_BACKGROUND}
+                    ),
+                    html.Div(
+                        [   
+                            html.Div("No tuple seclected.", id="ceviz_selection_infos"),
+                            html.Hr(),
+                            html.Strong("Graph depth"),
+                            html.Div(
+                                dcc.Slider(
+                                    id='graph_depth_slider',
+                                    min=1,
+                                    max=10,
+                                    step=1,
+                                    value=2,
+                                    marks={n:str(n) for n in list(range(1, 11))}
+                                )
+                            )
+                        ],
+                        style={'width': '50%', "paddingLeft": "20px", "float": "right", "height": "100%"}
+                    ),
                 ],
-                elements=[]
+                style={'width': "100%", 'height': "350px", "marginTop": "10px", "marginBottom": "10px"}
             ),
-            html.Div("", style={'width': "100%", 'height': "10px"}),
             html.Div(
                 [
                     dash_table.DataTable(

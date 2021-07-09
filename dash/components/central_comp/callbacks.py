@@ -13,7 +13,8 @@ import utils.figure_utils as fig_gen
 def register_callbacks(app, plogger):
     logger = plogger
 
-    @app.callback(Output("selection_changed", "children"),
+    @app.callback([Output("selection_changed", "children"),
+                Output("ceviz_selection_infos", "children")],
                 [Input('data-analysed', 'children'),
                 Input('main-graph','clickData'),
                 Input('clear-selection','n_clicks'),
@@ -53,9 +54,17 @@ def register_callbacks(app, plogger):
                     "point": selected_point_id,
                     "in_violation_with": []
                 }
-                if selected_point_id is not None and selected_point_id in graph:
-                    selection_infos["in_violation_with"] = graph[selected_point_id]
+                if selected_point_id is not None:
+                    if selected_point_id in graph:
+                        selection_infos["in_violation_with"] = graph[selected_point_id]
+                        ceviz_infos = f'Tuple {selected_point_id} is involved in {len(selection_infos["in_violation_with"])} counterexamples.'
+                    else:
+                        ceviz_infos = f'Tuple {selected_point_id} is not involved in any counterexample.'
+                else:
+                    ceviz_infos = "No tuple selected."
                 overwrite_session_selected_point(session_id, selection_infos)
-                return ""
+                return "", ceviz_infos
             else:
                 raise PreventUpdate
+        else:
+            raise PreventUpdate
