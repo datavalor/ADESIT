@@ -13,7 +13,7 @@ about_content = [
 
         We thank Matteo Dumont and Antoine Mandin for their help on the initial development of ADESIT. We also thank Benjamin Bertin and Vincent Barellon for testing the application and their help for its deployment. Finally, we thank the Datavalor initiative at INSA Lyon for funding a part of this work.
 
-        ADESIT is coded in Python (>=3.7) based on the Dash framework. Counterexample analysis is powered by the [fastg3](https://github.com/datavalor/fastg3) python library.
+        ADESIT is coded in Python based on the Dash framework. Counterexample analysis is powered by the [fastg3](https://github.com/datavalor/fastg3) python library.
         Sources are available on [GitHub](https://github.com/datavalor/adesit).
 
         Copyright (c) 2021, DataValor. All rights reserved.
