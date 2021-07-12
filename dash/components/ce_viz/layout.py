@@ -2,64 +2,21 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-import dash_cytoscape as cyto
-from dash_html_components.Hr import Hr
 import dash_table
 
-from constants import *
+from .cyto_utils import gen_cyto
 
 def render():
     return dbc.Collapse(
         [
             html.Hr(),
             html.H5("Selection infos"),
-            html.Div([
-                    cyto.Cytoscape(
-                        id='cytoscape_ce_graph',
-                        layout={
-                            'name': 'breadthfirst'
-                        },
-                        stylesheet=[
-                            {
-                                'selector': 'node',
-                                'style': {
-                                    'content': 'data(label)',
-                                    'borderColor': 'black',
-                                    'borderOpacity': '1',
-                                    'borderWidth': '2px',
-                                }
-                            },
-                            {
-                                'selector': '.selected_node_bad',
-                                'style': {'background-color': SELECTED_COLOR_BAD}
-                            },
-                            {
-                                'selector': '.hovered',
-                                'style': {
-                                    'borderColor': 'black',
-                                    'borderOpacity': '1',
-                                    'borderWidth': '6px',
-                                }
-                            },
-                            {
-                                'selector': '.selected_node_good',
-                                'style': {'background-color': SELECTED_COLOR_GOOD}
-                            },
-                            {
-                                'selector': '.ce_node',
-                                'style': {'background-color': CE_COLOR}
-                            },
-                            {
-                                'selector': '.undirect_edges',
-                                'style': {'line-color': 'lightgray'}
-                            },
-                            {
-                                'selector': '.direct_edges',
-                                'style': {'line-color': 'darkgray'}
-                            }
-                        ],
-                        elements=[],
-                        style={'width': '50%', 'height': '100%', "float": "left", 'backgroundColor': GRAPHS_BACKGROUND}
+            html.Div(
+                [
+                    html.Div(
+                        gen_cyto(),
+                        id="cyto_container",
+                        style={'width': '50%', 'height': '100%', "float": "left"}
                     ),
                     html.Div(
                         [   

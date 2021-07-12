@@ -2,20 +2,18 @@ import dash
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-
-import queue
-
 import dash_table
 
 # Miscellaneous
 import pandas as pd
 import math
+import random
+import queue
 pd.options.mode.chained_assignment = None
 
 from constants import *
 from utils.cache_utils import *
-
-from constants import *
+from .cyto_utils import gen_cyto
 
 def register_callbacks(app, plogger):
     logger = plogger
@@ -87,7 +85,6 @@ def register_callbacks(app, plogger):
                 page_size=TABLE_MAX_ROWS,
                 page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
                 style_data_conditional=style_data_conditional,
-                # style_as_list_view=True,
                 merge_duplicate_headers=True
             )
                
@@ -96,29 +93,13 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     @app.callback(
-        [Output('cytoscape_ce_graph', 'elements'),
-        Output('cytoscape_ce_graph', 'layout')],
+        Output('cyto_container', 'children'),
         [Input('selection_changed', 'children'),
-        Input('graph_depth_slider', 'value'),
-        Input('cytoscape_ce_graph', 'mouseoverNodeData')],
-        [State('cytoscape_ce_graph', 'elements'),
-        State('session-id', 'children')]
+        Input('graph_depth_slider', 'value')],
+        [State('session-id', 'children')]
     )
-    def handle_ceviz_cyto(selection_changed, max_depth, hovered_data, previous_elements, session_id):
+    def handle_ceviz_cyto(selection_changed, max_depth, session_id):
         logger.debug("handle_ceviz_cyto callback")
-
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        if changed_id=='cytoscape_ce_graph.mouseoverNodeData':
-            if hovered_data is not None:
-                hovered_id = str(hovered_data["id"])
-                for i, el in enumerate(previous_elements):
-                    if str(el["data"].get("id", "NO"))==hovered_id:
-                        previous_elements[i]["classes"] = f'{el["classes"]} hovered'
-                    else:
-                        previous_elements[i]["classes"] = el["classes"].split(" ")[0]
-                return previous_elements, dash.no_update
-            else:
-                raise PreventUpdate
 
         session_data = get_data(session_id)
         dh = session_data["data_holder"]
@@ -128,10 +109,12 @@ def register_callbacks(app, plogger):
             graph=dh["graph"]
             root=selected_points['point']
             selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
+            modified_node_name = {}
+            modified_node_name[root] = f"{root}_{'{:.6f}'.format(random.random())}"
             elements = [{
                 'data': {
-                    'id': root, 
-                    'label': f"{root}",
+                    'id': modified_node_name[root], 
+                    'label': str(root),
                 },
                 'classes': selected_class,
             }]
@@ -155,11 +138,13 @@ def register_callbacks(app, plogger):
                                 norm_edge = tuple(sorted([v,w]))
                                 if norm_edge not in edges: edges[norm_edge]=depth+1
                                 q.put(w)
+            del nodes[root]
             for node, depth in nodes.items():
+                modified_node_name[node] = f"{node}_{'{:.6f}'.format(random.random())}"
                 elements.append({
                     'data': {
-                        'id': node, 
-                        'label': f"{node}"
+                        'id': modified_node_name[node], 
+                        'label': str(node)
                     },
                     'classes': 'ce_node'
                 })
@@ -168,14 +153,33 @@ def register_callbacks(app, plogger):
                 else: edge_class = 'direct_edges'
                 elements.append({
                     'data': {
-                        'source': edge[0], 
-                        'target': edge[1]
+                        'source': modified_node_name[edge[0]], 
+                        'target': modified_node_name[edge[1]]
                     },
                     'classes': edge_class
                 })
-            return elements, {'name': 'breadthfirst', 'roots': f'[id = "{root}"]'}
+            return gen_cyto(elements, {'name': 'breadthfirst', 'roots': f'[id = "{modified_node_name[root]}"]'})
         else:
-            return [], {'name': 'breadthfirst'}
+            return gen_cyto()
+
+    @app.callback(
+        Output('cytoscape_ce_graph', 'elements'),
+        [Input('cytoscape_ce_graph', 'mouseoverNodeData')],
+        [State('cytoscape_ce_graph', 'elements')]
+    )
+    def highlightHoveredNode(hovered_data, previous_elements):
+        logger.debug("handle_hovered_ceviz_cyto callback")
+
+        if hovered_data is not None:
+            hovered_id = str(hovered_data["id"])
+            for i, el in enumerate(previous_elements):
+                if str(el["data"].get("id", "NO"))==hovered_id:
+                    previous_elements[i]["classes"] = f'{el["classes"]} hovered'
+                else:
+                    previous_elements[i]["classes"] = el["classes"].split(" ")[0]
+            return previous_elements
+        else:
+            raise PreventUpdate
 
     @app.callback(Output('ceviz_hovered_node', 'children'),
                   [Input('cytoscape_ce_graph', 'mouseoverNodeData'),
@@ -198,7 +202,7 @@ def register_callbacks(app, plogger):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         if changed_id=='cytoscape_ce_graph.mouseoverNodeData' and data is not None:
-            hovered_id = data['id']
+            clicked_id = data['label']
             dh = get_data(session_id)["data_holder"]
             df = dh["data"]
             features = dh["X"]
@@ -206,6 +210,6 @@ def register_callbacks(app, plogger):
             other = dh["user_columns"]
             for f in features: other.remove(f)
             for t in target: other.remove(t)
-            return gen_content(df.loc[int(hovered_id)], hovered_id, features, target, other)
+            return gen_content(df.loc[int(clicked_id)], clicked_id, features, target, other)
         else:
             return ""

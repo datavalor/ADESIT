@@ -17,13 +17,14 @@ def register_callbacks(app, plogger):
                 Output("ceviz_selection_infos", "children")],
                 [Input('data-analysed', 'children'),
                 Input('main-graph','clickData'),
+                Input('cytoscape_ce_graph', 'tapNodeData'),
                 Input('clear-selection','n_clicks'),
                 Input("viz_datatable", "active_cell"),
                 Input("ceviz_datatable", "active_cell")],
                 [State('x-axis', 'value'),
                 State('y-axis', 'value'),
                 State('session-id', 'children')])
-    def handle_selection(data_analysed, clickData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
+    def handle_selection(data_analysed, clickData, cytoData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
         logger.debug("update_selection_from_graph callback")
         
         dh = get_data(session_id).get("data_holder", None)
@@ -37,6 +38,8 @@ def register_callbacks(app, plogger):
                     selected_point_id = None
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None:
                     selected_point_id = active_cell['row_id']
+                elif changed_id == 'cytoscape_ce_graph.tapNodeData' and cytoData is not None:
+                    selected_point_id = int(cytoData["label"])
                 elif changed_id == 'ceviz_datatable.active_cell' and active_cell_ce is not None:
                     selected_point_id = active_cell_ce['row_id']
                 elif changed_id == 'main-graph.clickData' and clickData is not None:
