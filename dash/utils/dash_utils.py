@@ -11,16 +11,16 @@ def Tooltip(**kwargs):
 
 def gen_modal(id, title="Modal header", content="This is content"):
     return dbc.Modal(
-            [
-                dbc.ModalHeader(title),
-                dbc.ModalBody(content),
-                dbc.ModalFooter(
-                    dbc.Button(
-                        "Close", id=f"{id}_close", className="ml-auto", n_clicks=0
-                    )
-                ),
-            ],
-            id=id,
-            is_open=False,
-            size="xl",
+        [
+            dbc.ModalHeader(title),
+            dbc.ModalBody(content),
+            dbc.ModalFooter(
+                dbc.Button(
+                    "Close", id=f"{id}_close", className="ml-auto", n_clicks=0
+                )
+            ),
+        ],
+        id=id,
+        is_open=False,
+        size="xl",
     )

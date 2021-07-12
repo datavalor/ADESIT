@@ -10,6 +10,7 @@ import base64
 import io
 
 import constants
+from constants import *
 from utils.data_utils import num_or_cat
 
 import pydataset
@@ -77,7 +78,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
             except Exception as e:
                 logger.error(e)
                 return None
-            if constants.RESOURCE_LIMITED and (len(df.index)>constants.MAX_N_TUPLES or len(df.columns)>constants.MAX_N_ATTRS): 
+            if constants.RESOURCE_LIMITED and (len(df.index)>MAX_N_TUPLES or len(df.columns)>MAX_N_ATTRS): 
                 return None
         else:
             return None

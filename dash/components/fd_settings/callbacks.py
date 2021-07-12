@@ -6,12 +6,16 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 pd.options.mode.chained_assignment = None 
 import numpy as np
+import multiprocessing as mp
 
 # Personnal imports
 import fastg3.ncrisp as g3ncrisp
 import utils.figure_utils as fig_gen
 from utils.data_utils import parse_attributes_settings
 from utils.cache_utils import *
+from utils.resource_utils import timeout
+from utils.fastg3_utils import make_analysis
+import constants
 from constants import *
 
 def register_callbacks(app, plogger):
@@ -189,18 +193,24 @@ def register_callbacks(app, plogger):
                 xparams=parse_attributes_settings(left_tols, ctypes)
                 yparams=parse_attributes_settings(right_tols, ctypes)
 
-                # Setting up solver
-                VPE = g3ncrisp.create_vpe_instance(
-                    df, 
-                    xparams, 
-                    yparams,
-                    verbose=False
-                )
-                rg3 = g3ncrisp.RSolver(VPE, precompute=True)
+                
+                
+                # Making analysis
+                manager = mp.Manager()
+                return_dict = manager.dict()
+                process = mp.Process(target=make_analysis, args=(df, xparams, yparams, g3_computation=="exact", return_dict,))
+                process.daemon = True
+                process.start()
+                if constants.RESOURCE_LIMITED: 
+                    process.join(VPE_TIMEOUT)
+                    if process.is_alive():
+                        process.terminate()
+                        return [dash.no_update, True]+[dash.no_update]*7
+                else: 
+                    process.join()
 
-                # Enumerating violating pairs
-                vps = rg3.get_vps()
-                dh["graph"] = rg3.get_vps(as_map=True)
+                vps = return_dict["vps"]
+                dh["graph"] = return_dict["vps_al"]
                 involved_tuples = np.unique(np.array(vps))
 
                 # Creating figures
@@ -215,7 +225,7 @@ def register_callbacks(app, plogger):
                     g2_fig=fig_gen.bullet_indicator(value=(1-g2)*100, reference=g2_indicator['data'][0]['value'])
                     # Computing G3
                     if g3_computation=="exact": 
-                        cover = rg3.exact(method="wgyc", return_cover=True)
+                        cover = return_dict["g3_exact_cover"]
                         g3 = len(cover)/n_tuples
                         if not g3 is None:
                             accuracy_ub = 1-g3
@@ -224,10 +234,9 @@ def register_callbacks(app, plogger):
                             is_open=True
                             g3_indicator = fig_gen.gauge_indicator(value=0, reference=learnability_indicator['data'][0]['value'], lower_bound=0, upper_bound=0)
                     else:
-                        gic, approx2 = rg3.upper_bound(method="gic", return_cover=True), rg3.upper_bound(method="2approx", return_cover=True)
-                        cover = gic if len(gic)<len(approx2) else approx2
+                        cover = return_dict["g3_ub_cover"]
                         g3_up = len(cover)/n_tuples
-                        g3_lb = rg3.lower_bound(method="maxmatch")
+                        g3_lb = return_dict["g3_lb"]
                         lb_acc, ub_acc = (1-g3_up)*100, (1-g3_lb)*100
                         g3_indicator = fig_gen.gauge_indicator(value=(lb_acc+ub_acc)*0.5, reference=learnability_indicator['data'][0]['value'], lower_bound=lb_acc, upper_bound=ub_acc)
 
