@@ -9,11 +9,9 @@ import numpy as np
 import multiprocessing as mp
 
 # Personnal imports
-import fastg3.ncrisp as g3ncrisp
 import utils.figure_utils as fig_gen
 from utils.data_utils import parse_attributes_settings
 from utils.cache_utils import *
-from utils.resource_utils import timeout
 from utils.fastg3_utils import make_analysis
 import constants
 from constants import *

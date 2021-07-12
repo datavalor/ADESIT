@@ -45,7 +45,7 @@ def gen_data_holder(df):
     cols = list(cols_type.keys())
     df = df[cols]
     df = df.reset_index(drop=True)
-    df[constants.ADESIT_INDEX] = df.index
+    df.insert(0, ADESIT_INDEX, df.index)
 
     return {
         "data": df,

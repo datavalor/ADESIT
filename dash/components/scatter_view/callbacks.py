@@ -190,7 +190,7 @@ def register_callbacks(app, plogger):
             points = selected_data.get("points")
             data = dh["data"]
             data[SELECTION_COLUMN_NAME] = 0 
-            selected_ids=[p["customdata"] for p in points if "customdata" in p]
+            selected_ids=[p["customdata"][0] for p in points if "customdata" in p]
             if label_column in data.columns:
                 n_involved = len(data.loc[selected_ids].loc[data[label_column] > 0].index)
             else: 
@@ -198,7 +198,8 @@ def register_callbacks(app, plogger):
             data[SELECTION_COLUMN_NAME][selected_ids]=1
             dh["data"]=data
             overwrite_session_data_holder(session_id, dh)
-            return str(len(selected_ids)), str(n_involved)
+            percent = round(100*n_involved/len(selected_ids))
+            return str(len(selected_ids)), f"{n_involved} ({percent}%)"
         else:
             if dh is not None:
                 dh["data"][SELECTION_COLUMN_NAME] = 0 

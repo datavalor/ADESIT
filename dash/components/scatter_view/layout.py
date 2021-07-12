@@ -29,8 +29,8 @@ def render():
             html.Div([
                 html.H5("Box select infos"),
                 html.Ul([
-                    html.Li(["Number of tuples: ", html.Span("0", id="ntuples-selection")]),
-                    html.Li(["Number of violating tuples: ", html.Span("0", id="nviolating-selection")]),
+                    html.Li([html.Span("0", id="ntuples-selection"), " tuples selected."]),
+                    html.Li(["Tuple involved in a counterexample: ", html.Span("0", id="nviolating-selection")]),
                     html.Li([
                         html.Div("SQL Query:"),
                         dcc.Textarea(id='sql-query', value="", style={'width':'100%', 'height': 90,'color':'#A3A3A3'})
