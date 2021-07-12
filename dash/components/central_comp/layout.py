@@ -64,7 +64,7 @@ def render():
                     disabled=True,
                     style={
                         'display': 'inline-block',
-                        'width': '100px',
+                        'width': '120px',
                         'marginRight': '20px'
                     }
                 ),
@@ -78,11 +78,10 @@ def render():
                         {'label': 'Tuples to suppress to remove all counterexamples', 'value': 'color_g3'}
                     ],
                     value='color_involved',
-                    # clearable=False,
                     disabled=True,
                     style={
                         'display': 'inline-block', 
-                        'width': '350px'
+                        'width': '375px'
                     }
                 ),
                 html.Div([
@@ -99,8 +98,6 @@ def render():
                 is_open=False,
                 style={
                     "width": "60%",
-                    # "marginBottom": "10px",
-                    # 'backgroundColor': GRAPHS_BACKGROUND,
                     'margin': '0 auto',
                     'padding': '20px',
                     'textAlign': 'center'

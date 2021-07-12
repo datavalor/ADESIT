@@ -61,9 +61,12 @@ def register_callbacks(app, plogger):
                 [State('session-id', 'children')])
     def handle_table(data_updated, selected_data, view, mode, analysed, session_id):
         logger.debug("handle_table callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+        
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=get_data(session_id)["data_holder"]
+        dh=session_data["data_holder"]
         if dh is not None:
             data=dh["data"]
             # select_problematics/non problematics according to mode and view
@@ -108,7 +111,10 @@ def register_callbacks(app, plogger):
     [State('session-id', 'children')])
     def update_table(page_current, page_size, session_id):
         logger.debug("update_table callback")
-        table_data=get_data(session_id)["table_data"]
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        table_data = session_data["table_data"]
         if table_data is not None and page_current is not None:
             return table_data.iloc[
                 page_current*page_size:(page_current+ 1)*page_size

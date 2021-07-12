@@ -18,7 +18,7 @@ def render():
                         dbc.Button('Upload File', color="primary", style={'width' : '100%',}),
                         id='upload-form',
                         style={'marginBottom' : '10px',},
-                        max_size=10000000
+                        max_size=30000000
                     ),
                 ], style={ 'width' : '49%', 'display' : 'inline-block'}),
                 

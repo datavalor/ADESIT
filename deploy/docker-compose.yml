@@ -14,7 +14,7 @@ services:
     volumes:
       - ./dash:/dash
     working_dir: /dash
-    command: python app.py
+    command: python app.py -r
     network_mode: "bridge"
   nginx:
     restart: always

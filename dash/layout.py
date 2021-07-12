@@ -9,6 +9,7 @@ from components import fd_settings as fd_settings_component
 from components import stats as stats_component
 from components import central_comp as central_comp_component
 from components import ce_viz as ce_viz_component
+from constants import *
 
 index_string = '''
         <!DOCTYPE html>
@@ -54,26 +55,24 @@ def serve_layout(banner, app):
         [
             html.Div(session_id, id='session-id', style={'display': 'none'}),
             html.Span("", id='data-loaded', style={'display': 'none'}),
-            html.Span("", id='data-updated', style={'display': 'none'}),
             html.Span("", id='data-analysed', style={'display': 'none'}),
             html.Span("", id="selection_changed", style={"display": "none"}),
             dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
-            html.Span("", id='test-callback', style={'display': 'none'}),
 
             dbc.Alert(
-                "The computation has exceeded the time limit. Try again with different settings.",
-                id="alert-timeout",
+                f"Error while loading dataset. Note that there is a limit of {MAX_N_TUPLES} tuples and {MAX_N_ATTRS} attributes on this online version.",
+                id="alert-data_not_loaded",
                 dismissable=True,
                 is_open=False,
                 color='danger',
                 fade='True',
-                duration=5000,
+                duration=4000,
                 style={'position':'absolute', 'z-index': '99', 'top': '5%', 'left': '5%'}
             ),
 
             dbc.Alert(
-                "Projections are computed on the features, please select more features in order to continue.",
-                id="alert-projection",
+                "The computation has exceeded the time limit (dataset too large, too many counterexamples...). Try again with different settings.",
+                id="alert-timeout",
                 dismissable=True,
                 is_open=False,
                 color='danger',

@@ -100,33 +100,23 @@ def register_callbacks(app, plogger):
     )
     def handle_ceviz_cyto(selection_changed, max_depth, session_id):
         logger.debug("handle_ceviz_cyto callback")
-
         session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
         dh = session_data["data_holder"]
         selected_points = session_data["selected_point"]
-
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
-            graph=dh["graph"]
             root=selected_points['point']
-            selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
-            modified_node_name = {}
-            modified_node_name[root] = f"{root}_{'{:.6f}'.format(random.random())}"
-            elements = [{
-                'data': {
-                    'id': modified_node_name[root], 
-                    'label': str(root),
-                },
-                'classes': selected_class,
-            }]
-        
+
+            nodes = {}
+            nodes [root] = 0        
+            edges = {}
             if selected_points["in_violation_with"]:
                 # Creates graph in a DFS fashion
+                graph=dh["graph"]
                 explored_list = {}
                 q = queue.LifoQueue()
                 q.put(root)
-                nodes = {}
-                edges = {}
-                nodes[root] = 0
                 while not q.empty():
                     v = q.get()
                     depth = nodes[v]
@@ -138,16 +128,23 @@ def register_callbacks(app, plogger):
                                 norm_edge = tuple(sorted([v,w]))
                                 if norm_edge not in edges: edges[norm_edge]=depth+1
                                 q.put(w)
-            del nodes[root]
+            
+            elements = []
+            modified_node_name = {}
             for node, depth in nodes.items():
+                if node==root:
+                    selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
+                else:
+                    selected_class = 'ce_node'
                 modified_node_name[node] = f"{node}_{'{:.6f}'.format(random.random())}"
                 elements.append({
                     'data': {
                         'id': modified_node_name[node], 
                         'label': str(node)
                     },
-                    'classes': 'ce_node'
+                    'classes': selected_class
                 })
+
             for edge, depth in edges.items():
                 if depth>1: edge_class = 'undirect_edges'
                 else: edge_class = 'direct_edges'

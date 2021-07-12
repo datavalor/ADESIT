@@ -9,7 +9,7 @@ pd.options.mode.chained_assignment = None
 import base64
 import io
 
-from constants import *
+import constants
 from utils.data_utils import num_or_cat
 
 import pydataset
@@ -44,9 +44,8 @@ def gen_data_holder(df):
     cols = list(cols_type.keys())
     df = df[cols]
     df = df.reset_index(drop=True)
-    df[ADESIT_INDEX] = df.index
+    df[constants.ADESIT_INDEX] = df.index
 
-    
     return {
         "data": df,
         "graph": None,
@@ -59,15 +58,12 @@ def gen_data_holder(df):
 def get_data(session_id, pydata=False, clear=False, filename=None, contents=None, copy=None):    
     @cache.memoize()
     def handle_data(session_id):
-        if not copy is None: 
-            logger.debug("/!\ replacing stored data /!\\")
-            return copy
-        logger.debug(f"/!\ full data loading of {filename} /!\\")
+        if copy is not None: return copy
+
         if pydata:
             df = pydataset.data(dataset_names[filename])
-            if filename=="diamonds": df=df.sample(n=10000)
-            data_holder = gen_data_holder(df)
-        elif not filename is None:
+            if filename=="diamonds": df = df.sample(n=10000)
+        elif filename is not None:
             _, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
             try:
@@ -80,13 +76,14 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
                     df = pd.read_excel(io.BytesIO(decoded))
             except Exception as e:
                 logger.error(e)
-                data_holder = None
-            data_holder = gen_data_holder(df)
+                return None
+            if constants.RESOURCE_LIMITED and (len(df.index)>constants.MAX_N_TUPLES or len(df.columns)>constants.MAX_N_ATTRS): 
+                return None
         else:
-            data_holder = None
+            return None
 
         final_data = default_data
-        final_data["data_holder"]=data_holder
+        final_data["data_holder"]=gen_data_holder(df)
         return final_data
 
     if clear: 

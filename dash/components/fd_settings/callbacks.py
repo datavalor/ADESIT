@@ -21,7 +21,8 @@ def register_callbacks(app, plogger):
         [Output('data-loaded','children'),
         Output('dataset_confirm', 'children'),
         Output('left-attrs', 'disabled'),
-        Output('right-attrs', 'disabled')],
+        Output('right-attrs', 'disabled'),
+        Output('alert-data_not_loaded', 'is_open')],
         [Input('toy-dataset-iris','n_clicks'),
         Input('toy-dataset-housing','n_clicks'),
         Input('toy-dataset-diamonds','n_clicks'),
@@ -34,19 +35,23 @@ def register_callbacks(app, plogger):
         logger.debug('handle_data callback')
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         clear_session(session_id)
+        data=None
         if "toy-dataset" in changed_id:
             toy_dataset = changed_id.split(".")[0].split("-")[-1]
-            clear_session(session_id)
-            dh = get_data(session_id, filename=toy_dataset, pydata=True)["data_holder"]
-            n = len(dh["data"].index) if dh is not None else 0
-            return toy_dataset, fig_gen.dataset_infos(toy_dataset, n, len(dh["data"].columns)), False, False
+            filename = toy_dataset
+            data = get_data(session_id, filename=toy_dataset, pydata=True)
         elif filename is not None: 
-            clear_session(session_id)
-            dh = get_data(session_id, filename=filename, contents=contents)["data_holder"]
-            n = len(dh["data"].index) if dh is not None else 0
-            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False
+            data = get_data(session_id, filename=filename, contents=contents)
         else:
             raise PreventUpdate
+
+        if data is not None:
+            dh = data.get("data_holder", None)
+            n = len(dh["data"].index) if dh is not None else 0
+            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
+        else:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, True
+        
 
     # Callback for Dimensions (attribute) options in dropdowns (b->c,d,f)
     @app.callback(
@@ -58,8 +63,11 @@ def register_callbacks(app, plogger):
         [State('session-id', 'children')]
     )
     def update_options(data_loaded, session_id):
-        logger.debug("update_options")
-        dh=get_data(session_id)["data_holder"]
+        logger.debug("update_options  callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        dh=session_data["data_holder"]
         if dh is not None:
             df_parsed=dh["data"]
             user_cols=dh["user_columns"]
@@ -81,6 +89,8 @@ def register_callbacks(app, plogger):
     )
     def handle_thresolds(data_loaded, left_attrs, right_attrs, fthresolds, tthresolds, session_id):
         logger.debug("handle_thresolds callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
 
         # Detect which attributes changed
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -89,9 +99,8 @@ def register_callbacks(app, plogger):
         else: inputtols, inputattr=tthresolds, right_attrs
 
         # Update tolerances
-        dh=get_data(session_id)["data_holder"]
+        dh=session_data["data_holder"]
         if inputattr is not None and dh is not None:
-            df=dh["data"]
             ctypes = dh["user_columns_type"]
 
             # Retrieve previous settings
@@ -158,9 +167,13 @@ def register_callbacks(app, plogger):
     )
     def handle_analysis(data_updated, n_clicks, left_attrs, right_attrs, left_tols, right_tols, g3_computation, learnability_indicator, g2_indicator, g1_indicator, ncountexample_indicator, session_id):
         logger.debug("handle_analysis callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         is_open = False
-        dh=get_data(session_id)["data_holder"]
+
+        dh=session_data["data_holder"]
         if dh is not None:
             df = dh["data"]
             ctypes = dh["user_columns_type"]
@@ -188,7 +201,6 @@ def register_callbacks(app, plogger):
                 # Enumerating violating pairs
                 vps = rg3.get_vps()
                 dh["graph"] = rg3.get_vps(as_map=True)
-
                 involved_tuples = np.unique(np.array(vps))
 
                 # Creating figures

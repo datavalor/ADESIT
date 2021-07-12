@@ -20,6 +20,8 @@ from components import ce_viz as ce_viz_component
 from components import central_comp as central_comp_component
 from components import scatter_view as scatter_view_component
 
+import constants
+
 components = [
     banner_component,
     fd_settings_component,
@@ -33,7 +35,7 @@ components = [
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='ADESIT')
     parser.add_argument('-d', '--debug', const=True, nargs='?', help='Debug mode')
-    parser.add_argument('-t', '--timeout', const=True, nargs='?', help='No cache timeout')
+    parser.add_argument('-r', '--resources', const=True, nargs='?', help='Resource Limits')
     parser.add_argument('-b', '--banner', const=True, nargs='?', help='Removes the banner')
     args = parser.parse_args()
 
@@ -41,14 +43,18 @@ if __name__ == '__main__':
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
     app.index_string = index_string
 
+    if args.resources: constants.RESOURCE_LIMITED = True
+
     serve_layout_final = functools.partial(serve_layout, not args.banner, app)
     app.layout = serve_layout_final
 
+    # Setting cache
     cache_config={
         'CACHE_TYPE': 'SimpleCache',
         'CACHE_THRESHOLD': 100
     }
-    if not args.timeout: cache_config['CACHE_DEFAULT_TIMEOUT']=500
+    if constants.RESOURCE_LIMITED: cache_config['CACHE_DEFAULT_TIMEOUT']=500
+    else: cache_config['CACHE_DEFAULT_TIMEOUT']=0
     cache_utils.cache = Cache(app.server, config=cache_config)
 
     logging_level = logging.DEBUG if args.debug else logging.INFO

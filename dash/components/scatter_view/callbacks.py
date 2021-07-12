@@ -24,7 +24,10 @@ def register_callbacks(app, plogger):
                 [State('session-id', 'children')])
     def update_viz_options(left_attrs, session_id):
         logger.debug("update_viz_options")
-        dh=get_data(session_id)["data_holder"]
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        dh=session_data["data_holder"]
         if dh is not None:
             ctypes=dh["user_columns_type"]
             options=[{'label': col, 'title' : col, 'value': col} for col in dh["user_columns"]]
@@ -77,10 +80,13 @@ def register_callbacks(app, plogger):
                 State('session-id', 'children')])
     def handle_graph(data_updated, data_analysed, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
         logger.debug("handle_graph callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=get_data(session_id)["data_holder"]
+        dh=session_data["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
             df=dh["data"]
             ctypes = dh["user_columns_type"]
@@ -174,9 +180,12 @@ def register_callbacks(app, plogger):
                 State('session-id', 'children')])
     def handle_selection(selected_data, contents, mode, xaxis, yaxis, n_clicks, session_id):
         logger.debug("update_select callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=get_data(session_id)["data_holder"]
+        dh=session_data["data_holder"]
         if dh is not None and str(selected_data)!="None":
             points = selected_data.get("points")
             data = dh["data"]

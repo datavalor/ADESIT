@@ -36,6 +36,7 @@ python app.py -d -t -b
 
 ```
 cd deploy/
+docker-compose build
 docker-compose up
 ```
 

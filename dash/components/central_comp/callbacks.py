@@ -26,8 +26,10 @@ def register_callbacks(app, plogger):
                 State('session-id', 'children')])
     def handle_selection(data_analysed, clickData, cytoData, clear_session_ncliks, active_cell, active_cell_ce, xaxis_column_name, yaxis_column_name, session_id):
         logger.debug("update_selection_from_graph callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
         
-        dh = get_data(session_id).get("data_holder", None)
+        dh = session_data["data_holder"]
         if dh is not None:
             df=dh["data"]
             graph=dh["graph"]
