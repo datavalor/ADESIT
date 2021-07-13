@@ -25,7 +25,7 @@ Once it is launched, ADESIT is available on port 8050.
 ```
 pip install -r deploy/requirements.txt
 cd dash/
-python app.py -d -t -b
+python app.py
 ```
 
 * -d: debut logs
