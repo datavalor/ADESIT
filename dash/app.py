@@ -53,7 +53,7 @@ if __name__ == '__main__':
         'CACHE_TYPE': 'SimpleCache',
         'CACHE_THRESHOLD': 100
     }
-    if constants.RESOURCE_LIMITED: cache_config['CACHE_DEFAULT_TIMEOUT']=500
+    if constants.RESOURCE_LIMITED: cache_config['CACHE_DEFAULT_TIMEOUT']=10*60
     else: cache_config['CACHE_DEFAULT_TIMEOUT']=0
     cache_utils.cache = Cache(app.server, config=cache_config)
 

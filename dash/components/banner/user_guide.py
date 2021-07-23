@@ -8,7 +8,7 @@ user_guide_content = [
         Only parts A is availaible when you open ADESIT.
         
 
-        #### A - Supervised learning problem settings
+        #### A - Data and problem settings
         * Upload a dataset or choose one among the propositions. *In this this online version you are restricted to 100,000 rows and 20 attributes.*
         * Choose the functionnal dependency corresponding to the supervised problem at hand (eg. sepal_length, sepal_width → specie corresponds to specie=f(sepal_length, sepal_width)).
             * For each numerical attribute, uncertainties are null by default: this corresponds to the case of *crisp FDs*.

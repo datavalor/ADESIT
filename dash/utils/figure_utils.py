@@ -70,12 +70,12 @@ def gauge_indicator(value=0, reference=0, lower_bound=0, upper_bound=0):
                 }
             )).update_layout(autosize = True, margin=dict(b=0, t=0, l=20, r=30))
 
-def bullet_indicator(value=0, reference=0, color='green', suffix='%'):
+def bullet_indicator(value=0, reference=0, color='green', suffix='%', prefix=''):
     return go.Figure(go.Indicator(
                             mode = "gauge+number+delta",
                             value = value,
                             delta = {'reference': reference, 'font': {'size': 15}},
-                            number = {'valueformat':'.2f', 'suffix': suffix, 'font': {'size': 20}},
+                            number = {'valueformat':'.2f', 'prefix': prefix, 'suffix': suffix, 'font': {'size': 20}},
                             gauge = {
                                 'shape': "bullet",
                                 'bar': {'color': color, 'thickness': 0.8},

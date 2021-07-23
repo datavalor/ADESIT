@@ -8,7 +8,7 @@ from utils.dash_utils import Tooltip
 def render():
     return html.Div(
         [
-            html.H4("Supervised learning problem settings"),
+            html.H4("Data and problem settings"),
 
             # File Input and params (b)
             html.Div([
@@ -73,8 +73,8 @@ def render():
                         id='thresold_table_features',
                         columns=(
                             [{'id': 'attribute', 'name': 'attribute'}, 
-                            {'id': 'absolute', 'name': 'absolute'}, 
-                            {'id': 'relative', 'name': 'relative'}]
+                            {'id': 'absolute', 'name': 'abs'}, 
+                            {'id': 'relative', 'name': 'rel'}]
                         ),
                         data=[],
                         editable=True
@@ -112,8 +112,8 @@ def render():
                         id='thresold_table_target',
                         columns=(
                             [{'id': 'attribute', 'name': 'attribute'}, 
-                            {'id': 'absolute', 'name': 'absolute'}, 
-                            {'id': 'relative', 'name': 'relative'}]
+                            {'id': 'absolute', 'name': 'abs'}, 
+                            {'id': 'relative', 'name': 'rel'}]
                         ),
                         data=[],
                         editable=True

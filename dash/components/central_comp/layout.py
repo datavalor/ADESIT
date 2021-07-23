@@ -104,14 +104,14 @@ def render():
                 }
             ),
             dbc.Tabs([
-                dbc.Tab(scatter_view_component.render(), label="Scatter view"),
-                dbc.Tab(table_component.render(), label="Table view")
+                dbc.Tab(table_component.render(), label="Table"),
+                dbc.Tab(scatter_view_component.render(), label="2D Scatter View"),
             ])
         ], 
         style={
             'marginLeft' : '0%', 
             'marginRight' : '0%',
-            'height': '850px'
+            'height': '865px'
         },
         id="collapse-viz",
         is_open=False

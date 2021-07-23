@@ -191,8 +191,6 @@ def register_callbacks(app, plogger):
                 xparams=parse_attributes_settings(left_tols, ctypes)
                 yparams=parse_attributes_settings(right_tols, ctypes)
 
-                
-                
                 # Making analysis
                 manager = mp.Manager()
                 return_dict = manager.dict()
@@ -217,9 +215,11 @@ def register_callbacks(app, plogger):
                     # Computing G1, G2
                     ncounterexample = involved_tuples.size
                     ncounterexample_fig = f"({ncounterexample} tuples over {n_tuples} are involved in at least one counterexample)"
-                    g1 = round(len(vps)/n_tuples**2,4)
-                    g1_fig=fig_gen.bullet_indicator(value=(1-g1)*100, reference=g1_indicator['data'][0]['value'])
-                    g2 = round(ncounterexample/n_tuples, 4)
+                    inv_g1, inv_g1_prefix = 100*(1-len(vps)/n_tuples**2), ''
+                    if inv_g1>99.99 and inv_g1<100:
+                        inv_g1, inv_g1_prefix = 99.99, '>'
+                    g1_fig=fig_gen.bullet_indicator(value=inv_g1, reference=g1_indicator['data'][0]['value'], prefix=inv_g1_prefix)
+                    g2 = ncounterexample/n_tuples
                     g2_fig=fig_gen.bullet_indicator(value=(1-g2)*100, reference=g2_indicator['data'][0]['value'])
                     # Computing G3
                     if g3_computation=="exact": 
