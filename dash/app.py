@@ -14,7 +14,7 @@ import utils.cache_utils as cache_utils
 
 from components import banner as banner_component
 from components import fd_settings as fd_settings_component
-from components import stats as stats_component
+from components import indicators as indicators_component
 from components import table as table_component
 from components import ce_viz as ce_viz_component
 from components import central_comp as central_comp_component
@@ -25,7 +25,7 @@ import constants
 components = [
     banner_component,
     fd_settings_component,
-    stats_component,
+    indicators_component,
     table_component,
     ce_viz_component,
     central_comp_component,

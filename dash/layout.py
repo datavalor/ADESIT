@@ -6,7 +6,7 @@ import uuid
 
 from components import banner as banner_component
 from components import fd_settings as fd_settings_component
-from components import stats as stats_component
+from components import indicators as indicators_component
 from components import central_comp as central_comp_component
 from components import ce_viz as ce_viz_component
 from constants import *
@@ -83,7 +83,7 @@ def serve_layout(banner, app):
 
             banner_component.render(app, banner=banner),
             fd_settings_component.render(),
-            stats_component.render(),
+            indicators_component.render(),
             central_comp_component.render(),
             ce_viz_component.render(),
 

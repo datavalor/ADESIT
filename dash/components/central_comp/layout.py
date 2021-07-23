@@ -1,10 +1,10 @@
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 
-import dash_core_components as dcc
 from components import table as table_component
 from components import scatter_view as scatter_view_component
 
+from utils.dash_utils import Tooltip, hr_tooltip
 from constants import *
 
 def render():
@@ -27,10 +27,25 @@ def render():
         [
             html.H5("Dataset exploration"),
             dbc.Collapse(dbc.Card(dbc.CardBody([
-                html.Strong("Free tuple: ", style={
-                    "marginRight": "10px", 
-                    "verticalAlign": "top",
-                }),
+                Tooltip(children=["Tuple involved in no counterexample."], target='free_tuple_tooltip'),
+                Tooltip(children=["Tuple involved in at least 1 counterexample."], target='involved_tuple_tooltip'),
+                html.Strong(
+                    [
+                        html.Span(
+                            "Free tuple",
+                            id="free_tuple_tooltip",
+                            style={
+                                'textDecoration': 'underline', 
+                                'cursor': 'pointer'
+                            }
+                        ),
+                        ": "
+                    ], 
+                    style={
+                        "marginRight": "10px", 
+                        "verticalAlign": "top"
+                    }
+                ),
                 gen_legend_element(FREE_COLOR, "Unselected"),
                 gen_legend_element(SELECTED_COLOR_GOOD, "Selected"),
                 html.Div([], style=
@@ -43,10 +58,23 @@ def render():
                         "marginLeft": "5px",
                     }
                 ),
-                html.Strong("Involved tuple:", style={
-                    "marginRight": "10px", 
-                    "verticalAlign": "top",
-                }),
+                html.Strong(
+                    [
+                        html.Span(
+                            "Involved tuple",
+                            id="involved_tuple_tooltip",
+                            style={
+                                'textDecoration': 'underline', 
+                                'cursor': 'pointer'
+                            }
+                        ),
+                        ": "
+                    ], 
+                    style={
+                        "marginRight": "10px", 
+                        "verticalAlign": "top"
+                    }
+                ),
                 gen_legend_element(CE_COLOR, "Unselected"),
                 gen_legend_element(SELECTED_COLOR_BAD, "Selected"),
                 html.Br(),
