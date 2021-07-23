@@ -69,6 +69,7 @@ def register_callbacks(app, plogger):
         dh=session_data["data_holder"]
         if dh is not None:
             data=dh["data"]
+            col_types=dh["user_columns_type"]
             # select_problematics/non problematics according to mode and view
             if label_column in data.columns:
                 if view == 'NP': data=data.loc[data[label_column] == 0]
@@ -77,12 +78,13 @@ def register_callbacks(app, plogger):
             if SELECTION_COLUMN_NAME in data.columns and len(np.unique(data[SELECTION_COLUMN_NAME]))!=1:
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
-            columns = [{"name": column, "id": column, "hideable":True} for column in data.columns if column in dh["user_columns"]]
+            columns = [{"name": [col_types[column], column], "id": column, "hideable":True} for column in data.columns if column in dh["user_columns"]]
+            columns = sorted(columns, key=lambda x: "".join(x["name"]))
             if G12_COLUMN_NAME in data.columns:
-                columns = [{"name": G12_COLUMN_NAME, "id": G12_COLUMN_NAME}]+columns
-            columns = [{"name": ADESIT_INDEX, "id": ADESIT_INDEX, "hideable":False}]+columns
+                columns = [{"name": ["", G12_COLUMN_NAME], "id": G12_COLUMN_NAME}]+columns
+            columns = [{"name": ["", ADESIT_INDEX], "id": ADESIT_INDEX, "hideable":False}]+columns
             
-            output_df = data[[c["name"] for c in columns]]
+            output_df = data[[c["id"] for c in columns]]
             overwrite_session_table_data(session_id, output_df)
 
             n_rows=len(output_df.index)
@@ -98,6 +100,7 @@ def register_callbacks(app, plogger):
                 style_cell_conditional=[
                     {'if': {'column_id': G12_COLUMN_NAME,}, 'display': 'None',}
                 ],
+                merge_duplicate_headers=True
                 # style_as_list_view=True
             )
             return table
