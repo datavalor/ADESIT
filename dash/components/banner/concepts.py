@@ -5,10 +5,10 @@ concepts_content = [
         #### Context
         Suppose you are facing a new supervised learning (SL) challenge: a domain expert asks you if it is possible to predict a **target C** from a set of **features X** by learning on a **dataset r**. 
         To answer this question, it is common for a data scientist to directly jump into the learning step by training a model and  then evaluate it against a testing set to obtain an accuracy.
-        If this approach might work, the interpretability of the result is generally rather low: *Why such accuracy, where the errors come from? Could you obtain a better one with a different model or settings?*
+        If this approach might work, the interpretability of the result is generally rather low: *Why such accuracy? From where does the errors come from? Could you obtain a better one with a different model or settings?*
         Moreover, it can also be very costly as answering such questions might require many trainings.
 
-        With ADESIT, we propose a tool to better understand your data beforehand in view of that SL problem, allowing to avoid many costly training and to obtain a deeper insight on your data. We target questions such as:
+        With ADESIT, we propose a tool to better understand your data beforehand in view of that SL problem, allowing to avoid many costly trainings and to obtain a deeper insight on your data. We target questions such as:
         * What areas of my data might present a problem?
             * How the domain expert could explain those issues and provide potential solutions?
             * How incorporating domain knowledge such as accuracies changes my results?
@@ -34,10 +34,10 @@ concepts_content = [
         φ: sepal_length, sepal_width → specie
 
         We say that the pair (t50, t80) violates φ: **(t50, t80) forms a counterexample.**. From there, R might go talk with specialist biologist researchers who might indicate to her why such counterexample might be happening. 
-        Should R also measure the *petal length* and the *petal width* of the flower, who knows?
+        Should R also measure the *petal length* and the *petal width* of the flower?.. who knows?
 
         #### About counterexample indicators
-        In 1995, Kivinen introduces 3 counterexample indicators to measure the veracity of a FD in a relation:
+        In 1995, Kivinen introduces 3 counterexample indicators to measure the veracity of a FD (and thus its associated supervised learning function) in a relation:
         * g1 measures the proportion of counterexamples
         * g2 measures the proportion of tuples of involved in a counterexample
         * g3 gives the minimum proportion of tuples to remove from the relation such that no counterexample remains
