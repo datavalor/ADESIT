@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 
 import uuid
 
@@ -65,8 +65,8 @@ def serve_layout(banner, app):
                 dismissable=True,
                 is_open=False,
                 color='danger',
-                fade='True',
-                duration=4000,
+                # fade='True',
+                # duration=4000,
                 style={'position':'absolute', 'z-index': '99', 'top': '5%', 'left': '5%'}
             ),
 
@@ -76,8 +76,8 @@ def serve_layout(banner, app):
                 dismissable=True,
                 is_open=False,
                 color='danger',
-                fade='True',
-                duration=5000,
+                # fade='True',
+                # duration=5000,
                 style={'position':'absolute', 'z-index': '99', 'top': '5%', 'left': '5%'}
             ),
 

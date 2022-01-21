@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 
 from utils.dash_utils import Tooltip, hr_tooltip
 import utils.figure_utils as fig_gen

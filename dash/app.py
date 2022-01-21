@@ -62,7 +62,7 @@ if __name__ == '__main__':
     logger=logging.getLogger('adesit_callbacks')
     cache_utils.logger.setLevel(logging_level)
     logger.setLevel(logging_level)
-    for component in components: component.register_callbacks(app, plogger=logger)
+    for component in components: component.register_callbacks(plogger=logger)
 
     if args.debug: app.run_server(debug=True)
     else: app.run_server(debug=False, host='0.0.0.0')

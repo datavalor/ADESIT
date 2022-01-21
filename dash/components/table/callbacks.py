@@ -1,8 +1,7 @@
 import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-
-import dash_table
+from dash import dash_table
 
 # Miscellaneous
 import pandas as pd
@@ -13,7 +12,7 @@ pd.options.mode.chained_assignment = None
 from constants import *
 from utils.cache_utils import *
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
     default_style_data_conditional = [
@@ -52,7 +51,7 @@ def register_callbacks(app, plogger):
     ]
 
     # Callback for Table Output (b,c,d,e,f,g->h) 
-    @app.callback(Output('viz_table_container', 'children'),
+    @dash.callback(Output('viz_table_container', 'children'),
                 [Input('data-loaded','children'),
                 Input('main-graph','selectedData'),
                 Input('view','value'),
@@ -107,7 +106,7 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
     
-    @app.callback(
+    @dash.callback(
     Output('viz_datatable', 'data'),
     [Input('viz_datatable', "page_current"),
     Input('viz_datatable', "page_size")],
@@ -125,7 +124,7 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
 
-    @app.callback(
+    @dash.callback(
         [Output("viz_datatable", "style_data_conditional"),
         Output("viz_datatable", "page_current")],
         Input('selection_changed', 'children'),

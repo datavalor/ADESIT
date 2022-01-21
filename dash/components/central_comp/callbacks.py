@@ -8,12 +8,11 @@ pd.options.mode.chained_assignment = None
 
 from constants import *
 from utils.cache_utils import *
-import utils.figure_utils as fig_gen
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
-    @app.callback([Output("selection_changed", "children"),
+    @dash.callback([Output("selection_changed", "children"),
                 Output("ceviz_selection_infos", "children")],
                 [Input('data-analysed', 'children'),
                 Input('main-graph','clickData'),

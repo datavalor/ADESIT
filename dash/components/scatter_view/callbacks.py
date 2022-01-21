@@ -15,10 +15,10 @@ from utils.cache_utils import *
 import utils.figure_utils as fig_gen
 from utils.data_utils import which_proj_type
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
-    @app.callback([Output('x-axis', 'options'),
+    @dash.callback([Output('x-axis', 'options'),
                 Output('y-axis', 'options')],
                 [Input('left-attrs','value')],
                 [State('session-id', 'children')])
@@ -46,7 +46,7 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     # Callback for setting default x axis for visualization
-    @app.callback(Output('x-axis', 'value'),
+    @dash.callback(Output('x-axis', 'value'),
                 [Input('left-attrs','value')],
                 [State('x-axis', 'value')])
     def handle_default_xaxis(left_attrs, x_axis):
@@ -56,7 +56,7 @@ def register_callbacks(app, plogger):
         else: raise PreventUpdate
 
     # Callback for setting default y axis for visualization
-    @app.callback(Output('y-axis', 'value'),
+    @dash.callback(Output('y-axis', 'value'),
                 [Input('right-attrs','value')],
                 [State('y-axis', 'value')])
     def handle_default_yaxis(right_attrs, y_axis):
@@ -66,7 +66,7 @@ def register_callbacks(app, plogger):
         else: raise PreventUpdate
 
     # Callback for Graph Output (f,g->e)
-    @app.callback([Output('main-graph', 'figure'),
+    @dash.callback([Output('main-graph', 'figure'),
                 Output('clear-selection', 'disabled')],
                 [Input('data-loaded','children'),
                 Input('data-analysed', 'children'),
@@ -148,7 +148,7 @@ def register_callbacks(app, plogger):
             raise PreventUpdate
 
     # Callback for SQL translation
-    @app.callback([Output('sql-query', 'value'),
+    @dash.callback([Output('sql-query', 'value'),
                 Output('sql-div','style')],
                 [Input('main-graph', 'selectedData'),
                 Input('data-loaded', 'children')],
@@ -169,7 +169,7 @@ def register_callbacks(app, plogger):
             return "", {}
         
     #Callback for Selection Info
-    @app.callback([Output('ntuples-selection', 'children'),
+    @dash.callback([Output('ntuples-selection', 'children'),
                 Output('nviolating-selection', 'children')],
                 [Input('main-graph', 'selectedData'),
                 Input('upload-form', 'contents'),

@@ -16,10 +16,10 @@ from utils.fastg3_utils import make_analysis
 import constants
 from constants import *
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
-    @app.callback(
+    @dash.callback(
         [Output('data-loaded','children'),
         Output('dataset_confirm', 'children'),
         Output('left-attrs', 'disabled'),
@@ -56,7 +56,7 @@ def register_callbacks(app, plogger):
         
 
     # Callback for Dimensions (attribute) options in dropdowns (b->c,d,f)
-    @app.callback(
+    @dash.callback(
         [Output('right-attrs', 'options'),
         Output('left-attrs', 'options'),
         Output('right-attrs', 'value'),
@@ -79,7 +79,7 @@ def register_callbacks(app, plogger):
             return [], [], None, None
 
     # Callback for Left Tolerances Output ()
-    @app.callback(
+    @dash.callback(
         [Output('thresold_table_features', 'data'),
         Output('thresold_table_target', 'data')],
         [Input('data-loaded','children'),
@@ -132,7 +132,7 @@ def register_callbacks(app, plogger):
 
 
     # Callback for Analyse button state
-    @app.callback(
+    @dash.callback(
         [Output('analyse_btn', 'disabled'),
         Output('g3_computation', 'disabled')],
         [Input('left-attrs','value'),
@@ -144,7 +144,7 @@ def register_callbacks(app, plogger):
         else: return True, True
 
     # Callback for data update and calculations ()
-    @app.callback(
+    @dash.callback(
         [Output('loading_screen','fullscreen'),
         Output('alert-timeout', 'is_open'),
         Output('data-analysed', 'children'),
@@ -253,7 +253,7 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
 
-    @app.callback(
+    @dash.callback(
         [Output('collapse-viz', 'is_open'),
         Output('collapse-stats', 'is_open'),
         Output('collapse-ceviz', 'is_open'),

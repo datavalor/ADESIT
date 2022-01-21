@@ -1,8 +1,8 @@
 import dash
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-import dash_table
+from dash import dash_table
 
 # Miscellaneous
 import pandas as pd
@@ -15,10 +15,10 @@ from constants import *
 from utils.cache_utils import *
 from .cyto_utils import gen_cyto
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
-    @app.callback(Output('ceviz_table_container', 'children'),
+    @dash.callback(Output('ceviz_table_container', 'children'),
                 Input('selection_changed', 'children'),
                 [State('session-id', 'children')])
     def handle_ceviz_table(selection_changed, session_id):
@@ -92,7 +92,7 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
 
-    @app.callback(
+    @dash.callback(
         Output('cyto_container', 'children'),
         [Input('selection_changed', 'children'),
         Input('graph_depth_slider', 'value')],
@@ -159,7 +159,7 @@ def register_callbacks(app, plogger):
         else:
             return gen_cyto()
 
-    @app.callback(
+    @dash.callback(
         Output('cytoscape_ce_graph', 'elements'),
         [Input('cytoscape_ce_graph', 'mouseoverNodeData')],
         [State('cytoscape_ce_graph', 'elements')]
@@ -178,7 +178,7 @@ def register_callbacks(app, plogger):
         else:
             raise PreventUpdate
 
-    @app.callback(Output('ceviz_hovered_node', 'children'),
+    @dash.callback(Output('ceviz_hovered_node', 'children'),
                   [Input('cytoscape_ce_graph', 'mouseoverNodeData'),
                   Input('selection_changed', 'children')],
                   [State('session-id', 'children')])

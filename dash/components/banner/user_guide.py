@@ -1,4 +1,4 @@
-import dash_core_components as dcc
+from dash import dcc
 
 user_guide_content = [
     dcc.Markdown('''

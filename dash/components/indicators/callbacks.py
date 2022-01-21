@@ -7,5 +7,5 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger

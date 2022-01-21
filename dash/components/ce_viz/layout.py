@@ -1,8 +1,7 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
-
-import dash_table
+from dash import dcc
+from dash import html
+from dash import dash_table
 
 from .cyto_utils import gen_cyto
 
@@ -36,7 +35,7 @@ def render():
                                         marks={n:str(n) for n in list(range(1, 6))}
                                     )
                                 )
-                            ], style={"display" : "table-row", "vertical-align" : "bottom", "height" : "1px"})
+                            ], style={"display" : "table-row", "verticalAlign" : "bottom", "height" : "1px"})
                         ],
                         style= {
                                 'width': '50%', 

@@ -1,6 +1,5 @@
-import dash_html_components as html
-
-import dash_table
+from dash import html
+from dash import dash_table
 
 def render():
     return [

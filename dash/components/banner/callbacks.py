@@ -6,10 +6,10 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 pd.options.mode.chained_assignment = None
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
-    @app.callback(
+    @dash.callback(
         Output("user_guide_modal", "is_open"),
         [Input("user_guide_open", "n_clicks"), Input("user_guide_modal_close", "n_clicks")],
         [State("user_guide_modal", "is_open")],
@@ -19,7 +19,7 @@ def register_callbacks(app, plogger):
             return not is_open
         return is_open
 
-    @app.callback(
+    @dash.callback(
         Output("about_modal", "is_open"),
         [Input("about_open", "n_clicks"), Input("about_modal_close", "n_clicks")],
         [State("about_modal", "is_open")],
@@ -29,7 +29,7 @@ def register_callbacks(app, plogger):
             return not is_open
         return is_open
 
-    @app.callback(
+    @dash.callback(
         Output("concepts_modal", "is_open"),
         [Input("concepts_open", "n_clicks"), Input("concepts_modal_close", "n_clicks")],
         [State("concepts_modal", "is_open")],
