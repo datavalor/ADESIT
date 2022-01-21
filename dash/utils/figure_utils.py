@@ -230,3 +230,63 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
         return fig
     else:
         return fig
+
+
+import plotly.express as px
+
+def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution=20):
+    # fig = go.Figure(scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
+    
+
+    # fig = px.density_heatmap(df, x=xaxis_column_name, y=yaxis_column_name, nbinsx=resolution, nbinsy=resolution, color_continuous_scale="greys")
+    fig = go.Figure()
+    fig.add_trace(go.Histogram2d(
+        x=df[xaxis_column_name],
+        y=df[yaxis_column_name],
+        colorscale='greys',
+        # zmax=10,
+        nbinsx=resolution,
+        nbinsy=resolution,
+        zauto=True,
+    ))
+    fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
+    fig.update_layout(
+        xaxis_title=xaxis_column_name,
+        yaxis_title=yaxis_column_name,
+    )
+
+    if df.dtypes[xaxis_column_name] == 'object':
+        fig.update_xaxes(type='category', categoryorder='category ascending')
+    if df.dtypes[yaxis_column_name] == 'object':
+        fig.update_yaxes(type='category', categoryorder='category ascending')
+
+    return fig
+
+def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, resolution=20):
+    # fig = go.Figure(scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
+    
+
+    # fig = px.density_heatmap(df, x=xaxis_column_name, y=yaxis_column_name, nbinsx=resolution, nbinsy=resolution, color_continuous_scale="greys")
+    fig = go.Figure()
+    fig.add_trace(go.Histogram2d(
+        x=df[xaxis_column_name],
+        y=df[yaxis_column_name],
+        colorscale='greys',
+        # zmax=10,
+        nbinsx=resolution,
+        nbinsy=resolution,
+        zauto=True,
+    ))
+    fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
+    fig.update_layout(
+        xaxis_title=xaxis_column_name,
+        yaxis_title=yaxis_column_name,
+    )
+
+    if df.dtypes[xaxis_column_name] == 'object':
+        fig.update_xaxes(type='category', categoryorder='category ascending')
+    if df.dtypes[yaxis_column_name] == 'object':
+        fig.update_yaxes(type='category', categoryorder='category ascending')
+
+    return fig
+

@@ -45,6 +45,14 @@ def register_callbacks(plogger):
         else:
             raise PreventUpdate
 
+    # Callback for displaying heatmap slider
+    @dash.callback(Output('heatmap_resolution_slider', 'disabled'),
+                Input('2d-viewmode', 'value'))
+    def handle_heatmap_slider(d2_viewmode):
+        logger.debug("handle_heatmap_slider callback")
+        if(d2_viewmode=="scatter"): return True
+        else: return False
+
     # Callback for setting default x axis for visualization
     @dash.callback(Output('x-axis', 'value'),
                 [Input('left-attrs','value')],
@@ -70,6 +78,8 @@ def register_callbacks(plogger):
                 Output('clear-selection', 'disabled')],
                 [Input('data-loaded','children'),
                 Input('data-analysed', 'children'),
+                Input('2d-viewmode', 'value'),
+                Input('heatmap_resolution_slider', 'value'),
                 Input('x-axis', 'value'),
                 Input('y-axis', 'value'),
                 Input('view','value'),
@@ -78,7 +88,7 @@ def register_callbacks(plogger):
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
+    def handle_graph(data_updated, data_analysed, d2_viewmode, hm_nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
         logger.debug("handle_graph callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -137,11 +147,18 @@ def register_callbacks(plogger):
                     return fig, False
 
                 # data has been analysed
-                fig=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh)  
+                if(d2_viewmode=="scatter"):
+                    fig=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh) 
+                else:
+                    fig=fig_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, resolution=hm_nbins)  
                 return fig, True
             # if showing raw data
             else :
-                return fig_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name), True
+                if(d2_viewmode=="scatter"):
+                    return fig_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name), True
+                else:
+                    print("=>>>>>>>>>>>>>><<<<   ", hm_nbins)
+                    return fig_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution=hm_nbins), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:

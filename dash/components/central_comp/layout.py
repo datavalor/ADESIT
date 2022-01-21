@@ -133,7 +133,7 @@ def render():
             ),
             dbc.Tabs([
                 dbc.Tab(table_component.render(), label="Table"),
-                dbc.Tab(scatter_view_component.render(), label="2D Scatter View"),
+                dbc.Tab(scatter_view_component.render(), label="2D View"),
             ])
         ], 
         style={

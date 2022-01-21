@@ -18,7 +18,33 @@ def render():
         
         # Main Commands Board (f)
         html.Div([
-            html.H5("Scatter settings"),
+            html.H5("View settings"),
+            html.Div("Mode:"),
+            dcc.Dropdown(
+                id='2d-viewmode',
+                options=[
+                    {'label': 'Scatter plot', 'value': 'scatter'},
+                    {'label': 'Heatmap', 'value': 'heat'}
+                ],
+                value='scatter',
+                style={'width' : '100%', 'marginBottom' : '10px'},
+                clearable=False
+            ),
+            
+            html.Div(
+                [
+                html.Span("Heatmap nbins:"),
+                dcc.Slider(
+                    id='heatmap_resolution_slider',
+                    min=1,
+                    max=30,
+                    step=1,
+                    value=10,
+                    marks={n:str(n) for n in [1]+list(range(5, 35, 5))},
+                    disabled=False
+                )
+                ]
+            ),
             html.Div("X-Axis:"),
             dcc.Dropdown(id='x-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
             html.Div("Y-Axis:"),
