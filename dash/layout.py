@@ -51,7 +51,7 @@ index_string = '''
 def serve_layout(banner, app):
     session_id = str(uuid.uuid4())
 
-    return html.Div(
+    return dbc.Container(
         [
             html.Div(session_id, id='session-id', style={'display': 'none'}),
             html.Span("", id='data-loaded', style={'display': 'none'}),
@@ -90,8 +90,5 @@ def serve_layout(banner, app):
             html.Div([
                 ""
             ], style={"width": "100%", "height": "10px"})
-    ], 
-    style={
-        'width' : '90%', 
-        'margin' : '0 auto'
-    })
+    ],
+    fluid=True)

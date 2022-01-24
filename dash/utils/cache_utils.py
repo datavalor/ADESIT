@@ -42,6 +42,7 @@ def gen_data_holder(df):
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
     cols_type = {col: num_or_cat(col, df) for col in list(df.columns) if num_or_cat(col, df) is not None}
+    cols_minmax = {col: [df[col].min(), df[col].max()] for col in list(df.columns) if num_or_cat(col, df) == 'numerical'}
     cols = list(cols_type.keys())
     df = df[cols]
     df = df.reset_index(drop=True)
@@ -52,6 +53,7 @@ def gen_data_holder(df):
         "graph": None,
         "user_columns": cols,
         "user_columns_type": cols_type,
+        "user_columns_minmax": cols_minmax,
         "X": [],
         "Y": []
     }

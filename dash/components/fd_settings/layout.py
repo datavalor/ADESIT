@@ -8,7 +8,7 @@ from utils.dash_utils import Tooltip
 def render():
     return html.Div(
         [
-            html.H4("Data and problem settings"),
+            html.H5("Data and problem settings"),
 
             # File Input and params (b)
             html.Div([

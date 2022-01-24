@@ -234,7 +234,7 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
 
 import plotly.express as px
 
-def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution=20):
+def basic_heatmap(df, xaxis_column_name, yaxis_column_name, session_infos, resolution=20):
     # fig = go.Figure(scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False))
     
 
@@ -249,11 +249,28 @@ def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution=20):
         nbinsy=resolution,
         zauto=True,
     ))
+    fig.add_trace(go.Scatter(
+        x=df[xaxis_column_name],
+        y=df[yaxis_column_name],
+        mode='markers',
+        showlegend=False,
+        marker=dict(
+            symbol='circle',
+            opacity=0.7,
+            color='white',
+            size=8,
+            line=dict(width=1),
+        )
+    ))
     fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
     fig.update_layout(
         xaxis_title=xaxis_column_name,
         yaxis_title=yaxis_column_name,
     )
+    if xaxis_column_name in session_infos["user_columns_minmax"]:
+        fig.update_xaxes(range=session_infos["user_columns_minmax"][xaxis_column_name])
+    if yaxis_column_name in session_infos["user_columns_minmax"]:
+        fig.update_yaxes(range=session_infos["user_columns_minmax"][yaxis_column_name])
 
     if df.dtypes[xaxis_column_name] == 'object':
         fig.update_xaxes(type='category', categoryorder='category ascending')
@@ -277,6 +294,7 @@ def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, res
         nbinsy=resolution,
         zauto=True,
     ))
+    
     fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
     fig.update_layout(
         xaxis_title=xaxis_column_name,

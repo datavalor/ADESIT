@@ -46,12 +46,13 @@ def register_callbacks(plogger):
             raise PreventUpdate
 
     # Callback for displaying heatmap slider
-    @dash.callback(Output('heatmap_resolution_slider', 'disabled'),
+    @dash.callback([Output('heatmap_resolution_slider', 'disabled'),
+                Output('slider_label', 'style')],
                 Input('2d-viewmode', 'value'))
     def handle_heatmap_slider(d2_viewmode):
         logger.debug("handle_heatmap_slider callback")
-        if(d2_viewmode=="scatter"): return True
-        else: return False
+        if(d2_viewmode=="scatter"): return True, {"color":"gray"}
+        else: return False, {}
 
     # Callback for setting default x axis for visualization
     @dash.callback(Output('x-axis', 'value'),
@@ -157,33 +158,33 @@ def register_callbacks(plogger):
                 if(d2_viewmode=="scatter"):
                     return fig_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name), True
                 else:
-                    print("=>>>>>>>>>>>>>><<<<   ", hm_nbins)
-                    return fig_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution=hm_nbins), True
+                    # print("=>>>>>>>>>>>>>><<<<   ", hm_nbins)
+                    return fig_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:
             raise PreventUpdate
 
-    # Callback for SQL translation
-    @dash.callback([Output('sql-query', 'value'),
-                Output('sql-div','style')],
-                [Input('main-graph', 'selectedData'),
-                Input('data-loaded', 'children')],
-                [State('x-axis', 'value'),
-                State('y-axis', 'value')])
-    def handle_sql_query(selected_data, data_loaded, xaxis_column_name, yaxis_column_name):
-        if str(selected_data)!="None" and selected_data.get("range") is not None:
-            selection_range = selected_data.get("range")
-            query = "SELECT * FROM Table WHERE "
-            if selection_range.get('x') is not None: 
-                query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x')[0]) + " AND "+ str(selection_range.get('x')[1])
-                query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y')[0]) + " AND "+ str(selection_range.get('y')[1])
-            elif selection_range.get('x3') is not None:
-                query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x3')[0]) + " AND "+ str(selection_range.get('x3')[1])
-                query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y4')[0]) + " AND "+ str(selection_range.get('y4')[1])
-            return query, None
-        else:
-            return "", {}
+    # # Callback for SQL translation
+    # @dash.callback([Output('sql-query', 'value'),
+    #             Output('sql-div','style')],
+    #             [Input('main-graph', 'selectedData'),
+    #             Input('data-loaded', 'children')],
+    #             [State('x-axis', 'value'),
+    #             State('y-axis', 'value')])
+    # def handle_sql_query(selected_data, data_loaded, xaxis_column_name, yaxis_column_name):
+    #     if str(selected_data)!="None" and selected_data.get("range") is not None:
+    #         selection_range = selected_data.get("range")
+    #         query = "SELECT * FROM Table WHERE "
+    #         if selection_range.get('x') is not None: 
+    #             query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x')[0]) + " AND "+ str(selection_range.get('x')[1])
+    #             query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y')[0]) + " AND "+ str(selection_range.get('y')[1])
+    #         elif selection_range.get('x3') is not None:
+    #             query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x3')[0]) + " AND "+ str(selection_range.get('x3')[1])
+    #             query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y4')[0]) + " AND "+ str(selection_range.get('y4')[1])
+    #         return query, None
+    #     else:
+    #         return "", {}
         
     #Callback for Selection Info
     @dash.callback([Output('ntuples-selection', 'children'),
@@ -206,8 +207,14 @@ def register_callbacks(plogger):
         if dh is not None and str(selected_data)!="None":
             points = selected_data.get("points")
             data = dh["data"]
-            data[SELECTION_COLUMN_NAME] = 0 
-            selected_ids=[p["customdata"][0] for p in points if "customdata" in p]
+            data[SELECTION_COLUMN_NAME] = 0
+            selected_ids=[]
+            for p in points:
+                if "customdata" in p:
+                    selected_ids.append(p["customdata"][0])
+                elif "pointIndex" in p:
+                    selected_ids.append(p["pointIndex"])
+            # selected_ids=[p["customdata"][0] for p in points if "customdata" in p]
             if label_column in data.columns:
                 n_involved = len(data.loc[selected_ids].loc[data[label_column] > 0].index)
             else: 

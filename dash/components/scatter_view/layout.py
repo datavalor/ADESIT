@@ -19,7 +19,7 @@ def render():
         # Main Commands Board (f)
         html.Div([
             html.H5("View settings"),
-            html.Div("Mode:"),
+            html.Div("Mode"),
             dcc.Dropdown(
                 id='2d-viewmode',
                 options=[
@@ -33,7 +33,7 @@ def render():
             
             html.Div(
                 [
-                html.Span("Heatmap nbins:"),
+                html.Div("Heatmap number of bins", id="slider_label"),
                 dcc.Slider(
                     id='heatmap_resolution_slider',
                     min=1,
@@ -45,23 +45,31 @@ def render():
                 )
                 ]
             ),
-            html.Div("X-Axis:"),
+
+            html.Hr(),
+
+            html.Div("X-Axis"),
             dcc.Dropdown(id='x-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
-            html.Div("Y-Axis:"),
+            html.Div("Y-Axis"),
             dcc.Dropdown(id='y-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
             
             html.Hr(),
 
             html.Div([
-                html.H5("Box select infos"),
-                html.Ul([
-                    html.Li([html.Span("0", id="ntuples-selection"), " tuples selected."]),
-                    html.Li(["Tuple involved in a counterexample: ", html.Span("0", id="nviolating-selection")]),
-                    html.Li([
-                        html.Div("SQL Query:"),
-                        dcc.Textarea(id='sql-query', value="", style={'width':'100%', 'height': 90,'color':'#A3A3A3'})
-                    ],id='sql-div',style={'width':'100%'})
-                ], style={'width':'100%', 'display' : 'inline-block', 'verticalAlign': 'top'}),
+                html.H5("Box/Lasso select infos"),
+                html.Span("0", id="ntuples-selection"), " tuples selected.\n",
+                html.Div(
+                [html.Span("0", id="nviolating-selection"), " of them are involved in a counterexample."]
+                )
+                # html.H5("Box select infos"),
+                # html.Ul([
+                #     html.Li([html.Span("0", id="ntuples-selection"), " tuples selected."]),
+                #     html.Li(["Tuple involved in a counterexample: ", html.Span("0", id="nviolating-selection")]),
+                #     html.Li([
+                #         html.Div("SQL Query:"),
+                #         dcc.Textarea(id='sql-query', value="", style={'width':'100%', 'height': 90,'color':'#A3A3A3'})
+                #     ],id='sql-div',style={'width':'100%'})
+                # ], style={'width':'100%', 'display' : 'inline-block', 'verticalAlign': 'top'}),
             ], style={"marginTop": "10px"})
         ], style={
             'width': '29%',
