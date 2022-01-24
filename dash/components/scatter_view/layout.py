@@ -59,7 +59,9 @@ def render():
                 html.H5("Box/Lasso select infos"),
                 html.Span("0", id="ntuples-selection"), " tuples selected.\n",
                 html.Div(
-                [html.Span("0", id="nviolating-selection"), " of them are involved in a counterexample."]
+                    [html.Span("0 (0%)", id="nviolating-selection"), " of them are involved in a counterexample."],
+                    id="select-infos-after-analysis",
+                    style={'visibility' : 'hidden'}
                 )
                 # html.H5("Box select infos"),
                 # html.Ul([

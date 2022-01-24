@@ -153,7 +153,8 @@ def register_callbacks(plogger):
         Output('g1_indicator', 'figure'),
         Output('ntuples_involved', 'children'),
         Output('mode', 'disabled'),
-        Output('view', 'disabled')],
+        Output('view', 'disabled'),
+        Output('select-infos-after-analysis', 'style')],
         [Input('data-loaded','children'),
         Input('analyse_btn','n_clicks')],
         [State('left-attrs','value'),
@@ -246,10 +247,10 @@ def register_callbacks(plogger):
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)
-                    return True, is_open, "True", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, False, False
+                    return True, is_open, "True", g3_indicator, g2_fig, g1_fig, ncounterexample_fig, False, False, {}
                 else:
                     is_open=True
-            return True, is_open, "False", dash.no_update, dash.no_update, dash.no_update, " ", True, True
+            return True, is_open, "False", dash.no_update, dash.no_update, dash.no_update, " ", True, True, {'visibility' : 'hidden'}
         else:
             raise PreventUpdate
 
