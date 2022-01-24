@@ -120,9 +120,12 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         col=1
     )
 
-    fig = add_advanced_histograms(fig, graph_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution)
+    fig = add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 
-    return adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
+    fig.update_layout(barmode='group')
+
+    return fig
 
 def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=None):
     _class = str(right_attrs[0])

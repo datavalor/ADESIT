@@ -5,6 +5,12 @@ import numpy as np
 
 from constants import *
 
+def convert_from_numpy_edges(edges):
+    centers = []
+    for i in range(len(edges)-1):
+        centers.append((edges[i]+edges[i+1])/2)
+    return centers
+
 def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
     return make_subplots(
         rows=2, cols=2,
@@ -37,41 +43,63 @@ def adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos):
 
     return fig
 
+def make_histogram(df, axis, resolution, session_infos, minmax=None):
+    if session_infos['user_columns_type'][axis]=='numerical':
+        if minmax is None: min, max = session_infos['num_columns_minmax'][axis]
+        else: min, max = minmax
+        # delta = 1*(max-min)/resolution
+        delta = 0
+        bin_counts, bin_edges = np.histogram(
+            df[axis], 
+            bins=resolution,
+            range=(min-delta, max+delta)
+        )
+        bin_labels = convert_from_numpy_edges(bin_edges)
+    else:
+        bin_labels, _ = session_infos["cat_columns_ncats"][axis]
+        unique, count = np.unique(df[axis], return_counts=True)
+        count_dict = {}
+        for i in range(len(unique)): count_dict[unique[i]]=count[i]
+        bin_counts = [count_dict.get(label,0) for label in bin_labels]
+    return [bin_counts, bin_labels]
+
+
 def add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     histo_data = []
     for axis in [xaxis_column_name, yaxis_column_name]:
-        if session_infos['user_columns_type'][axis]=='numerical':
-            min, max = session_infos['num_columns_minmax'][axis]
-            # delta = 1*(max-min)/resolution
-            delta = 0
-            bin_counts, bin_edges = np.histogram(
-                df[axis], 
-                bins=resolution,
-                range=(min-delta, max+delta)
-            )
-            bin_labels = []
-            for i in range(len(bin_edges)-1):
-                bin_labels.append((bin_edges[i]+bin_edges[i+1])/2)
-        else:
-            bin_labels, bin_counts = session_infos["cat_columns_ncats"][axis]
-        histo_data.append([bin_counts, bin_labels])
+        histo_data.append(make_histogram(df, axis, resolution, session_infos))
 
     fig.add_trace(
-        go.Bar(y=histo_data[0][0], x=histo_data[0][1], marker_color='#000000'),
+        go.Bar(y=histo_data[0][0], x=histo_data[0][1], marker_color=NON_ANALYSED_COLOR),
         row=1, col=1, 
     )
 
     fig.add_trace(
-        go.Bar(x=histo_data[1][0], y=histo_data[1][1], marker_color='#000000', orientation="h"),
+        go.Bar(x=histo_data[1][0], y=histo_data[1][1], marker_color=NON_ANALYSED_COLOR, orientation="h"),
         row=2, col=2, 
     )
     return fig
 
-def add_advanced_histograms(fig, graph_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution):
-    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color=FREE_COLOR, bingroup=1, nbinsx=resolution), row=1, col=1, secondary_y=False)
-    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color=CE_COLOR, bingroup=1,  nbinsx=resolution), row=1, col=1,secondary_y=False)
-    
-    fig.add_trace(go.Histogram(y = graph_df[str(yaxis_column_name)], marker_color=FREE_COLOR, bingroup=2, nbinsy=resolution), row=2, col=2)
-    fig.add_trace(go.Histogram(y = problematics_df[str(yaxis_column_name)], marker_color=CE_COLOR, bingroup=2,  nbinsy=resolution), row=2, col=2)
+def add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
+    histo_data_x_free = make_histogram(non_problematics_df, xaxis_column_name, resolution, session_infos, minmax=session_infos['num_columns_minmax'].get(xaxis_column_name, None))
+    histo_data_x_prob = make_histogram(problematics_df, xaxis_column_name, resolution, session_infos, minmax=session_infos['num_columns_minmax'].get(xaxis_column_name, None))
+    fig.add_trace(
+        go.Bar(y=histo_data_x_free[0], x=histo_data_x_free[1], name='Free tuples', offsetgroup=0, marker_color=FREE_COLOR),
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Bar(y=histo_data_x_prob[0], x=histo_data_x_free[1], name='Involved tuples', offsetgroup=1, marker_color=CE_COLOR),
+        row=1, col=1
+    )
 
+    histo_data_y_free = make_histogram(non_problematics_df, yaxis_column_name, resolution, session_infos, minmax=session_infos['num_columns_minmax'].get(yaxis_column_name, None))
+    histo_data_y_prob = make_histogram(problematics_df, yaxis_column_name, resolution, session_infos, minmax=session_infos['num_columns_minmax'].get(yaxis_column_name, None))
+    fig.add_trace(
+        go.Bar(x=histo_data_y_free[0], y=histo_data_y_free[1], name='Free tuples', offsetgroup=0, marker_color=FREE_COLOR, orientation="h"),
+        row=2, col=2
+    )
+    fig.add_trace(
+        go.Bar(x=histo_data_y_prob[0], y=histo_data_y_free[1], name='Involved tuples', offsetgroup=1, marker_color=CE_COLOR, orientation="h"),
+        row=2, col=2
+    )
     return fig
