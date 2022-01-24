@@ -33,7 +33,7 @@ def render():
             
             html.Div(
                 [
-                html.Div("Heatmap number of bins", id="slider_label"),
+                html.Div("Number of bins (numeric attributes)", id="slider_label"),
                 dcc.Slider(
                     id='heatmap_resolution_slider',
                     min=1,
@@ -63,15 +63,6 @@ def render():
                     id="select-infos-after-analysis",
                     style={'visibility' : 'hidden'}
                 )
-                # html.H5("Box select infos"),
-                # html.Ul([
-                #     html.Li([html.Span("0", id="ntuples-selection"), " tuples selected."]),
-                #     html.Li(["Tuple involved in a counterexample: ", html.Span("0", id="nviolating-selection")]),
-                #     html.Li([
-                #         html.Div("SQL Query:"),
-                #         dcc.Textarea(id='sql-query', value="", style={'width':'100%', 'height': 90,'color':'#A3A3A3'})
-                #     ],id='sql-div',style={'width':'100%'})
-                # ], style={'width':'100%', 'display' : 'inline-block', 'verticalAlign': 'top'}),
             ], style={"marginTop": "10px"})
         ], style={
             'width': '29%',

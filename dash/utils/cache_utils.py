@@ -1,5 +1,6 @@
 
 import pandas as pd
+import numpy as np
 import logging
 logging.basicConfig()
 
@@ -46,8 +47,10 @@ def gen_data_holder(df):
             df = df.drop(columns=c)
         elif num_or_cat(c, df)=='categorical':
             cols_type[c] = num_or_cat(c, df)
-            df[c] = pd.Categorical(df[c])
-            cols_ncats[c] = len(list(df[c].cat.categories))
+            # df[c] = pd.Categorical(df[c])
+            unique, count = np.unique(df[c], return_counts=True)
+            unique, count = (list(t) for t in zip(*sorted(zip(unique, count), reverse=False)))
+            cols_ncats[c] = (unique, count)
         elif num_or_cat(c, df)=='numerical':
             cols_type[c] = num_or_cat(c, df)
             cols_minmax[c] = [df[c].min(), df[c].max()]

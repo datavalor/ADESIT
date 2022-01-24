@@ -46,15 +46,6 @@ def register_callbacks(plogger):
         else:
             raise PreventUpdate
 
-    # Callback for displaying heatmap slider
-    @dash.callback([Output('heatmap_resolution_slider', 'disabled'),
-                Output('slider_label', 'style')],
-                Input('2d-viewmode', 'value'))
-    def handle_heatmap_slider(d2_viewmode):
-        logger.debug("handle_heatmap_slider callback")
-        if(d2_viewmode=="scatter"): return True, {"color":"gray"}
-        else: return False, {}
-
     # Callback for setting default x axis for visualization
     @dash.callback(Output('x-axis', 'value'),
                 [Input('left-attrs','value')],
@@ -90,7 +81,7 @@ def register_callbacks(plogger):
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, d2_viewmode, hm_nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
+    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
         logger.debug("handle_graph callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -144,47 +135,26 @@ def register_callbacks(plogger):
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
-                    fig_base=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
+                    fig_base=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, selection=True, session_infos=dh)  
                     fig = scatter_gen.add_selection_to_scatter(fig_base, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed
                 if(d2_viewmode=="scatter"):
-                    fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh) 
+                    fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, view, session_infos=dh) 
                 else:
-                    fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins)  
+                    fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, nbins, dh)  
                 return fig, True
             # if showing raw data
             else :
                 if(d2_viewmode=="scatter"):
-                    return scatter_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name, dh), True
+                    return scatter_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name, nbins, dh), True
                 else:
-                    return heatmap_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins), True
+                    return heatmap_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, nbins, dh), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:
             raise PreventUpdate
-
-    # # Callback for SQL translation
-    # @dash.callback([Output('sql-query', 'value'),
-    #             Output('sql-div','style')],
-    #             [Input('main-graph', 'selectedData'),
-    #             Input('data-loaded', 'children')],
-    #             [State('x-axis', 'value'),
-    #             State('y-axis', 'value')])
-    # def handle_sql_query(selected_data, data_loaded, xaxis_column_name, yaxis_column_name):
-    #     if str(selected_data)!="None" and selected_data.get("range") is not None:
-    #         selection_range = selected_data.get("range")
-    #         query = "SELECT * FROM Table WHERE "
-    #         if selection_range.get('x') is not None: 
-    #             query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x')[0]) + " AND "+ str(selection_range.get('x')[1])
-    #             query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y')[0]) + " AND "+ str(selection_range.get('y')[1])
-    #         elif selection_range.get('x3') is not None:
-    #             query += str(xaxis_column_name) + " BETWEEN " + str(selection_range.get('x3')[0]) + " AND "+ str(selection_range.get('x3')[1])
-    #             query += " AND " + str(yaxis_column_name) + " BETWEEN " + str(selection_range.get('y4')[0]) + " AND "+ str(selection_range.get('y4')[1])
-    #         return query, None
-    #     else:
-    #         return "", {}
         
     #Callback for Selection Info
     @dash.callback([Output('ntuples-selection', 'children'),

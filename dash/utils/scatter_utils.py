@@ -4,7 +4,7 @@ from dash import dcc
 from dash import html
 
 from utils.data_utils import calc_percentage, calc_vertical_percentage
-from utils.figure_utils import gen_subplot_fig, adjust_layout, add_basic_histograms
+from utils.figure_utils import gen_subplot_fig, adjust_layout, add_basic_histograms, add_advanced_histograms
 from constants import *
 
 def dataset_infos(name, ntuples, nattributes):
@@ -85,18 +85,18 @@ def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name,
     else:
         return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], mode = 'markers', marker_color=color, marker=marker)
 
-def basic_scatter(df, xaxis_column_name, yaxis_column_name, session_infos):
+def basic_scatter(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     fig.add_trace(
         scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False), 
         row=2, 
         col=1
     )
-    fig = add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name)
+    fig = add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
 
-def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view='ALL', selection=False, session_infos=None):
+def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, resolution, view='ALL', selection=False, session_infos=None):
     _class = str(right_attrs[0])
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
 
@@ -120,29 +120,7 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         col=1
     )
 
-    # x axis histograms (and ratio line if not categorial)
-    if str(graph_df.dtypes[str(xaxis_column_name)]) != "object":
-        xratio_df = calc_percentage(graph_df,problematics_df,xaxis_column_name)
-        bin_size = xratio_df.at[0, 'bin-size']
-        start = xratio_df.at[0, 'start']
-        fig.add_trace(go.Scatter(x = xratio_df[str(xaxis_column_name)], y = xratio_df['Ratio'], line_shape='spline',line_color='rgba(0,204,150,0.5)'), row = 1, col = 1, secondary_y=True,)
-    else:
-        start=None
-        bin_size = None
-    fig.add_trace(go.Histogram(x = graph_df[str(xaxis_column_name)], marker_color=FREE_COLOR,bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1, secondary_y=False)
-    fig.add_trace(go.Histogram(x = problematics_df[str(xaxis_column_name)], marker_color=CE_COLOR, bingroup=1, xbins=dict(size=bin_size, start=start)), row=1, col=1,secondary_y=False)
-    
-    # y axis histograms (and ratio line if not categorial)
-    if str(graph_df.dtypes[str(yaxis_column_name)]) != "object":
-        yratio_df = calc_vertical_percentage(graph_df,problematics_df,yaxis_column_name)
-        bin_size = yratio_df.at[0, 'bin-size']
-        start = yratio_df.at[0, 'start']
-        fig.add_trace(go.Scatter(x = yratio_df['Ratio'], y = yratio_df[str(yaxis_column_name)], orientation='v', line_shape='spline',line_color='rgba(0,204,150,0.5)'), row = 2, col = 2, secondary_y=False,)
-    else:
-        start=None
-        bin_size = None
-    fig.add_trace(go.Histogram(y = graph_df[str(yaxis_column_name)], marker_color=FREE_COLOR,bingroup=2, ybins=dict(size=bin_size, start=start)), row=2, col=2,)
-    fig.add_trace(go.Histogram(y = problematics_df[str(yaxis_column_name)], marker_color=CE_COLOR,bingroup=2,  ybins=dict(size=bin_size, start=start)), row=2, col=2,)
+    fig = add_advanced_histograms(fig, graph_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution)
 
     return adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 

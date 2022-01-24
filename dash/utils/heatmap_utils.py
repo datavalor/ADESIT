@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from utils.figure_utils import gen_subplot_fig, adjust_layout, add_basic_histograms
+from utils.figure_utils import gen_subplot_fig, adjust_layout, add_basic_histograms, add_advanced_histograms
 
 def heatmap_basic_bloc(fig, df, xaxis_column_name, yaxis_column_name, resolution):
     colorscale=[
@@ -42,16 +42,19 @@ def heatmap_basic_bloc(fig, df, xaxis_column_name, yaxis_column_name, resolution
 
     return fig
 
-def basic_heatmap(df, xaxis_column_name, yaxis_column_name, session_infos, resolution=20):
+def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     fig = heatmap_basic_bloc(fig, df, xaxis_column_name, yaxis_column_name, resolution)
-    fig = add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name)
+    fig = add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
 
-def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, session_infos, resolution=20):
+def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     fig = heatmap_basic_bloc(fig, df, xaxis_column_name, yaxis_column_name, resolution)
-    # fig = heatmap_adjust(fig, session_infos, xaxis_column_name, yaxis_column_name)
-    fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name)
+    
+    problematics_df = df.loc[df[label_column] > 0]
+
+    fig = add_advanced_histograms(fig, df, problematics_df, xaxis_column_name, yaxis_column_name, resolution)
+    fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
