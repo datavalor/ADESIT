@@ -9,7 +9,7 @@ import numpy as np
 import multiprocessing as mp
 
 # Personnal imports
-import utils.figure_utils as fig_gen
+import utils.scatter_utils as fig_gen
 from utils.data_utils import parse_attributes_settings
 from utils.cache_utils import *
 from utils.fastg3_utils import make_analysis

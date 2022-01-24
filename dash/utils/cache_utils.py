@@ -38,11 +38,20 @@ default_data = {
 def gen_data_holder(df):
     # Proprocessing dataframe
     df = df.dropna()
+    cols_type = {}
+    cols_minmax = {}
+    cols_ncats = {}
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
-    cols_type = {col: num_or_cat(col, df) for col in list(df.columns) if num_or_cat(col, df) is not None}
-    cols_minmax = {col: [df[col].min(), df[col].max()] for col in list(df.columns) if num_or_cat(col, df) == 'numerical'}
+        elif num_or_cat(c, df)=='categorical':
+            cols_type[c] = num_or_cat(c, df)
+            df[c] = pd.Categorical(df[c])
+            cols_ncats[c] = len(list(df[c].cat.categories))
+        elif num_or_cat(c, df)=='numerical':
+            cols_type[c] = num_or_cat(c, df)
+            cols_minmax[c] = [df[c].min(), df[c].max()]
+
     cols = list(cols_type.keys())
     df = df[cols]
     df = df.reset_index(drop=True)
@@ -53,7 +62,8 @@ def gen_data_holder(df):
         "graph": None,
         "user_columns": cols,
         "user_columns_type": cols_type,
-        "user_columns_minmax": cols_minmax,
+        "num_columns_minmax": cols_minmax,
+        "cat_columns_ncats": cols_ncats,
         "X": [],
         "Y": []
     }

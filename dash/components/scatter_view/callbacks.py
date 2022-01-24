@@ -12,7 +12,8 @@ pd.options.mode.chained_assignment = None
 
 from constants import *
 from utils.cache_utils import *
-import utils.figure_utils as fig_gen
+import utils.scatter_utils as scatter_gen
+import utils.heatmap_utils as heatmap_gen
 from utils.data_utils import which_proj_type
 
 def register_callbacks(plogger):
@@ -143,23 +144,22 @@ def register_callbacks(plogger):
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
-                    fig_base=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
-                    fig = fig_gen.add_selection_to_scatter(fig_base, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
+                    fig_base=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, selection=True, session_infos=dh)  
+                    fig = scatter_gen.add_selection_to_scatter(fig_base, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed
                 if(d2_viewmode=="scatter"):
-                    fig=fig_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh) 
+                    fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, view, session_infos=dh) 
                 else:
-                    fig=fig_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, resolution=hm_nbins)  
+                    fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins)  
                 return fig, True
             # if showing raw data
             else :
                 if(d2_viewmode=="scatter"):
-                    return fig_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name), True
+                    return scatter_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name, dh), True
                 else:
-                    # print("=>>>>>>>>>>>>>><<<<   ", hm_nbins)
-                    return fig_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins), True
+                    return heatmap_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, dh, resolution=hm_nbins), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:

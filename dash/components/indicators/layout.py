@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 
 from utils.dash_utils import Tooltip, hr_tooltip
-import utils.figure_utils as fig_gen
+import utils.scatter_utils as fig_gen
 
 def render():
     return dcc.Loading(dbc.Collapse(html.Div(
