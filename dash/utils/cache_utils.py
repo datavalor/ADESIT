@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn import preprocessing
 import logging
 logging.basicConfig()
 
@@ -36,6 +37,10 @@ default_data = {
     }
 }
 
+def do_label_encode(col):
+    le = preprocessing.LabelEncoder()
+    le.fit(col)
+
 def gen_data_holder(df):
     # Proprocessing dataframe
     df = df.dropna()
@@ -45,14 +50,17 @@ def gen_data_holder(df):
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
-        elif num_or_cat(c, df)=='categorical':
-            cols_type[c] = num_or_cat(c, df)
-            # df[c] = pd.Categorical(df[c])
-            unique, count = np.unique(df[c], return_counts=True)
-            unique, count = (list(t) for t in zip(*sorted(zip(unique, count), reverse=False)))
-            cols_ncats[c] = (unique, count)
-        elif num_or_cat(c, df)=='numerical':
-            cols_type[c] = num_or_cat(c, df)
+        elif num_or_cat(c, df)==CATEGORICAL_COLUMN:
+            cols_type[c] = CATEGORICAL_COLUMN
+            le = preprocessing.LabelEncoder()
+            df[c+SUFFIX_OF_ENCODED_COLS] = le.fit_transform(df[c])
+            print()
+            cols_ncats[c] = {
+                "unique_values": sorted(le.classes_),
+                "label_encoder": le,
+            }
+        elif num_or_cat(c, df)==NUMERICAL_COLUMN:
+            cols_type[c] = NUMERICAL_COLUMN
             cols_minmax[c] = [df[c].min(), df[c].max()]
 
     cols = list(cols_type.keys())

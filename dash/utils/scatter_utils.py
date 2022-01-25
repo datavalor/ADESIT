@@ -1,10 +1,7 @@
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from dash import dcc
-from dash import html
 
-from utils.data_utils import calc_percentage, calc_vertical_percentage
-from utils.figure_utils import gen_subplot_fig, adjust_layout, add_basic_histograms, add_advanced_histograms
+from utils.figure_utils import gen_subplot_fig, adjust_layout
+import utils.histogram_utils as hist_gen
 from constants import *
 
 def dataset_infos(name, ntuples, nattributes):
@@ -92,7 +89,7 @@ def basic_scatter(df, xaxis_column_name, yaxis_column_name, resolution, session_
         row=2, 
         col=1
     )
-    fig = add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
 
@@ -120,7 +117,7 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         col=1
     )
 
-    fig = add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 
     fig.update_layout(barmode='group')

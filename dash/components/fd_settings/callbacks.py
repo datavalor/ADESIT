@@ -116,9 +116,9 @@ def register_callbacks(plogger):
             for attr in inputattr:
                 attr_type = ctypes[attr]
                 if attr_type is not None:
-                    if attr_type == "categorical":
+                    if attr_type == CATEGORICAL_COLUMN:
                         outuput_thresolds.append({'attribute': attr, 'absolute': 'is', 'relative': 'categorical...'})
-                    elif attr_type == "numerical":
+                    elif attr_type == NUMERICAL_COLUMN:
                         outuput_thresolds.append({'attribute': attr, 
                             'absolute': attributes_settings.get(attr, {"params":[0,0]})["params"][0], 
                             'relative': attributes_settings.get(attr, {"params":[0,0]})["params"][1]
