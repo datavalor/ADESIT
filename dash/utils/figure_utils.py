@@ -25,9 +25,9 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
 
 def adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos):
     for axis, func in [(xaxis_column_name, fig.update_xaxes), (yaxis_column_name, fig.update_yaxes)]:
-        if session_infos["user_columns_type"][axis] == 'categorical':
-            func(type='category', categoryorder='array', categoryarray=session_infos["cat_columns_ncats"][axis][0], row=2, col=1)
-            n_cats = len(session_infos["cat_columns_ncats"][axis][0])
+        if session_infos["user_columns_type"][axis] == CATEGORICAL_COLUMN:
+            func(type='category', categoryorder='array', categoryarray=session_infos["cat_columns_ncats"][axis]["unique_values"], row=2, col=1)
+            n_cats = len(session_infos["cat_columns_ncats"][axis]["unique_values"])
             func(range=[0-0.5, n_cats-1+0.5], row=2, col=1)
         elif session_infos["user_columns_type"][axis] == 'numerical':
             vmin = session_infos["num_columns_minmax"][axis][0]

@@ -37,10 +37,6 @@ default_data = {
     }
 }
 
-def do_label_encode(col):
-    le = preprocessing.LabelEncoder()
-    le.fit(col)
-
 def gen_data_holder(df):
     # Proprocessing dataframe
     df = df.dropna()
@@ -54,7 +50,7 @@ def gen_data_holder(df):
             cols_type[c] = CATEGORICAL_COLUMN
             le = preprocessing.LabelEncoder()
             df[c+SUFFIX_OF_ENCODED_COLS] = le.fit_transform(df[c])
-            print()
+            # print(le.transform(df[c]))
             cols_ncats[c] = {
                 "unique_values": sorted(le.classes_),
                 "label_encoder": le,

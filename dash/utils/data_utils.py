@@ -14,7 +14,7 @@ def num_or_cat(attr, df):
         return None
 
 def which_proj_type(Xattrs, ctypes):
-    n_nums = sum([1 for attr in Xattrs if ctypes[attr]=="numerical"])
+    n_nums = sum([1 for attr in Xattrs if ctypes[attr]==NUMERICAL_COLUMN])
     if n_nums==len(Xattrs): return "PCA"
     elif n_nums==0: return "MCA"
     else: return "FAMD"
@@ -24,8 +24,17 @@ def to_float(str):
         return float(str)
     except ValueError:
         return 0
+
+def is_categorical(axis, session_infos):
+    if session_infos["user_columns_type"][axis]==CATEGORICAL_COLUMN: return True
+    else: return False
+
+def is_numerical(axis, session_infos):
+    if session_infos["user_columns_type"][axis]==NUMERICAL_COLUMN: return True
+    else: return False
         
 def parse_attributes_settings(tols, ctypes):
+    #formarmating for fastg3
     attributes_settings = {}
     if tols is not None:
         for row in tols:
