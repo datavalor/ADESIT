@@ -89,23 +89,38 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         else: prob_opacity, nprob_opacity = 0.7, 0.7
     
     fig = add_basic_scatter(fig, non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=nprob_opacity, marker_color=FREE_COLOR)
-    fig = add_basic_scatter(fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR)
+    fig = add_basic_scatter(fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR, marker_symbol="cross")
     fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 
     return fig
 
-def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, selected=None):
-    _class = str(right_attrs[0])
+def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, prob_mark_symbol = "cross", selected=None):
     if selected is not None:
         selected_point=graph_df.loc[[selected[0]]]
         if len(selected)>1:
             selection_color = SELECTED_COLOR_BAD
+            selection_symbol = prob_mark_symbol
             involved_points=graph_df.loc[selected[1:]]
-            fig=add_basic_scatter(fig, involved_points, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=CE_COLOR, marker_size=12, marker_line_width=2)
+            fig=add_basic_scatter(
+                fig, involved_points, xaxis_column_name, yaxis_column_name, 
+                marker_opacity=0.9, 
+                marker_color=CE_COLOR, 
+                marker_size=12, 
+                marker_line_width=2,
+                marker_symbol = selection_symbol
+            )
         else:
             selection_color = SELECTED_COLOR_GOOD
-        fig=add_basic_scatter(fig, selected_point, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=selection_color, marker_size=14, marker_line_width=2)
+            selection_symbol = "circle"
+        fig=add_basic_scatter(
+            fig, selected_point, xaxis_column_name, yaxis_column_name, 
+            marker_opacity=0.9, 
+            marker_color=selection_color, 
+            marker_size=14,
+            marker_line_width=2,
+            marker_symbol = selection_symbol
+        )
         return fig
     else:
         return fig

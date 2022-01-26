@@ -135,8 +135,11 @@ def register_callbacks(plogger):
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
-                    fig_base=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, selection=True, session_infos=dh)  
-                    fig = scatter_gen.add_selection_to_scatter(fig_base, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
+                    if(d2_viewmode=="scatter"):
+                        fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, selection=True, session_infos=dh)  
+                    else:
+                        fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, nbins, dh)  
+                    fig = scatter_gen.add_selection_to_scatter(fig, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed

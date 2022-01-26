@@ -33,8 +33,8 @@ def compute_2d_histogram(df, xaxis_column_name, yaxis_column_name, resolution, s
     ydata, yres = get_data_and_res_for_histogram(df, yaxis_column_name, resolution, session_infos)
     if range is None: 
         range=[
-            data_utils.attribute_min_max(xaxis_column_name, session_infos),
-            data_utils.attribute_min_max(yaxis_column_name, session_infos),
+            data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.05),
+            data_utils.attribute_min_max(yaxis_column_name, session_infos, rel_margin=0.05),
         ]
     H, xedges, yedges = np.histogram2d(xdata, ydata, bins=(xres, yres), range=range)
     xbins = create_bins_from_edges_from_histogram(xedges, xaxis_column_name, session_infos)
