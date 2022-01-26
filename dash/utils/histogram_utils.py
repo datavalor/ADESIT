@@ -2,11 +2,11 @@ import plotly.graph_objects as go
 import numpy as np
 
 from utils.figure_utils import convert_from_numpy_edges
-from utils.data_utils import is_categorical
+import utils.data_utils as data_utils
 from constants import *
 
 def compute_1d_histogram(df, axis, resolution, session_infos, minmax=None):
-    if is_categorical(axis, session_infos):
+    if data_utils.is_categorical(axis, session_infos):
         bins = session_infos["cat_columns_ncats"][axis]["unique_values"]
         unique_values, count = np.unique(df[axis], return_counts=True)
         count_dict = {}

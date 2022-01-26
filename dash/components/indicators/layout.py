@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 
 from utils.dash_utils import Tooltip, hr_tooltip
-import utils.scatter_utils as fig_gen
+import utils.indicator_utils as indicator_utils
 
 def render():
     return dcc.Loading(dbc.Collapse(html.Div(
@@ -13,13 +13,13 @@ def render():
                 html.H6("Generalized g1 indicator", id='g1-tooltip', style={'textAlign':'center', 'textDecoration': 'underline', 'cursor': 'pointer', 'marginTop':'10px'}),
                 dcc.Graph(
                     id='g1_indicator',
-                    figure=fig_gen.bullet_indicator(),
+                    figure=indicator_utils.bullet_indicator(),
                     style={'width':'100%', 'height':'50px', 'margin':'0 auto'}
                 ),
                 html.H6("Generalized g2 indicator", id='g2-tooltip', style={'textAlign':'center', 'textDecoration': 'underline', 'cursor': 'pointer'}),
                 dcc.Graph(
                     id='g2_indicator',
-                    figure=fig_gen.bullet_indicator(),
+                    figure=indicator_utils.bullet_indicator(),
                     style={'width':'100%', 'height':'50px', 'margin':'0 auto'}
                 ),
                 html.H6("110 tuples over 150 are involved in at least one counterexample.", id='ntuples_involved', style={'textAlign':'center', 'marginTop':'10px'}),
@@ -29,7 +29,7 @@ def render():
                 html.H6("Upper bound for a machine learning problem (generalized g3)", style={'textAlign':'center'}),
                 dcc.Graph(
                     id='learnability_indicator',
-                    figure=fig_gen.gauge_indicator(),
+                    figure=indicator_utils.gauge_indicator(),
                     style={'width':'260px', 'height':'150px', 'margin':'0 auto'}
                 ),
             ], style={'width':'49%', 'display' : 'inline-block', 'verticalAlign': 'top', 'borderLeft': '1px solid', 'borderColor': 'lightgrey'}),

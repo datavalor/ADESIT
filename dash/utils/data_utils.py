@@ -1,17 +1,11 @@
-import pandas as pd
-import numpy as np
-from pandas.api.types import is_string_dtype
-from pandas.api.types import is_numeric_dtype
-
 from constants import *
 
-def num_or_cat(attr, df):
-    if is_numeric_dtype(df[attr]):
-        return NUMERICAL_COLUMN
-    elif is_string_dtype(df[attr]):
-        return CATEGORICAL_COLUMN
-    else:
-        return None
+def dataset_infos(name, ntuples, nattributes):
+    return f'''
+                Dataset: {name}  
+                Number of tuples: {ntuples}  
+                Number of attributes: {nattributes}
+            '''
 
 def which_proj_type(Xattrs, ctypes):
     n_nums = sum([1 for attr in Xattrs if ctypes[attr]==NUMERICAL_COLUMN])
@@ -32,6 +26,16 @@ def is_categorical(axis, session_infos):
 def is_numerical(axis, session_infos):
     if session_infos["user_columns_type"][axis]==NUMERICAL_COLUMN: return True
     else: return False
+
+def attribute_min_max(axis, session_infos, rel_margin=0):
+    if is_numerical(axis, session_infos):
+        min, max = session_infos['num_columns_minmax'][axis]
+    elif is_categorical(axis, session_infos):
+        min, max = [0, len(session_infos["cat_columns_ncats"][axis]["unique_values"])]
+    else:
+        return [None, None]
+    abs_margin = (max-min)*rel_margin
+    return [min-abs_margin, max+abs_margin]
         
 def parse_attributes_settings(tols, ctypes):
     #formarmating for fastg3

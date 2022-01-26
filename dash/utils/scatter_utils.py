@@ -4,51 +4,6 @@ from utils.figure_utils import gen_subplot_fig, adjust_layout
 import utils.histogram_utils as hist_gen
 from constants import *
 
-def dataset_infos(name, ntuples, nattributes):
-    return f'''
-                Dataset: {name}  
-                Number of tuples: {ntuples}  
-                Number of attributes: {nattributes}
-            '''
-
-def gauge_indicator(value=0, reference=0, lower_bound=0, upper_bound=0):
-    return go.Figure(go.Indicator(
-                mode = "gauge+number+delta",
-                value = value,
-                domain = {'x': [0, 1], 'y': [0, 1]},
-                delta = {'reference': reference},
-                number = {'suffix': "%"},
-                gauge = {   
-                    'axis': {'range': [0, 100], 'tickmode' : 'auto', 'nticks': 10},
-                    'steps': [{'range': [lower_bound, upper_bound], 'color': "lightgray"}],
-                }
-            )).update_layout(autosize = True, margin=dict(b=0, t=0, l=20, r=30))
-
-def bullet_indicator(value=0, reference=0, color='green', suffix='%', prefix=''):
-    return go.Figure(go.Indicator(
-                            mode = "gauge+number+delta",
-                            value = value,
-                            delta = {'reference': reference, 'font': {'size': 15}},
-                            number = {'valueformat':'.2f', 'prefix': prefix, 'suffix': suffix, 'font': {'size': 20}},
-                            gauge = {
-                                'shape': "bullet",
-                                'bar': {'color': color, 'thickness': 0.8},
-                                'axis' : {'range': [0, 100], 'tickmode' : 'auto', 'nticks': 10}
-                            }
-            )).update_layout(autosize = True, margin=dict(b=20, t=10, l=25, r=0))
-
-def number_indicator(value=0, reference=0):
-    return go.Figure(go.Indicator(
-                    mode = "number+delta",
-                    value = value,
-                    domain = {'x': [0, 1], 'y': [0, 1]},
-                    delta = {
-                        'reference': reference, 
-                        'increasing': {'color':'red'},
-                        'decreasing': {'color':'green'},
-                        }
-            )).update_layout(autosize = True, margin=dict(b=0, t=0, l=0, r=0))
-
 def gen_hovertemplate(df, session_infos):
     col_pos = {col: i for i, col in enumerate(df.columns)}
     # Fetching and grouping column names
@@ -67,25 +22,40 @@ def gen_hovertemplate(df, session_infos):
     hovertemplate+="<extra></extra>"
     return hovertemplate
 
-def scatter_basic_bloc(df, opacity, color, xaxis_column_name, yaxis_column_name, _class, marker_size=7, marker_line_width=0, hovertemplate=True, session_infos=None):
-    marker=dict(
-        opacity=opacity, 
-        size=marker_size, 
-        line=dict(
-            color='Black',
-            width=marker_line_width
-        )
+def gen_marker(symbol='circle', opacity=1, marker_size=8, marker_line_width=1, color="white"):
+    return {
+        'symbol': symbol,
+        'opacity': opacity, 
+        'size': marker_size, 
+        'color': color,
+        'line':{
+            'color':'Black',
+            'width': marker_line_width
+        }
+    }
+
+def scatter_basic_bloc(df, xaxis_column_name, yaxis_column_name, session_infos=None, marker_size=7, marker_line_width=0, marker_opacity=1, marker_color="black"):
+    marker = gen_marker(
+        marker_size=marker_size,
+        opacity=marker_opacity,
+        marker_line_width=marker_line_width,
+        color=marker_color
     )
-    if hovertemplate and session_infos is not None:
-        return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], customdata=df.to_numpy(),
-            mode = 'markers', marker_color=color, marker=marker, hovertemplate=gen_hovertemplate(df, session_infos))
-    else:
-        return go.Scattergl(x = df[xaxis_column_name], y = df[yaxis_column_name], mode = 'markers', marker_color=color, marker=marker)
+    params = {
+        'x': df[xaxis_column_name], 
+        'y': df[yaxis_column_name], 
+        'mode': 'markers', 
+        'marker': marker
+    }
+    if session_infos is not None:
+        params['customdata']=df.to_numpy()
+        params['hovertemplate']=gen_hovertemplate(df, session_infos)
+    return go.Scattergl(**params)
 
 def basic_scatter(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     fig.add_trace(
-        scatter_basic_bloc(df, 0.6, NON_ANALYSED_COLOR, xaxis_column_name, yaxis_column_name, None, hovertemplate=False), 
+        scatter_basic_bloc(df, xaxis_column_name, yaxis_column_name, session_infos, marker_opacity=0.6, marker_color=NON_ANALYSED_COLOR), 
         row=2, 
         col=1
     )
@@ -107,20 +77,18 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         else: prob_opacity, nprob_opacity = 0.7, 0.7
     
     fig.add_trace(
-        scatter_basic_bloc(non_problematics_df, nprob_opacity, FREE_COLOR, xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        scatter_basic_bloc(non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=nprob_opacity, marker_color=FREE_COLOR), 
         row=2, 
         col=1
     )   
     fig.add_trace(
-        scatter_basic_bloc(problematics_df, prob_opacity, CE_COLOR, xaxis_column_name, yaxis_column_name, _class, session_infos=session_infos), 
+        scatter_basic_bloc(problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR), 
         row=2, 
         col=1
     )
 
     fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
-
-    fig.update_layout(barmode='group')
 
     return fig
 
@@ -131,11 +99,11 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
         if len(selected)>1:
             selection_color = SELECTED_COLOR_BAD
             involved_points=graph_df.loc[selected[1:]]
-            selected_scatter=scatter_basic_bloc(involved_points, 0.9, CE_COLOR, xaxis_column_name, yaxis_column_name, _class, marker_size=12, marker_line_width=2)
+            selected_scatter=scatter_basic_bloc(involved_points, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=CE_COLOR, marker_size=12, marker_line_width=2)
             fig.add_trace(selected_scatter, row=2, col=1)
         else:
             selection_color = SELECTED_COLOR_GOOD
-        selected_point=scatter_basic_bloc(selected_point, 0.9, selection_color, xaxis_column_name, yaxis_column_name, _class, marker_size=14, marker_line_width=2)
+        selected_point=scatter_basic_bloc(selected_point, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=selection_color, marker_size=14, marker_line_width=2)
         fig.add_trace(selected_point, row=2, col=1)
         return fig
     else:

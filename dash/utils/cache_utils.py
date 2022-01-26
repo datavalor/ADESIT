@@ -1,5 +1,6 @@
-
 import pandas as pd
+from pandas.api.types import is_string_dtype
+from pandas.api.types import is_numeric_dtype
 import numpy as np
 from sklearn import preprocessing
 import logging
@@ -13,7 +14,6 @@ import io
 
 import constants
 from constants import *
-from utils.data_utils import num_or_cat
 
 import pydataset
 dataset_names={
@@ -46,18 +46,19 @@ def gen_data_holder(df):
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
-        elif num_or_cat(c, df)==CATEGORICAL_COLUMN:
+        elif is_string_dtype(df[c]):
             cols_type[c] = CATEGORICAL_COLUMN
             le = preprocessing.LabelEncoder()
-            df[c+SUFFIX_OF_ENCODED_COLS] = le.fit_transform(df[c])
-            # print(le.transform(df[c]))
+            le.fit(df[c])
             cols_ncats[c] = {
                 "unique_values": sorted(le.classes_),
                 "label_encoder": le,
             }
-        elif num_or_cat(c, df)==NUMERICAL_COLUMN:
+        elif is_numeric_dtype(df[c]):
             cols_type[c] = NUMERICAL_COLUMN
             cols_minmax[c] = [df[c].min(), df[c].max()]
+        else:
+            df = df.drop(columns=c)
 
     cols = list(cols_type.keys())
     df = df[cols]

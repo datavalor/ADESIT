@@ -9,8 +9,9 @@ import numpy as np
 import multiprocessing as mp
 
 # Personnal imports
-import utils.scatter_utils as fig_gen
-from utils.data_utils import parse_attributes_settings
+# import utils.scatter_utils as scatter_utils
+import utils.indicator_utils as indicator_utils
+import utils.data_utils as data_utils
 from utils.cache_utils import *
 from utils.fastg3_utils import make_analysis
 import constants
@@ -50,7 +51,7 @@ def register_callbacks(plogger):
         if data is not None:
             dh = data.get("data_holder", None)
             n = len(dh["data"].index) if dh is not None else 0
-            return filename, fig_gen.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
+            return filename, data_utils.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
         else:
             return dash.no_update, dash.no_update, dash.no_update, dash.no_update, True
         
@@ -106,7 +107,7 @@ def register_callbacks(plogger):
             ctypes = dh["user_columns_type"]
 
             # Retrieve previous settings
-            new_attributes_settings = parse_attributes_settings(inputtols, ctypes)
+            new_attributes_settings = data_utils.parse_attributes_settings(inputtols, ctypes)
             attributes_settings = get_data(session_id)["thresolds_settings"]
             if new_attributes_settings is not None:
                 for attr in new_attributes_settings.keys(): attributes_settings[attr] = new_attributes_settings[attr]
@@ -189,8 +190,8 @@ def register_callbacks(plogger):
                 df_calc[G3_COLUMN_NAME] = 0                
                 
                 # Setting left and right tolerances
-                xparams=parse_attributes_settings(left_tols, ctypes)
-                yparams=parse_attributes_settings(right_tols, ctypes)
+                xparams=data_utils.parse_attributes_settings(left_tols, ctypes)
+                yparams=data_utils.parse_attributes_settings(right_tols, ctypes)
 
                 # Making analysis
                 manager = mp.Manager()
@@ -219,25 +220,25 @@ def register_callbacks(plogger):
                     inv_g1, inv_g1_prefix = 100*(1-len(vps)/n_tuples**2), ''
                     if inv_g1>99.99 and inv_g1<100:
                         inv_g1, inv_g1_prefix = 99.99, '>'
-                    g1_fig=fig_gen.bullet_indicator(value=inv_g1, reference=g1_indicator['data'][0]['value'], prefix=inv_g1_prefix)
+                    g1_fig=indicator_utils.bullet_indicator(value=inv_g1, reference=g1_indicator['data'][0]['value'], prefix=inv_g1_prefix)
                     g2 = ncounterexample/n_tuples
-                    g2_fig=fig_gen.bullet_indicator(value=(1-g2)*100, reference=g2_indicator['data'][0]['value'])
+                    g2_fig=indicator_utils.bullet_indicator(value=(1-g2)*100, reference=g2_indicator['data'][0]['value'])
                     # Computing G3
                     if g3_computation=="exact": 
                         cover = return_dict["g3_exact_cover"]
                         g3 = len(cover)/n_tuples
                         if not g3 is None:
                             accuracy_ub = 1-g3
-                            g3_indicator = fig_gen.gauge_indicator(value=accuracy_ub*100, reference=learnability_indicator['data'][0]['value'], lower_bound=0, upper_bound=0)
+                            g3_indicator = indicator_utils.gauge_indicator(value=accuracy_ub*100, reference=learnability_indicator['data'][0]['value'], lower_bound=0, upper_bound=0)
                         else:
                             is_open=True
-                            g3_indicator = fig_gen.gauge_indicator(value=0, reference=learnability_indicator['data'][0]['value'], lower_bound=0, upper_bound=0)
+                            g3_indicator = indicator_utils.gauge_indicator(value=0, reference=learnability_indicator['data'][0]['value'], lower_bound=0, upper_bound=0)
                     else:
                         cover = return_dict["g3_ub_cover"]
                         g3_up = len(cover)/n_tuples
                         g3_lb = return_dict["g3_lb"]
                         lb_acc, ub_acc = (1-g3_up)*100, (1-g3_lb)*100
-                        g3_indicator = fig_gen.gauge_indicator(value=(lb_acc+ub_acc)*0.5, reference=learnability_indicator['data'][0]['value'], lower_bound=lb_acc, upper_bound=ub_acc)
+                        g3_indicator = indicator_utils.gauge_indicator(value=(lb_acc+ub_acc)*0.5, reference=learnability_indicator['data'][0]['value'], lower_bound=lb_acc, upper_bound=ub_acc)
 
                     # Merging
                     df_calc[G3_COLUMN_NAME][cover] = 1

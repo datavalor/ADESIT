@@ -1,5 +1,6 @@
 from plotly.subplots import make_subplots
 
+import utils.data_utils as data_utils
 from constants import *
 
 def convert_from_numpy_edges(edges):
@@ -24,18 +25,14 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
     )
 
 def adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos):
-    for axis, func in [(xaxis_column_name, fig.update_xaxes), (yaxis_column_name, fig.update_yaxes)]:
-        if session_infos["user_columns_type"][axis] == CATEGORICAL_COLUMN:
-            func(type='category', categoryorder='array', categoryarray=session_infos["cat_columns_ncats"][axis]["unique_values"], row=2, col=1)
-            n_cats = len(session_infos["cat_columns_ncats"][axis]["unique_values"])
-            func(range=[0-0.5, n_cats-1+0.5], row=2, col=1)
-        elif session_infos["user_columns_type"][axis] == 'numerical':
-            vmin = session_infos["num_columns_minmax"][axis][0]
-            vmax = session_infos["num_columns_minmax"][axis][1]
-            func(range=[0.95*vmin, 1.05*vmax], row=2, col=1)
-
-    fig.update_layout(barmode='overlay', showlegend=False)
+    fig.update_xaxes(range=data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.05), row=2, col=1)
+    fig.update_yaxes(range=data_utils.attribute_min_max(yaxis_column_name, session_infos, rel_margin=0.05), row=2, col=1)
     fig.update_traces(opacity=0.9)
-    fig.update_layout(margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, hovermode='closest', height = 550)
-
+    fig.update_layout(
+        margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, 
+        hovermode='closest', 
+        height = 550,
+        showlegend=False,
+        barmode='group'
+    )
     return fig
