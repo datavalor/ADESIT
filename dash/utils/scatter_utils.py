@@ -34,8 +34,19 @@ def gen_marker(symbol='circle', opacity=1, marker_size=8, marker_line_width=1, c
         }
     }
 
-def scatter_basic_bloc(df, xaxis_column_name, yaxis_column_name, session_infos=None, marker_size=7, marker_line_width=0, marker_opacity=1, marker_color="black"):
+def add_basic_scatter(
+        fig, 
+        df, xaxis_column_name, 
+        yaxis_column_name, 
+        session_infos=None, 
+        marker_size=7, 
+        marker_symbol='circle',
+        marker_line_width=0, 
+        marker_opacity=1, 
+        marker_color="black"
+    ):
     marker = gen_marker(
+        symbol=marker_symbol,
         marker_size=marker_size,
         opacity=marker_opacity,
         marker_line_width=marker_line_width,
@@ -50,15 +61,16 @@ def scatter_basic_bloc(df, xaxis_column_name, yaxis_column_name, session_infos=N
     if session_infos is not None:
         params['customdata']=df.to_numpy()
         params['hovertemplate']=gen_hovertemplate(df, session_infos)
-    return go.Scattergl(**params)
+    
+    fig.add_trace(
+        go.Scattergl(**params),
+        row=2, col=1
+    )
+    return fig
 
 def basic_scatter(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
-    fig.add_trace(
-        scatter_basic_bloc(df, xaxis_column_name, yaxis_column_name, session_infos, marker_opacity=0.6, marker_color=NON_ANALYSED_COLOR), 
-        row=2, 
-        col=1
-    )
+    fig = add_basic_scatter(fig, df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=0.6, marker_color=NON_ANALYSED_COLOR) 
     fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
@@ -76,17 +88,8 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
         elif view == 'P': prob_opacity, nprob_opacity = 0.7, 0.1
         else: prob_opacity, nprob_opacity = 0.7, 0.7
     
-    fig.add_trace(
-        scatter_basic_bloc(non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=nprob_opacity, marker_color=FREE_COLOR), 
-        row=2, 
-        col=1
-    )   
-    fig.add_trace(
-        scatter_basic_bloc(problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR), 
-        row=2, 
-        col=1
-    )
-
+    fig = add_basic_scatter(fig, non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=nprob_opacity, marker_color=FREE_COLOR)
+    fig = add_basic_scatter(fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR)
     fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 
@@ -99,12 +102,10 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
         if len(selected)>1:
             selection_color = SELECTED_COLOR_BAD
             involved_points=graph_df.loc[selected[1:]]
-            selected_scatter=scatter_basic_bloc(involved_points, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=CE_COLOR, marker_size=12, marker_line_width=2)
-            fig.add_trace(selected_scatter, row=2, col=1)
+            fig=add_basic_scatter(fig, involved_points, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=CE_COLOR, marker_size=12, marker_line_width=2)
         else:
             selection_color = SELECTED_COLOR_GOOD
-        selected_point=scatter_basic_bloc(selected_point, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=selection_color, marker_size=14, marker_line_width=2)
-        fig.add_trace(selected_point, row=2, col=1)
+        fig=add_basic_scatter(fig, selected_point, xaxis_column_name, yaxis_column_name, marker_opacity=0.9, marker_color=selection_color, marker_size=14, marker_line_width=2)
         return fig
     else:
         return fig

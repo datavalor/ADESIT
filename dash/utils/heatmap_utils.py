@@ -49,8 +49,6 @@ def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
         [1.0, f'rgba({RBG_3digits_str},1)'],
     ]
 
-    # H, xbins, ybins = compute_2d_histogram(df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
-
     fig.add_trace(
         go.Heatmap(
             z=np.transpose(H),
@@ -65,34 +63,16 @@ def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
 
     return fig
 
-def add_heatmap_scatter(fig, df, xaxis_column_name, yaxis_column_name, session_infos, color='white', symbol="circle"):
-    marker = scatter_utils.gen_marker(
-        symbol=symbol,
-        opacity=0.7,
-        color=color,
-        marker_size=8,
-        marker_line_width=1
-    )
-    fig.add_trace(
-        go.Scattergl(
-            x=df[xaxis_column_name],
-            y=df[yaxis_column_name],
-            mode='markers',
-            showlegend=False,
-            marker=marker,
-            customdata=df.to_numpy(),
-            hovertemplate=scatter_utils.gen_hovertemplate(df, session_infos)
-        ),
-        row=2, 
-        col=1
-    )
-    return fig
-
 def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     H, xbins, ybins = compute_2d_histogram(df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = add_basic_heatmap(fig, H, xbins, ybins)
-    fig = add_heatmap_scatter(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
+    fig = scatter_utils.add_basic_scatter(
+        fig, df, xaxis_column_name, yaxis_column_name, session_infos, 
+        marker_color="white", 
+        marker_opacity=0.7,
+        marker_line_width=1
+    )
     fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
@@ -107,8 +87,22 @@ def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, res
 
     fig = add_basic_heatmap(fig, H_np, xbins_np, ybins_np, hue=FREE_COLOR)
     fig = add_basic_heatmap(fig, H_pr, xbins_pr, ybins_pr, hue=CE_COLOR)
-    fig = add_heatmap_scatter(fig, df, xaxis_column_name, yaxis_column_name, session_infos, symbol="circle")
-    fig = add_heatmap_scatter(fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos, symbol="cross")
+
+    fig = scatter_utils.add_basic_scatter(
+        fig, non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos, 
+        marker_color="white", 
+        marker_opacity=0.7,
+        marker_line_width=1,
+        marker_symbol="circle"
+    )
+    fig = scatter_utils.add_basic_scatter(
+        fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos, 
+        marker_color="white", 
+        marker_opacity=0.7,
+        marker_line_width=1,
+        marker_symbol="cross"
+    )
+    
     fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
