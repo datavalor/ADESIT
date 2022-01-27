@@ -43,17 +43,25 @@ def gen_data_holder(df):
     cols_type = {}
     cols_minmax = {}
     cols_ncats = {}
+    time_cols = []
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
-        elif is_string_dtype(df[c]):
-            cols_type[c] = CATEGORICAL_COLUMN
-            le = preprocessing.LabelEncoder()
-            le.fit(df[c])
-            cols_ncats[c] = {
-                "unique_values": sorted(le.classes_),
-                "label_encoder": le,
-            }
+        elif is_string_dtype(df[c]):  
+            try:
+                df[c] = pd.to_datetime(df[c], infer_datetime_format=True)
+                cols_type[c] = TIME_COLUMN
+                time_cols.append(c)
+                cols_minmax[c] = [df[c].min(), df[c].max()]
+            except ValueError:
+                cols_type[c] = CATEGORICAL_COLUMN
+                le = preprocessing.LabelEncoder()
+                le.fit(df[c])
+                cols_ncats[c] = {
+                    "unique_values": sorted(le.classes_),
+                    "label_encoder": le,
+                }
+                cols_minmax[c] = [0, len(le.classes_)-1]
         elif is_numeric_dtype(df[c]):
             cols_type[c] = NUMERICAL_COLUMN
             cols_minmax[c] = [df[c].min(), df[c].max()]
@@ -64,14 +72,15 @@ def gen_data_holder(df):
     df = df[cols]
     df = df.reset_index(drop=True)
     df.insert(0, ADESIT_INDEX, df.index)
-
     return {
         "data": df,
         "graph": None,
         "user_columns": cols,
         "user_columns_type": cols_type,
-        "num_columns_minmax": cols_minmax,
+        "columns_minmax": cols_minmax,
         "cat_columns_ncats": cols_ncats,
+        "time_columns": time_cols,
+        "original_adesit_index": df.index,
         "X": [],
         "Y": []
     }

@@ -25,8 +25,9 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
     )
 
 def adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos):
-    fig.update_xaxes(range=data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.05), row=2, col=1)
-    fig.update_yaxes(range=data_utils.attribute_min_max(yaxis_column_name, session_infos, rel_margin=0.05), row=2, col=1)
+    fig.update_xaxes(range=data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.1), row=2, col=1)
+    fig.update_yaxes(range=data_utils.attribute_min_max(yaxis_column_name, session_infos, rel_margin=0.1), row=2, col=1)
+    print(data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.05))
     fig.update_traces(opacity=0.9)
     fig.update_layout(
         margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, 

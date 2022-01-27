@@ -36,11 +36,11 @@ def render():
                 html.Div("Number of bins (numeric attributes)", id="slider_label"),
                 dcc.Slider(
                     id='heatmap_resolution_slider',
-                    min=1,
+                    min=5,
                     max=30,
                     step=1,
                     value=10,
-                    marks={n:str(n) for n in [1]+list(range(5, 35, 5))},
+                    marks={n:str(n) for n in list(range(5, 35, 5))},
                     disabled=False
                 )
                 ]

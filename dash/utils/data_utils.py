@@ -28,12 +28,7 @@ def is_numerical(axis, session_infos):
     else: return False
 
 def attribute_min_max(axis, session_infos, rel_margin=0):
-    if is_numerical(axis, session_infos):
-        min, max = session_infos['num_columns_minmax'][axis]
-    elif is_categorical(axis, session_infos):
-        min, max = [0, len(session_infos["cat_columns_ncats"][axis]["unique_values"])]
-    else:
-        return [None, None]
+    min, max = session_infos['columns_minmax'][axis]
     abs_margin = (max-min)*rel_margin
     return [min-abs_margin, max+abs_margin]
         

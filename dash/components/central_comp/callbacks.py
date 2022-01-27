@@ -72,3 +72,65 @@ def register_callbacks(plogger):
                 raise PreventUpdate
         else:
             raise PreventUpdate
+
+    @dash.callback(
+        Output('time-attribute', 'options'),
+        [Input('data-loaded','children')],
+        [State('session-id', 'children')]
+    )
+    def handle_time_attribute_options(data_loaded, session_id):
+        logger.debug("handle_time_attribute_options callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+        
+        dh = session_data["data_holder"]
+        if dh is not None:
+            time_cols_options = [{'label': 'No attribute selected', 'value': 'noattradesit'}]
+            for time_col in dh["time_columns"]:
+                time_cols_options.append({'label': time_col, 'value': time_col})
+            return time_cols_options
+        else:
+            raise PreventUpdate
+
+    @dash.callback(
+        [Output('time-period', 'options'),
+        Output('time-range', 'children')],
+        [Input('time-attribute', 'value')],
+        [State('session-id', 'children')]
+    )
+    def handle_time_period_options(time_attribute, session_id):
+        logger.debug("handle_time_attribute_options callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        dh = session_data["data_holder"]
+        if dh is not None:
+            df = dh["data"]
+            period_options = [{'label': 'Full dataset', 'value': 'nogroup'}]
+            if(time_attribute=='noattradesit'):
+                df.index = df[ADESIT_INDEX]
+                df = df.sort_index()
+                dh["data"] = df
+                overwrite_session_data_holder(session_id, dh)
+                return period_options, "Attribute period: N/A"
+            else:
+                # df[time_attribute] = pd.to_datetime(df[time_attribute], infer_datetime_format=True)
+                # time_min, time_max = df[time_attribute].min(), df[time_attribute].max()
+                # print(type(time_max-time_min))
+                # print(df[time_attribute].freq)
+                df.index = pd.to_datetime(df[time_attribute], infer_datetime_format=True)#.astype("datetime64[ns]").astype("int64")
+                df = df.sort_index()
+                dh["data"] = df
+                time_min, time_max = df.index.min(), df.index.max()
+                overwrite_session_data_holder(session_id, dh)
+                possible_groups = ['d', 'w', 'm', 'y']
+                print(df.index.day)
+                print(df.index.week)
+                print(df.index.year)
+                print(df.index.month)
+                # print(df.groupby(df.index.year).groups)
+                # for time_col in dh["time_columns"]:
+                #     time_cols_options.append({'label': time_col, 'value': time_col})
+                return period_options, f'Attribute period: {time_min} => {time_max}'
+        else:
+            raise PreventUpdate

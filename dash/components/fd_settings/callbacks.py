@@ -268,6 +268,6 @@ def register_callbacks(plogger):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         if changed_id == 'data-loaded.children':
-            return True, False, False, False
+            return True, False, False, True
         else:
             return True, True, True, True

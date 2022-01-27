@@ -56,9 +56,10 @@ def register_callbacks(plogger):
                 Input('main-graph','selectedData'),
                 Input('view','value'),
                 Input('mode','value'),
-                Input('data-analysed', 'children')],
+                Input('data-analysed', 'children'),
+                Input('time-period', 'options')],
                 [State('session-id', 'children')])
-    def handle_table(data_updated, selected_data, view, mode, analysed, session_id):
+    def handle_table(data_updated, selected_data, view, mode, analysed, time_period_options, session_id):
         logger.debug("handle_table callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
