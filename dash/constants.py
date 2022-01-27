@@ -1,3 +1,5 @@
+import pandas as pd
+
 # COLUMN TYPES
 NUMERICAL_COLUMN = "numerical"
 CATEGORICAL_COLUMN = "categorical"
@@ -28,3 +30,22 @@ RESOURCE_LIMITED = False
 MAX_N_TUPLES = 100000
 MAX_N_ATTRS = 20
 VPE_TIMEOUT = 10
+
+DEFAULT_TIME_CUTS = {
+    'day': {
+        "timedelta": pd.Timedelta(1,'d'),
+        "freq_symbol": "D"
+    },
+    'week': {
+        "timedelta": pd.Timedelta(7,'d'),
+        "freq_symbol": "W"
+    },
+    'month': {
+        "timedelta": pd.Timedelta(30,'d'),
+        "freq_symbol": "MS"
+    },
+    'year': {
+        "timedelta": pd.Timedelta(365,'d'),
+        "freq_symbol": "YS"
+    },
+}

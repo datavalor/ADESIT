@@ -77,11 +77,12 @@ def register_callbacks(plogger):
                 Input('y-axis', 'value'),
                 Input('view','value'),
                 Input('mode','value'),
-                Input('selection_changed', 'children')],
+                Input('selection_changed', 'children'),
+                Input('current-time-range', 'children')],
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, session_id):
+    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, current_time_range, left_attrs, right_attrs, session_id):
         logger.debug("handle_graph callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate

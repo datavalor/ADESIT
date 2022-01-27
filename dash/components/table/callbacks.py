@@ -57,9 +57,10 @@ def register_callbacks(plogger):
                 Input('view','value'),
                 Input('mode','value'),
                 Input('data-analysed', 'children'),
-                Input('time-period', 'options')],
+                Input('time-period-dropdown', 'options'),
+                Input('current-time-range', 'children')],
                 [State('session-id', 'children')])
-    def handle_table(data_updated, selected_data, view, mode, analysed, time_period_options, session_id):
+    def handle_table(data_updated, selected_data, view, mode, analysed, time_period_options, current_time_range, session_id):
         logger.debug("handle_table callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -69,6 +70,13 @@ def register_callbacks(plogger):
         dh=session_data["data_holder"]
         if dh is not None:
             data=dh["data"]
+
+            # filtering by time
+            # if dh["time_infos"] is not None:
+            #     curr_index = dh["time_infos"]["current_time_period"]
+            #     low_cut, high_cut = dh["time_infos"]["time_periods_list"][curr_index:curr_index+2]
+            #     data=data[low_cut:high_cut]
+
             col_types=dh["user_columns_type"]
             # select_problematics/non problematics according to mode and view
             if label_column in data.columns:
@@ -79,7 +87,7 @@ def register_callbacks(plogger):
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
             columns = [{"name": [col_types[column], column], "id": column, "hideable":True} for column in data.columns if column in dh["user_columns"]]
-            columns = sorted(columns, key=lambda x: "".join(x["name"]))
+            columns = sorted(columns, key=lambda x: "".join(x["name"]), reverse=True)
             if G12_COLUMN_NAME in data.columns:
                 columns = [{"name": ["", G12_COLUMN_NAME], "id": G12_COLUMN_NAME}]+columns
             columns = [{"name": ["", ADESIT_INDEX], "id": ADESIT_INDEX, "hideable":False}]+columns
@@ -101,7 +109,6 @@ def register_callbacks(plogger):
                     {'if': {'column_id': G12_COLUMN_NAME,}, 'display': 'None',}
                 ],
                 merge_duplicate_headers=True
-                # style_as_list_view=True
             )
             return table
         else:

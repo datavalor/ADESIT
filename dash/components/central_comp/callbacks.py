@@ -1,6 +1,7 @@
 import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from matplotlib.style import available
 
 # Miscellaneous
 import pandas as pd
@@ -74,7 +75,7 @@ def register_callbacks(plogger):
             raise PreventUpdate
 
     @dash.callback(
-        Output('time-attribute', 'options'),
+        Output('time-attribute-dropdown', 'options'),
         [Input('data-loaded','children')],
         [State('session-id', 'children')]
     )
@@ -93,9 +94,9 @@ def register_callbacks(plogger):
             raise PreventUpdate
 
     @dash.callback(
-        [Output('time-period', 'options'),
+        [Output('time-period-dropdown', 'options'),
         Output('time-range', 'children')],
-        [Input('time-attribute', 'value')],
+        [Input('time-attribute-dropdown', 'value')],
         [State('session-id', 'children')]
     )
     def handle_time_period_options(time_attribute, session_id):
@@ -105,32 +106,113 @@ def register_callbacks(plogger):
 
         dh = session_data["data_holder"]
         if dh is not None:
-            df = dh["data"]
-            period_options = [{'label': 'Full dataset', 'value': 'nogroup'}]
+            df = dh["full_data"]
+            period_options = [{'label': 'Don\'t group', 'value': 'nogroup'}]
             if(time_attribute=='noattradesit'):
                 df.index = df[ADESIT_INDEX]
                 df = df.sort_index()
                 dh["data"] = df
+                dh["full_data"] = df
                 overwrite_session_data_holder(session_id, dh)
                 return period_options, "Attribute period: N/A"
             else:
-                # df[time_attribute] = pd.to_datetime(df[time_attribute], infer_datetime_format=True)
-                # time_min, time_max = df[time_attribute].min(), df[time_attribute].max()
-                # print(type(time_max-time_min))
-                # print(df[time_attribute].freq)
+                # setting time as index
                 df.index = pd.to_datetime(df[time_attribute], infer_datetime_format=True)#.astype("datetime64[ns]").astype("int64")
                 df = df.sort_index()
                 dh["data"] = df
-                time_min, time_max = df.index.min(), df.index.max()
+                dh["full_data"] = df
+
                 overwrite_session_data_holder(session_id, dh)
-                possible_groups = ['d', 'w', 'm', 'y']
-                print(df.index.day)
-                print(df.index.week)
-                print(df.index.year)
-                print(df.index.month)
-                # print(df.groupby(df.index.year).groups)
-                # for time_col in dh["time_columns"]:
-                #     time_cols_options.append({'label': time_col, 'value': time_col})
-                return period_options, f'Attribute period: {time_min} => {time_max}'
+
+                # finding max and min time and delttas
+                time_min, time_max = df.index.min(), df.index.max()
+                diff = df.index[1:]-df.index[:-1]
+                min_delta, max_delta = min(diff), max(diff)
+
+                for time_cut in DEFAULT_TIME_CUTS:
+                    td = DEFAULT_TIME_CUTS[time_cut]["timedelta"]
+                    if td>=10*min_delta:
+                        period_options.append({'label': time_cut, 'value': time_cut})
+
+                return period_options, f'{time_min} => {time_max}'
         else:
             raise PreventUpdate
+
+    @dash.callback(
+        [Output("current-time-range", "children"),
+        Output('current-time-range-number', 'children'),
+        Output('max-time-range-number', 'children')],
+        [Input('time-period-dropdown', 'value'),
+        Input('time-backward-button', 'n_clicks'),
+        Input('time-forward-button', 'n_clicks')],
+        [State('session-id', 'children')]
+    )
+    def handle_time_period_value(time_period_value, bf_nclicks, bb_nclicks, session_id):
+        logger.debug("handle_time_period_value callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+        dh = session_data["data_holder"]
+        if dh is not None:
+            time_infos = dh["time_infos"]
+            if "n_clicks" in changed_id:
+                curr_index = time_infos["current_time_period"]
+                periods_list = time_infos["time_periods_list"]
+                if changed_id=='time-backward-button.n_clicks' and curr_index>0:
+                    curr_index-=1 
+                elif changed_id=='time-forward-button.n_clicks' and curr_index<len(periods_list)-2:
+                    curr_index+=1 
+                period_min, period_max = periods_list[curr_index], periods_list[curr_index+1]
+                dh["data"]=dh["full_data"][period_min:period_max]
+                dh["time_infos"]["current_time_period"]=curr_index
+                overwrite_session_data_holder(session_id, dh)
+                return f'{period_min} => {period_max}', curr_index+1, dash.no_update
+            else:
+                if time_period_value=="nogroup":
+                    dh["time_infos"] = None
+                    dh["data"] = dh["full_data"]
+                    overwrite_session_data_holder(session_id, dh)
+                    return f'N/A', "1", "1"
+                else:
+                    df = dh["full_data"]
+                    time_min, time_max = df.index.min(), df.index.max()
+                    freq=DEFAULT_TIME_CUTS[time_period_value]["freq_symbol"]
+                    list = pd.date_range(time_min, time_max, freq=freq)
+                    period_min, period_max = list[0], list[1]
+                    dh["data"]=dh["full_data"][period_min:period_max]
+                    dh["time_infos"]= {
+                        "time_periods_list": list,
+                        "current_time_period": 0
+                    }
+                    overwrite_session_data_holder(session_id, dh)
+                    return f'{period_min} => {period_max}', 1, len(list)-1
+        else:
+            raise PreventUpdate
+
+    @dash.callback(
+        [Output("time-backward-button", "disabled"),
+        Output('time-forward-button', 'disabled')],
+        [Input('current-time-range', 'children')],
+        [State('session-id', 'children')]
+    )
+    def handle_time_period_buttons_state(current_time_range, session_id):
+        logger.debug("handle_time_period_buttons_state callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        time_infos = session_data["data_holder"]["time_infos"]
+        if time_infos is not None:
+            list_len = len(time_infos["time_periods_list"])
+            curr_index = time_infos["current_time_period"]
+            if list_len==2:
+                return True, True
+            if curr_index==0:
+                return True, False
+            elif curr_index==list_len-2:
+                return False, True
+            else:
+                return False, False
+        else:
+            return True, True

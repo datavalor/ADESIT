@@ -132,7 +132,7 @@ def gen_time_controller():
                 "marginRight": "10px", 
                 "verticalAlign": "top",
             }),
-            dbc.Select(id='time-attribute', 
+            dbc.Select(id='time-attribute-dropdown', 
                 options=[
                     {'label': 'No attribute selected', 'value': 'noattradesit'}
                 ],
@@ -144,13 +144,13 @@ def gen_time_controller():
                     'marginRight': '20px'
                 }
             ),
-            html.Strong("Grouping period:", style={
+            html.Strong("Group by:", style={
                 "marginRight": "10px", 
                 "verticalAlign": "top",
             }),
-            dbc.Select(id='time-period', 
+            dbc.Select(id='time-period-dropdown', 
                 options=[
-                    {'label': 'Full dataset', 'value': 'nogroup'},
+                    {'label': 'Don\'t group', 'value': 'nogroup'},
                 ],
                 value='nogroup',
                 disabled=False,
@@ -160,15 +160,21 @@ def gen_time_controller():
                 }
             ),
             html.Br(),
-            html.Strong("Attribute period: N/A", id="time-range"),
+            html.Strong("Attribute period: "), html.Strong("N/A", id="time-range"),
             html.Br(),
-            html.Strong("Current period: N/A", id="current-time-range"),
+            html.Strong("Current period: "), html.Strong("N/A", id="current-time-range"),
             html.Br(),
             dbc.Button(
-            "←", id="time-backward", className="me-2", n_clicks=0
+                "←", id="time-backward-button", className="me-2", n_clicks=0,
+                disabled=True
             ),
+            html.Span("1", id="current-time-range-number"), 
+            html.Span("/"),
+            html.Span("1", id="max-time-range-number"),
             dbc.Button(
-            "→", id="time-forward", className="me-2", n_clicks=0
+                "→", id="time-forward-button", className="me-2", n_clicks=0,
+                disabled=True,
+                style={"marginLeft":"10px"}
             ),
         ]),
         style= {

@@ -74,13 +74,14 @@ def gen_data_holder(df):
     df.insert(0, ADESIT_INDEX, df.index)
     return {
         "data": df,
+        "full_data": df,
         "graph": None,
         "user_columns": cols,
         "user_columns_type": cols_type,
         "columns_minmax": cols_minmax,
         "cat_columns_ncats": cols_ncats,
         "time_columns": time_cols,
-        "original_adesit_index": df.index,
+        "time_infos": None,
         "X": [],
         "Y": []
     }
