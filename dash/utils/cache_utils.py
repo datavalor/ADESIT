@@ -1,4 +1,5 @@
 import pandas as pd
+pd.options.mode.chained_assignment = None 
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
 import numpy as np
@@ -7,8 +8,6 @@ import logging
 logging.basicConfig()
 
 # Miscellaneous
-import pandas as pd
-pd.options.mode.chained_assignment = None 
 import base64
 import io
 
@@ -37,24 +36,33 @@ default_data = {
     }
 }
 
+def find_resolution_of_attribute(col):
+    scol = np.sort(np.unique(col))
+    diff = scol[1:]-scol[:-1]
+    return diff.min()
+
+
 def gen_data_holder(df):
     # Proprocessing dataframe
     df = df.dropna()
     cols_type = {}
     cols_minmax = {}
     cols_ncats = {}
+    cols_res = {}
     time_cols = []
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
         elif is_string_dtype(df[c]):  
             try:
+                cols_type[c] = DATETIME_COLUMN
                 df[c] = pd.to_datetime(df[c], infer_datetime_format=True)
-                cols_type[c] = TIME_COLUMN
                 time_cols.append(c)
                 cols_minmax[c] = [df[c].min(), df[c].max()]
+                cols_res[c] = find_resolution_of_attribute(df[c])
             except ValueError:
                 cols_type[c] = CATEGORICAL_COLUMN
+                cols_res[c] = 1
                 le = preprocessing.LabelEncoder()
                 le.fit(df[c])
                 cols_ncats[c] = {
@@ -65,6 +73,7 @@ def gen_data_holder(df):
         elif is_numeric_dtype(df[c]):
             cols_type[c] = NUMERICAL_COLUMN
             cols_minmax[c] = [df[c].min(), df[c].max()]
+            cols_res[c] = find_resolution_of_attribute(df[c])
         else:
             df = df.drop(columns=c)
 
@@ -80,6 +89,7 @@ def gen_data_holder(df):
         "user_columns_type": cols_type,
         "columns_minmax": cols_minmax,
         "cat_columns_ncats": cols_ncats,
+        "columns_res": cols_res,
         "time_columns": time_cols,
         "time_infos": None,
         "X": [],

@@ -15,15 +15,43 @@ def compute_1d_histogram(df, axis, resolution, session_infos, minmax=None):
     else:
         if minmax is None: min, max = data_utils.attribute_min_max(axis, session_infos)
         else: min, max = minmax
+        data = df[axis]
+        if data_utils.is_datetime(axis, session_infos):
+            min, max = min.to_datetime64().view("int64"), max.to_datetime64().view("int64")
+            data = data.astype("datetime64[ns]").view("int64")
         bins_counts, bins_edges = np.histogram(
-            df[axis], 
+            data, 
             bins=resolution,
             range=(min, max)
         )
         bins = convert_from_numpy_edges(bins_edges)
+        if data_utils.is_datetime(axis, session_infos):
+            for i in range(len(bins)):
+                bins[i]=pd.Timestamp(bins[i])
     return [bins, bins_counts]
 
-def add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
+def add_attribute_histogram(
+    fig, 
+    df, 
+    xaxis_column_name,
+    resolution, 
+    session_infos,
+):
+    bins, bins_counts = compute_1d_histogram(df, xaxis_column_name, resolution, session_infos)
+    fig.add_trace(
+        go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR),
+    )
+    return fig
+
+def add_basic_histograms(
+    fig, 
+    df, 
+    xaxis_column_name, 
+    yaxis_column_name, 
+    resolution, 
+    session_infos,
+
+):
     histo_data = []
     for axis in [xaxis_column_name, yaxis_column_name]:
         histo_data.append(compute_1d_histogram(df, axis, resolution, session_infos))

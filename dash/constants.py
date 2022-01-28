@@ -3,7 +3,7 @@ import pandas as pd
 # COLUMN TYPES
 NUMERICAL_COLUMN = "numerical"
 CATEGORICAL_COLUMN = "categorical"
-TIME_COLUMN = "time"
+DATETIME_COLUMN = "datetime"
 
 # ADESIT COLUMNS IN DATASET
 ADESIT_INDEX = "id"
@@ -34,18 +34,22 @@ VPE_TIMEOUT = 10
 DEFAULT_TIME_CUTS = {
     'day': {
         "timedelta": pd.Timedelta(1,'d'),
-        "freq_symbol": "D"
+        "freq_symbol": "D",
+        "date_format": '%Y-%m-%d'
     },
     'week': {
         "timedelta": pd.Timedelta(7,'d'),
-        "freq_symbol": "W"
+        "freq_symbol": "W",
+        "date_format": '%Y-%m-%d'
     },
     'month': {
         "timedelta": pd.Timedelta(30,'d'),
-        "freq_symbol": "MS"
+        "freq_symbol": "MS",
+        "date_format": '%Y-%m'
     },
     'year': {
         "timedelta": pd.Timedelta(365,'d'),
-        "freq_symbol": "YS"
+        "freq_symbol": "YS",
+        "date_format": '%Y'
     },
 }

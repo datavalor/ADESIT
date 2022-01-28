@@ -10,7 +10,6 @@ def gen_hovertemplate(df, session_infos):
     features = session_infos["X"]
     target = session_infos["Y"]
     other = []
-    # print(features, target, other)
     for col in session_infos["user_columns"]: 
         if col not in features and col not in target:
             other.append(col)

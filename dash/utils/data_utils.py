@@ -7,6 +7,9 @@ def dataset_infos(name, ntuples, nattributes):
                 Number of attributes: {nattributes}
             '''
 
+def format_date_period(period_min, period_max, format):
+    return f'{period_min.strftime(format)} → {period_max.strftime(format)}'
+
 def which_proj_type(Xattrs, ctypes):
     n_nums = sum([1 for attr in Xattrs if ctypes[attr]==NUMERICAL_COLUMN])
     if n_nums==len(Xattrs): return "PCA"
@@ -25,6 +28,10 @@ def is_categorical(axis, session_infos):
 
 def is_numerical(axis, session_infos):
     if session_infos["user_columns_type"][axis]==NUMERICAL_COLUMN: return True
+    else: return False
+
+def is_datetime(axis, session_infos):
+    if session_infos["user_columns_type"][axis]==DATETIME_COLUMN: return True
     else: return False
 
 def attribute_min_max(axis, session_infos, rel_margin=0):

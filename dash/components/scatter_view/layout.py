@@ -31,8 +31,7 @@ def render():
                 clearable=False
             ),
             
-            html.Div(
-                [
+            html.Div([
                 html.Div("Number of bins (numeric attributes)", id="slider_label"),
                 dcc.Slider(
                     id='heatmap_resolution_slider',
@@ -43,7 +42,7 @@ def render():
                     marks={n:str(n) for n in list(range(5, 35, 5))},
                     disabled=False
                 )
-                ]
+            ]
             ),
 
             html.Hr(),
