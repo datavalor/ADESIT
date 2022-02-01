@@ -14,16 +14,16 @@ def get_data_and_res_for_histogram(df, axis, target_resolution, session_infos):
     resolution = target_resolution
     # if the data is categorical, we need to label encode the data
     if data_utils.is_categorical(axis, session_infos): 
-        le = session_infos["cat_columns_ncats"][axis]["label_encoder"] 
+        le = session_infos["categorical_columns_infos"][axis]["label_encoder"] 
         data = le.transform(data)
-        ncats = len(session_infos["cat_columns_ncats"][axis]["unique_values"])
+        ncats = len(session_infos["categorical_columns_infos"][axis]["unique_values"])
         resolution = np.arange(0,ncats+1)-0.5
     return data, resolution
 
 def create_bins_from_edges_from_histogram(edges, axis, session_infos):
     bins = convert_from_numpy_edges(edges)
     if data_utils.is_categorical(axis, session_infos): 
-        le = session_infos["cat_columns_ncats"][axis]["label_encoder"] 
+        le = session_infos["categorical_columns_infos"][axis]["label_encoder"] 
         bins = le.inverse_transform(np.array(bins, dtype=np.int))
     return bins
 

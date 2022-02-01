@@ -9,6 +9,7 @@ from components import fd_settings as fd_settings_component
 from components import indicators as indicators_component
 from components import central_comp as central_comp_component
 from components import ce_viz as ce_viz_component
+from components import computation as computation_component
 from constants import *
 
 index_string = '''
@@ -83,12 +84,16 @@ def serve_layout(banner, app):
 
             banner_component.render(app, banner=banner),
             fd_settings_component.render(),
+            computation_component.render(),
             indicators_component.render(),
             central_comp_component.render(),
             ce_viz_component.render(),
 
+
             html.Div([
                 ""
-            ], style={"width": "100%", "height": "10px"})
+            ], style={"width": "100%", "height": "200px"}),
+            html.P(id='sliders_added'),
+            html.P(id='a_min_max_has_been_changed')
     ],
     fluid=True)

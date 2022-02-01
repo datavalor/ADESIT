@@ -77,7 +77,7 @@ def register_callbacks(plogger):
             #     low_cut, high_cut = dh["time_infos"]["time_periods_list"][curr_index:curr_index+2]
             #     data=data[low_cut:high_cut]
 
-            col_types=dh["user_columns_type"]
+            col_types=dh["columns_type"]
             # select_problematics/non problematics according to mode and view
             if label_column in data.columns:
                 if view == 'NP': data=data.loc[data[label_column] == 0]

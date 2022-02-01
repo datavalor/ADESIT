@@ -120,30 +120,6 @@ def render():
                     ), 
                 ],style={'width' : '48%', 'verticalAlign': 'top', 'float': 'right', 'display' : 'inline-block'}),                       
             ],style={'width' : '75%', 'display' : 'inline-block', 'paddingLeft' : '4%'}),
-
-            html.Div([
-                html.Div(style={'width' : '70%', 'display' : 'inline-block',}),
-                html.Div([
-                    dcc.Dropdown(
-                        id = "g3_computation",
-                        options=[
-                            {'label': 'g3 approximation', 'value': 'approx'},
-                            {'label': 'g3 exact', 'value': 'exact'}
-                        ],
-                        value='approx',
-                        disabled=True,
-                        clearable=False
-                    ),
-                ], style={ 'width' : '20%', 'display' : 'inline-block', 'paddingRight' : '1%'}),
-                html.Div([
-                    dbc.Button('Analyse', 
-                        color="primary", 
-                        disabled=True, 
-                        id='analyse_btn', 
-                        style={'width' : '100%'}
-                    ),
-                ], style={'width' : '10%', 'display' : 'inline-block', 'float' : 'right'}),
-            ], style={ 'width' : '100%', 'display' : 'block', 'marginTop': '20px'}), 
         
         ], style={
             'marginTop' : '1%',

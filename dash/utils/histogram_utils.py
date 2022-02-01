@@ -7,7 +7,7 @@ from constants import *
 
 def compute_1d_histogram(df, axis, resolution, session_infos, minmax=None):
     if data_utils.is_categorical(axis, session_infos):
-        bins = session_infos["cat_columns_ncats"][axis]["unique_values"]
+        bins = session_infos["categorical_columns_infos"][axis]["unique_values"]
         unique_values, count = np.unique(df[axis], return_counts=True)
         count_dict = {}
         for i in range(len(unique_values)): count_dict[unique_values[i]]=count[i]

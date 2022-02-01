@@ -6,7 +6,7 @@ from components import scatter_view as scatter_view_component
 from components import attributes as attributes_component
 
 from utils.dash_utils import Tooltip, hr_tooltip
-from .legend import gen_analysed_legend, gen_time_controller
+from .legend import gen_analysed_legend
 from constants import *
 
 def render():
@@ -14,8 +14,7 @@ def render():
         [
             html.H5("Dataset exploration"),
             dbc.Collapse(
-                [gen_analysed_legend(),
-                gen_time_controller()],
+                [gen_analysed_legend()],
                 id="collapse-legend",
                 is_open=True,
                 style={

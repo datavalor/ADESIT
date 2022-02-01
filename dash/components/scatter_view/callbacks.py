@@ -30,7 +30,7 @@ def register_callbacks(plogger):
 
         dh=session_data["data_holder"]
         if dh is not None:
-            ctypes=dh["user_columns_type"]
+            ctypes=dh["columns_type"]
             options=[{'label': col, 'title' : col, 'value': col} for col in dh["user_columns"]]
             if left_attrs:
                 for proj_name in PROJ_AXES:
@@ -93,7 +93,7 @@ def register_callbacks(plogger):
         dh=session_data["data_holder"]
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
             df=dh["data"]
-            ctypes = dh["user_columns_type"]
+            ctypes = dh["columns_type"]
             
             # handling projections if needed
             join_axes = [xaxis_column_name, yaxis_column_name]

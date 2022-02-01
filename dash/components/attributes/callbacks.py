@@ -1,5 +1,5 @@
 import dash
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL
 from dash.exceptions import PreventUpdate
 
 from dash import html
@@ -12,7 +12,7 @@ from utils.cache_utils import *
 import utils.data_utils as data_utils
 import utils.histogram_utils as histogram_utils
 
-def register_callbacks(plogger):
+def register_callbacks(app, plogger):
     logger = plogger
 
     def find_res(n):
@@ -26,12 +26,40 @@ def register_callbacks(plogger):
         return 10**(-i+b)
 
     @dash.callback(
-        Output("attrs-hist-div", "children"),
+        [Output({'type': 'attr_histogram', 'index': ALL}, 'children'),
+        Output("a_min_max_has_been_changed", 'children')],
+        [Input({'type': 'minmax_slider', 'index': ALL}, 'value')],
+        [Input({'type': 'minmax_slider', 'index': ALL}, 'id'),
+        State('session-id', 'children')]
+    )
+    def attributes_sliders_update(sliders_ranges, sliders_ids, session_id):
+        logger.debug("attributes_sliders_update callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate        
+        
+        dh = session_data["data_holder"]
+        if dh is not None:
+            query_lines = []
+            for i in range(len(sliders_ranges)):
+                attr = sliders_ids[i]["index"]
+                attr_range = sliders_ranges[i]
+                dh['columns_minmax'][attr] = attr_range
+                query_lines.append(f'{attr_range[0]} <= `{attr}` <= {attr_range[1]}')
+            query = " and ".join(query_lines)
+            dh['data'] = dh['full_data'].query(query)
+            overwrite_session_data_holder(session_id, dh)
+            return [dash.no_update]*(len(sliders_ranges)+1), ""
+        else:
+            raise PreventUpdate
+
+    @dash.callback(
+        [Output('attrs-hist-div', 'children'),
+        Output('sliders_added', 'children')],
         [Input('data-loaded', 'children')],
         [State('session-id', 'children')]
     )
-    def attributes_infos_tab_callback(data_loaded, session_id):
-        logger.debug("handle_time_period_buttons_state callback")
+    def attributes_infos_tab_init(data_loaded, session_id):
+        logger.debug("attributes_infos_tab_init callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
@@ -39,7 +67,7 @@ def register_callbacks(plogger):
         if dh is not None:
             content = []
             current_row = []
-            for i, attr in enumerate(dh["user_columns_type"]):
+            for i, attr in enumerate(dh["columns_type"]):
                 if i>0 and i%4==0:
                     content.append(dbc.Row(current_row))
                     current_row = []
@@ -53,33 +81,38 @@ def register_callbacks(plogger):
                     dh
                 )
                 figure.update_layout(
-                    title=f'{attr}',
-                    margin={'l': 0, 'b': 0, 't': 60, 'r': 0}, 
-                    # hovermode='closest', 
+                    title=f'{attr} ({dh["columns_type"][attr]})',
+                    margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
                     height = 300,
-                    # showlegend=False,
-                    # barmode='group'
                 )
                 col_content = html.Div([
                     dcc.Graph(
-                        figure=figure
+                        figure=figure,
                     )],
+                    # id=f'{dh["columns_stripped_id"][attr]}_histogram',
+                    id={
+                        'type': 'attr_histogram',
+                        'index': attr
+                    },
                     style={"height": 350}
                 )
-                print(dh["columns_res"][attr])
                 if data_utils.is_numerical(attr, dh):
                     attr_min, attr_max = dh["columns_minmax"][attr]
-                    res = min(find_res(attr_min), find_res(attr_max), find_res(dh["columns_res"][attr]))
+                    res = min(find_res(attr_min), find_res(attr_max), find_res(dh["columns_resolution"][attr]))
                     res = max(0.001, res)
                     col_content.children.append(
                         dcc.RangeSlider(
-                            id=f'{attr}_minmax_slider',
+                            id={
+                                'type': 'minmax_slider',
+                                'index': attr
+                            },
+                            # id=f'{dh["columns_stripped_id"][attr]}_minmax_slider',
                             min=attr_min,
                             max=attr_max,
                             step=res,
                             value=[attr_min, attr_max],
                             tooltip={"placement": "bottom", "always_visible": True},
-                        )
+                        )                        
                     )
 
                 figure.update_xaxes(
@@ -99,6 +132,6 @@ def register_callbacks(plogger):
             if current_row!=[]:
                 content.append(dbc.Row(current_row))
             
-            return content
+            return content, " "
         else:
             return PreventUpdate

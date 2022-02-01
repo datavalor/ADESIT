@@ -20,6 +20,7 @@ from components import ce_viz as ce_viz_component
 from components import central_comp as central_comp_component
 from components import scatter_view as scatter_view_component
 from components import attributes as attributes_component
+from components import computation as computation_component
 
 import constants
 
@@ -31,7 +32,8 @@ components = [
     ce_viz_component,
     central_comp_component,
     scatter_view_component,
-    attributes_component
+    # attributes_component,
+    computation_component
 ]
 
 if __name__ == '__main__':
@@ -65,6 +67,7 @@ if __name__ == '__main__':
     cache_utils.logger.setLevel(logging_level)
     logger.setLevel(logging_level)
     for component in components: component.register_callbacks(plogger=logger)
+    attributes_component.register_callbacks(app, logger)
 
     if args.debug: app.run_server(debug=True)
     else: app.run_server(debug=False, host='0.0.0.0')

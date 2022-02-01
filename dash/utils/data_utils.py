@@ -23,15 +23,15 @@ def to_float(str):
         return 0
 
 def is_categorical(axis, session_infos):
-    if session_infos["user_columns_type"][axis]==CATEGORICAL_COLUMN: return True
+    if session_infos["columns_type"][axis]==CATEGORICAL_COLUMN: return True
     else: return False
 
 def is_numerical(axis, session_infos):
-    if session_infos["user_columns_type"][axis]==NUMERICAL_COLUMN: return True
+    if session_infos["columns_type"][axis]==NUMERICAL_COLUMN: return True
     else: return False
 
 def is_datetime(axis, session_infos):
-    if session_infos["user_columns_type"][axis]==DATETIME_COLUMN: return True
+    if session_infos["columns_type"][axis]==DATETIME_COLUMN: return True
     else: return False
 
 def attribute_min_max(axis, session_infos, rel_margin=0):

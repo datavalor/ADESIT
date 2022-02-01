@@ -41,6 +41,11 @@ def find_resolution_of_attribute(col):
     diff = scol[1:]-scol[:-1]
     return diff.min()
 
+def strip_to_id(attr_name):
+    for char in ['.', '{', '}']:
+        attr_name = attr_name.replace(char, '_')
+    attr_name = attr_name.lower()
+    return attr_name
 
 def gen_data_holder(df):
     # Proprocessing dataframe
@@ -50,6 +55,7 @@ def gen_data_holder(df):
     cols_ncats = {}
     cols_res = {}
     time_cols = []
+    cols_ids = {}
     for c in df.columns:
         if c in ['id', 'Id', 'ID']:
             df = df.drop(columns=c)
@@ -60,6 +66,7 @@ def gen_data_holder(df):
                 time_cols.append(c)
                 cols_minmax[c] = [df[c].min(), df[c].max()]
                 cols_res[c] = find_resolution_of_attribute(df[c])
+                cols_ids[c] = strip_to_id(c)
             except ValueError:
                 cols_type[c] = CATEGORICAL_COLUMN
                 cols_res[c] = 1
@@ -70,10 +77,12 @@ def gen_data_holder(df):
                     "label_encoder": le,
                 }
                 cols_minmax[c] = [0, len(le.classes_)-1]
+                cols_ids[c] = strip_to_id(c)
         elif is_numeric_dtype(df[c]):
             cols_type[c] = NUMERICAL_COLUMN
             cols_minmax[c] = [df[c].min(), df[c].max()]
             cols_res[c] = find_resolution_of_attribute(df[c])
+            cols_ids[c] = strip_to_id(c)
         else:
             df = df.drop(columns=c)
 
@@ -81,20 +90,23 @@ def gen_data_holder(df):
     df = df[cols]
     df = df.reset_index(drop=True)
     df.insert(0, ADESIT_INDEX, df.index)
-    return {
+    data_holder =  {
         "data": df,
         "full_data": df,
         "graph": None,
         "user_columns": cols,
-        "user_columns_type": cols_type,
+        "columns_type": cols_type,
         "columns_minmax": cols_minmax,
-        "cat_columns_ncats": cols_ncats,
-        "columns_res": cols_res,
+        "columns_resolution": cols_res,
+        "columns_stripped_id": cols_ids,
+        "categorical_columns_infos": cols_ncats,
         "time_columns": time_cols,
         "time_infos": None,
         "X": [],
         "Y": []
     }
+    print(data_holder)
+    return data_holder
 
 def get_data(session_id, pydata=False, clear=False, filename=None, contents=None, copy=None):    
     @cache.memoize()

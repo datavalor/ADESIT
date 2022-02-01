@@ -4,8 +4,6 @@ from dash import html
 from constants import *
 
 def render():
-    return html.Div([
-        html.H5("Pouet")
-    ],
+    return html.Div([],
     id="attrs-hist-div",
     )
