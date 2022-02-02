@@ -94,6 +94,7 @@ def serve_layout(banner, app):
                 ""
             ], style={"width": "100%", "height": "200px"}),
             html.P(id='sliders_added'),
-            html.P(id='a_min_max_has_been_changed')
+            html.P(id='a_min_max_has_been_changed'),
+            html.P(id='data_filters_have_changed')
     ],
     fluid=True)

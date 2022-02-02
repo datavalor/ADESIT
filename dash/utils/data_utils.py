@@ -23,21 +23,31 @@ def to_float(str):
         return 0
 
 def is_categorical(axis, session_infos):
-    if session_infos["columns_type"][axis]==CATEGORICAL_COLUMN: return True
+    if session_infos['columns_type'][axis]==CATEGORICAL_COLUMN: return True
     else: return False
 
 def is_numerical(axis, session_infos):
-    if session_infos["columns_type"][axis]==NUMERICAL_COLUMN: return True
+    if session_infos['columns_type'][axis]==NUMERICAL_COLUMN: return True
     else: return False
 
 def is_datetime(axis, session_infos):
-    if session_infos["columns_type"][axis]==DATETIME_COLUMN: return True
+    if session_infos['columns_type'][axis]==DATETIME_COLUMN: return True
     else: return False
 
 def attribute_min_max(axis, session_infos, rel_margin=0):
     min, max = session_infos['columns_minmax'][axis]
     abs_margin = (max-min)*rel_margin
     return [min-abs_margin, max+abs_margin]
+
+def find_res(n):
+    a, b = "{:e}".format(n).split("e")
+    b = int(b.split('+')[-1])
+    a = a.split('.')[1]
+    i = len(a)-1
+    while i>=0 and a[i]=='0':
+        i-=1 
+    i+=1
+    return 10**(-i+b)
         
 def parse_attributes_settings(tols, ctypes):
     #formarmating for fastg3

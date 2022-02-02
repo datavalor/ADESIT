@@ -28,10 +28,10 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if dh is not None:
-            ctypes=dh["columns_type"]
-            options=[{'label': col, 'title' : col, 'value': col} for col in dh["user_columns"]]
+            ctypes=dh['columns_type']
+            options=[{'label': col, 'title' : col, 'value': col} for col in dh['user_columns']]
             if left_attrs:
                 for proj_name in PROJ_AXES:
                     disabled=False
@@ -78,7 +78,7 @@ def register_callbacks(plogger):
                 Input('view','value'),
                 Input('mode','value'),
                 Input('selection_changed', 'children'),
-                Input('current-time-range', 'children')],
+                Input('data_filters_have_changed', 'children')],
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('session-id', 'children')])
@@ -90,10 +90,10 @@ def register_callbacks(plogger):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
             df=dh["data"]
-            ctypes = dh["columns_type"]
+            ctypes = dh['columns_type']
             
             # handling projections if needed
             join_axes = [xaxis_column_name, yaxis_column_name]
@@ -177,7 +177,7 @@ def register_callbacks(plogger):
 
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if dh is not None and str(selected_data)!="None":
             points = selected_data.get("points")
             data = dh["data"]

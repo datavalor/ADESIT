@@ -4,17 +4,15 @@ from dash.exceptions import PreventUpdate
 
 # Miscellaneous
 import pandas as pd
-pd.options.mode.chained_assignment = None 
+pd.options.mode.chained_assignment = None
 import numpy as np
-import multiprocessing as mp
+import numpy as np
+import numpy as np
+
 
 # Personnal imports
-# import utils.scatter_utils as scatter_utils
-import utils.indicator_utils as indicator_utils
 import utils.data_utils as data_utils
 from utils.cache_utils import *
-from utils.fastg3_utils import make_analysis
-import constants
 from constants import *
 
 def register_callbacks(plogger):
@@ -49,7 +47,7 @@ def register_callbacks(plogger):
             raise PreventUpdate
 
         if data is not None:
-            dh = data.get("data_holder", None)
+            dh = data.get('data_holder', None)
             n = len(dh["data"].index) if dh is not None else 0
             return filename, data_utils.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
         else:
@@ -70,10 +68,10 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if dh is not None:
             df_parsed=dh["data"]
-            user_cols=dh["user_columns"]
+            user_cols=dh['user_columns']
             options=[{'label': str(col), 'title' : str(df_parsed.dtypes[str(col)]), 'value': str(col)} for col in user_cols]
             return options, options, None, None
         else:
@@ -102,9 +100,9 @@ def register_callbacks(plogger):
         else: inputtols, inputattr=tthresolds, right_attrs
 
         # Update tolerances
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if inputattr is not None and dh is not None:
-            ctypes = dh["columns_type"]
+            ctypes = dh['columns_type']
 
             # Retrieve previous settings
             new_attributes_settings = data_utils.parse_attributes_settings(inputtols, ctypes)

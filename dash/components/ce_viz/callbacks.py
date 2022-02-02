@@ -25,12 +25,12 @@ def register_callbacks(plogger):
         logger.debug("handle_ceviz_table callback")
 
         session_data = get_data(session_id)
-        dh = session_data["data_holder"]
+        dh = session_data['data_holder']
         selection_info = session_data["selected_point"]
         
         if dh is not None and dh["data"] is not None:
             df=dh["data"]
-            user_cols=dh["user_columns"]
+            user_cols=dh['user_columns']
             for c in dh["X"]+dh["Y"]: user_cols.remove(c)
 
             # Create column list for datatable
@@ -103,7 +103,7 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        dh = session_data["data_holder"]
+        dh = session_data['data_holder']
         selected_points = session_data["selected_point"]
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
             root=selected_points['point']
@@ -200,11 +200,11 @@ def register_callbacks(plogger):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         if changed_id=='cytoscape_ce_graph.mouseoverNodeData' and data is not None:
             clicked_id = data['label']
-            dh = get_data(session_id)["data_holder"]
+            dh = get_data(session_id)['data_holder']
             df = dh["data"]
             features = dh["X"]
             target = dh["Y"]
-            other = dh["user_columns"]
+            other = dh['user_columns']
             for f in features: other.remove(f)
             for t in target: other.remove(t)
             return gen_content(df.loc[int(clicked_id)], clicked_id, features, target, other)

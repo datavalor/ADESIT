@@ -1,5 +1,5 @@
 import dash
-from dash.dependencies import Input, Output, State, ALL
+from dash.dependencies import Input, Output, State, MATCH
 from dash.exceptions import PreventUpdate
 
 from dash import html
@@ -15,40 +15,23 @@ import utils.histogram_utils as histogram_utils
 def register_callbacks(app, plogger):
     logger = plogger
 
-    def find_res(n):
-        a, b = "{:e}".format(n).split("e")
-        b = int(b.split('+')[-1])
-        a = a.split('.')[1]
-        i = len(a)-1
-        while i>=0 and a[i]=='0':
-            i-=1 
-        i+=1
-        return 10**(-i+b)
-
     @dash.callback(
-        [Output({'type': 'attr_histogram', 'index': ALL}, 'children'),
-        Output("a_min_max_has_been_changed", 'children')],
-        [Input({'type': 'minmax_slider', 'index': ALL}, 'value')],
-        [Input({'type': 'minmax_slider', 'index': ALL}, 'id'),
-        State('session-id', 'children')]
+        [Output({'type': 'attr_histogram', 'index': MATCH}, 'children'),
+        Output({'type': 'minmax_changed', 'index': MATCH}, 'children')],
+        [Input({'type': 'minmax_slider', 'index': MATCH}, 'value'),
+        Input({'type': 'minmax_slider', 'index': MATCH}, 'id')],
+        [State('session-id', 'children')]
     )
-    def attributes_sliders_update(sliders_ranges, sliders_ids, session_id):
+    def attributes_sliders_update(slider_range, slider_id, session_id):
         logger.debug("attributes_sliders_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate        
         
-        dh = session_data["data_holder"]
+        dh = session_data['data_holder']
         if dh is not None:
-            query_lines = []
-            for i in range(len(sliders_ranges)):
-                attr = sliders_ids[i]["index"]
-                attr_range = sliders_ranges[i]
-                dh['columns_minmax'][attr] = attr_range
-                query_lines.append(f'{attr_range[0]} <= `{attr}` <= {attr_range[1]}')
-            query = " and ".join(query_lines)
-            dh['data'] = dh['full_data'].query(query)
+            dh['columns_minmax'][slider_id["index"]] = slider_range
             overwrite_session_data_holder(session_id, dh)
-            return [dash.no_update]*(len(sliders_ranges)+1), ""
+            return dash.no_update, ""
         else:
             raise PreventUpdate
 
@@ -63,11 +46,11 @@ def register_callbacks(app, plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        dh = session_data["data_holder"]
+        dh = session_data['data_holder']
         if dh is not None:
             content = []
             current_row = []
-            for i, attr in enumerate(dh["columns_type"]):
+            for i, attr in enumerate(dh['user_columns']):
                 if i>0 and i%4==0:
                     content.append(dbc.Row(current_row))
                     current_row = []
@@ -89,7 +72,6 @@ def register_callbacks(app, plogger):
                     dcc.Graph(
                         figure=figure,
                     )],
-                    # id=f'{dh["columns_stripped_id"][attr]}_histogram',
                     id={
                         'type': 'attr_histogram',
                         'index': attr
@@ -98,7 +80,7 @@ def register_callbacks(app, plogger):
                 )
                 if data_utils.is_numerical(attr, dh):
                     attr_min, attr_max = dh["columns_minmax"][attr]
-                    res = min(find_res(attr_min), find_res(attr_max), find_res(dh["columns_resolution"][attr]))
+                    res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(dh["columns_resolution"][attr]))
                     res = max(0.001, res)
                     col_content.children.append(
                         dcc.RangeSlider(
@@ -106,13 +88,20 @@ def register_callbacks(app, plogger):
                                 'type': 'minmax_slider',
                                 'index': attr
                             },
-                            # id=f'{dh["columns_stripped_id"][attr]}_minmax_slider',
                             min=attr_min,
                             max=attr_max,
                             step=res,
                             value=[attr_min, attr_max],
                             tooltip={"placement": "bottom", "always_visible": True},
                         )                        
+                    )
+                    col_content.children.append(
+                        html.P(
+                            id={
+                                'type': 'minmax_changed',
+                                'index': attr
+                            }
+                        )
                     )
 
                 figure.update_xaxes(
@@ -128,10 +117,10 @@ def register_callbacks(app, plogger):
                         md=3
                     )
                 )
-                # print(content)
+
             if current_row!=[]:
                 content.append(dbc.Row(current_row))
             
-            return content, " "
+            return content, ""
         else:
             return PreventUpdate

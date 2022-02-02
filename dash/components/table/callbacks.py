@@ -67,7 +67,7 @@ def register_callbacks(plogger):
         
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
-        dh=session_data["data_holder"]
+        dh=session_data['data_holder']
         if dh is not None:
             data=dh["data"]
 
@@ -77,7 +77,7 @@ def register_callbacks(plogger):
             #     low_cut, high_cut = dh["time_infos"]["time_periods_list"][curr_index:curr_index+2]
             #     data=data[low_cut:high_cut]
 
-            col_types=dh["columns_type"]
+            col_types=dh['columns_type']
             # select_problematics/non problematics according to mode and view
             if label_column in data.columns:
                 if view == 'NP': data=data.loc[data[label_column] == 0]
@@ -86,7 +86,7 @@ def register_callbacks(plogger):
             if SELECTION_COLUMN_NAME in data.columns and len(np.unique(data[SELECTION_COLUMN_NAME]))!=1:
                 data=data.loc[data[SELECTION_COLUMN_NAME]>0]
 
-            columns = [{"name": [col_types[column], column], "id": column, "hideable":True} for column in data.columns if column in dh["user_columns"]]
+            columns = [{"name": [col_types[column], column], "id": column, "hideable":True} for column in data.columns if column in dh['user_columns']]
             columns = sorted(columns, key=lambda x: "".join(x["name"]), reverse=True)
             if G12_COLUMN_NAME in data.columns:
                 columns = [{"name": ["", G12_COLUMN_NAME], "id": G12_COLUMN_NAME}]+columns
