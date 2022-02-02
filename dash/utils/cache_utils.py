@@ -56,6 +56,7 @@ class AdesitAttribute:
             self.type = NUMERICAL_COLUMN
             self.minmax = [column.min(), column.max()]
             self.resolution = find_resolution_of_attribute(column)
+        self.original_minmax = self.minmax
 
     def get_type(self):
         return self.type
@@ -72,8 +73,9 @@ class AdesitAttribute:
         if self.type == CATEGORICAL_COLUMN: return True
         else: return False
 
-    def get_minmax(self, relative_margin=0, auto_margin=True):
-        min, max = self.minmax
+    def get_minmax(self, relative_margin=0, auto_margin=False, original=False):
+        if original: min, max = self.original_minmax
+        else: min, max = self.minmax
         abs_margin = (max-min)*relative_margin
         if auto_margin:
             if self.is_categorical():

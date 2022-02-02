@@ -30,29 +30,17 @@ def compute_1d_histogram(df, columnn_name, resolution, session_infos, minmax=Non
                 bins[i]=pd.Timestamp(bins[i])
     return [bins, bins_counts]
 
-def add_attribute_histogram(
-    fig, 
-    df, 
-    xaxis_column_name,
-    resolution, 
-    session_infos,
-):
-    bins, bins_counts = compute_1d_histogram(df, xaxis_column_name, resolution, session_infos)
-    fig.add_trace(
-        go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR),
-    )
-    return fig
-
 def add_basic_histograms(
     fig, 
     df, 
     column_name,
     resolution, 
     session_infos,
+    minmax=None,
     orientation = 'v',
     add_trace_args = {}
 ):
-    bins, bins_counts = compute_1d_histogram(df, column_name, resolution, session_infos)
+    bins, bins_counts = compute_1d_histogram(df, column_name, resolution, session_infos, minmax=minmax)
 
     if orientation=='h': bins, bins_counts = bins_counts, bins
 

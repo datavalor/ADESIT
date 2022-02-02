@@ -1,3 +1,4 @@
+from click import style
 import dash
 from dash.dependencies import Input, Output, State, MATCH
 from dash.exceptions import PreventUpdate
@@ -15,23 +16,55 @@ import utils.viz.histogram_utils as histogram_utils
 def register_callbacks(app, plogger):
     logger = plogger
 
+    def generate_attribute_histogram(attr, attr_name, data_holder):
+        figure = go.Figure()
+        histogram_utils.add_basic_histograms(
+            figure,
+            data_holder["full_data"],
+            attr_name,
+            10,
+            data_holder,
+            minmax=attr.get_minmax(original=True)
+        )
+        figure.update_layout(
+            title=f'{attr_name} ({attr.get_type()})',
+            margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
+            height = 300,
+        )
+        if attr.is_numerical():
+            attr_min, attr_max = attr.get_minmax(original=False)
+            figure.add_vrect(
+                x0=attr_min, x1=attr_max,
+                fillcolor="green", 
+                opacity=0.25, 
+                line_width=0
+            )
+        figure.update_xaxes(
+            range=attr.get_minmax(auto_margin=True, original=True)
+        )
+        return figure
+
     @dash.callback(
-        [Output({'type': 'attr_histogram', 'index': MATCH}, 'children'),
+        [Output({'type': 'attr_histogram', 'index': MATCH}, 'figure'),
         Output({'type': 'minmax_changed', 'index': MATCH}, 'children')],
         [Input({'type': 'minmax_slider', 'index': MATCH}, 'value'),
         Input({'type': 'minmax_slider', 'index': MATCH}, 'id')],
-        [State('session-id', 'children')]
+        [State({'type': 'attr_histogram', 'index': MATCH}, 'figure'),
+        State('session-id', 'children')]
     )
-    def attributes_sliders_update(slider_range, slider_id, session_id):
+    def attributes_sliders_update(slider_range, slider_id, current_figure, session_id):
         logger.debug("attributes_sliders_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate        
         
         dh = session_data['data_holder']
         if dh is not None:
-            dh['user_columns'][slider_id["index"]].minmax = slider_range
+            attr_name=slider_id["index"]
+            dh['user_columns'][attr_name].minmax = slider_range
+            attr = dh['user_columns'][attr_name]
+            figure = generate_attribute_histogram(attr, attr_name, dh)
             overwrite_session_data_holder(session_id, dh)
-            return dash.no_update, ""
+            return figure, ""
         else:
             raise PreventUpdate
 
@@ -55,36 +88,16 @@ def register_callbacks(app, plogger):
                     content.append(dbc.Row(current_row))
                     current_row = []
                 
-                figure = go.Figure()
-                histogram_utils.add_basic_histograms(
-                    figure,
-                    dh["data"],
-                    attr_name,
-                    10,
-                    dh
-                )
-                figure.update_layout(
-                    title=f'{attr_name} ({attr.get_type()})',
-                    margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
-                    height = 300,
-                )
-                if attr.is_numerical():
-                    attr_min, attr_max = attr.get_minmax()
-                    figure.add_vrect(
-                        x0=attr_min, x1=attr_max,
-                        fillcolor="green", 
-                        opacity=0.25, 
-                        line_width=0
-                    )
+                figure = generate_attribute_histogram(attr, attr_name, dh)
 
                 col_content = html.Div([
                     dcc.Graph(
                         figure=figure,
+                        id={
+                            'type': 'attr_histogram',
+                            'index': attr_name
+                        },
                     )],
-                    id={
-                        'type': 'attr_histogram',
-                        'index': attr_name
-                    },
                     style={"height": 350}
                 )
                 if attr.is_numerical():
@@ -92,17 +105,22 @@ def register_callbacks(app, plogger):
                     res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(attr.resolution))
                     res = max(0.001, res)
                     col_content.children.append(
-                        dcc.RangeSlider(
-                            id={
-                                'type': 'minmax_slider',
-                                'index': attr_name
-                            },
-                            min=attr_min,
-                            max=attr_max,
-                            step=res,
-                            value=[attr_min, attr_max],
-                            tooltip={"placement": "bottom", "always_visible": True},
-                        )                        
+                        html.Div(
+                            dcc.RangeSlider(
+                                id={
+                                    'type': 'minmax_slider',
+                                    'index': attr_name
+                                },
+                                min=attr_min,
+                                max=attr_max,
+                                step=res,
+                                value=[attr_min, attr_max],
+                                tooltip={"placement": "bottom", "always_visible": True},
+                            ),
+                            style={
+                                'paddingLeft': '10px'
+                            }
+                        )
                     )
                     col_content.children.append(
                         html.P(
@@ -112,10 +130,6 @@ def register_callbacks(app, plogger):
                             }
                         )
                     )
-
-                figure.update_xaxes(
-                    range=attr.get_minmax(auto_margin=True)
-                )
 
                 current_row.append(
                     dbc.Col(
