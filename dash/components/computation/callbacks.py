@@ -153,9 +153,28 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate        
 
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
         dh = session_data['data_holder']
         if dh is not None:
-            # applying min_max filters
+            time_infos = dh['time_infos']
+            filtered_df = dh['full_data']
+
+            # the current time range may have already bin calculated in the past
+            if 'current-time-range' in changed_id:
+                if time_infos is not None: #shouldn't be none but who knows...
+                    curr_index = time_infos['current_time_period']
+                    if time_infos['computation_cache'][curr_index] is not None:
+                        dh['data'] = time_infos['computation_cache'][curr_index]
+                        overwrite_session_data_holder(session_id, dh)
+                        return ""
+
+            
+            # if minmax changes, we need to reset all the computation cache
+            if 'minmax_changed' in changed_id and time_infos is not None:
+                time_infos['computation_cache']=[None]*(len(time_infos['time_periods_list'])-1)
+
+            # minmax filtering
             query_lines = []
             for (attr_name, attr) in dh['user_columns'].items():
                 if attr.is_numerical():
@@ -165,13 +184,13 @@ def register_callbacks(plogger):
             filtered_df = dh['full_data'].query(query)
 
             # applying time filters
-            time_infos = dh["time_infos"]
+            time_infos = dh['time_infos']
             if time_infos is not None:
                 curr_index = time_infos["current_time_period"]
-                periods_list = time_infos["time_periods_list"]
+                periods_list = time_infos['time_periods_list']
                 period_min, period_max = periods_list[curr_index], periods_list[curr_index+1]
                 period_min64, period_max64 = period_min.to_datetime64().view("int64"), period_max.to_datetime64().view("int64")
-                filtered_df=filtered_df.loc[period_min64:period_max64]
+                filtered_df=filtered_df.loc[period_min64:period_max64]                
 
             dh['data'] = filtered_df
             overwrite_session_data_holder(session_id, dh)
@@ -197,8 +216,7 @@ def register_callbacks(plogger):
         if dh is not None:
             time_cols_options = [{'label': 'No attribute selected', 'value': 'noattradesit'}]
             for (attr_name, attr) in dh['user_columns'].items():
-                if attr.is_datetime():
-                    time_cols_options.append({'label': attr_name, 'value': attr_name})
+                if attr.is_datetime(): time_cols_options.append({'label': attr_name, 'value': attr_name})
             return time_cols_options
         else:
             raise PreventUpdate
@@ -216,13 +234,13 @@ def register_callbacks(plogger):
 
         dh = session_data['data_holder']
         if dh is not None:
-            df = dh["full_data"]
+            df = dh['full_data']
             period_options = [{'label': 'Don\'t group', 'value': 'nogroup'}]
             if(time_attribute=='noattradesit'):
                 df.index = df[ADESIT_INDEX]
                 df = df.sort_index()
                 dh["data"] = df
-                dh["full_data"] = df
+                dh['full_data'] = df
                 overwrite_session_data_holder(session_id, dh)
                 return period_options, "Attribute period: N/A"
             else:
@@ -244,7 +262,7 @@ def register_callbacks(plogger):
                 df.index = df.index.astype("datetime64[ns]").view("int64")
                 df = df.sort_index()
                 dh["data"] = df
-                dh["full_data"] = df
+                dh['full_data'] = df
                 overwrite_session_data_holder(session_id, dh)
 
                 return period_options, f'{time_min} → {time_max}'
@@ -269,44 +287,45 @@ def register_callbacks(plogger):
 
         dh = session_data['data_holder']
         if dh is not None:
-            time_infos = dh["time_infos"]
+            time_infos = dh['time_infos']
             if "n_clicks" in changed_id:
                 curr_index = time_infos["current_time_period"]
-                periods_list = time_infos["time_periods_list"]
+                dh['time_infos']["computation_cache"][curr_index]=dh['data']
+                periods_list = time_infos['time_periods_list']
                 if changed_id=='time-backward-button.n_clicks' and curr_index>0:
                     curr_index-=1 
                 elif changed_id=='time-forward-button.n_clicks' and curr_index<len(periods_list)-2:
                     curr_index+=1 
                 period_min, period_max = periods_list[curr_index], periods_list[curr_index+1]
-                dh["time_infos"]["current_time_period"]=curr_index
+                dh['time_infos']["current_time_period"]=curr_index
             else:
                 if time_period_value=="nogroup":
-                    dh["time_infos"] = None
+                    dh['time_infos'] = None
                     overwrite_session_data_holder(session_id, dh)
                     return f'N/A', "1", "1"
                 else:
-                    df = dh["full_data"]
+                    df = dh['full_data']
                     time_min, time_max = df.index.min(), df.index.max()
                     freq=DEFAULT_TIME_CUTS[time_period_value]["freq_symbol"]
                     list = pd.date_range(time_min, time_max, freq=freq)
                     period_min, period_max = list[0], list[1]
-                    dh["time_infos"]= {
-                        "time_periods_list": list,
-                        "current_time_period": 0,
-                        "date_format": DEFAULT_TIME_CUTS[time_period_value]["date_format"]
+                    dh['time_infos']= {
+                        'time_periods_list': list,
+                        'current_time_period': 0,
+                        'date_format': DEFAULT_TIME_CUTS[time_period_value]["date_format"],
+                        'computation_cache': [None]*(len(list)-1)
                     }
             overwrite_session_data_holder(session_id, dh)
-            time_infos = dh["time_infos"]
-            n_tuples = 0#len(dh["data"].index)
-            n_periods = len(time_infos["time_periods_list"])-1
+            time_infos = dh['time_infos']
+            n_periods = len(time_infos['time_periods_list'])-1
             date_format = time_infos["date_format"]
             curr_index = time_infos["current_time_period"]
-            return f'{data_utils.format_date_period(period_min, period_max, date_format)} ({n_tuples} tuples)', curr_index+1, n_periods
+            return f'{data_utils.format_date_period(period_min, period_max, date_format)}', curr_index+1, n_periods
         else:
             raise PreventUpdate
 
     @dash.callback(
-        [Output("time-backward-button", "disabled"),
+        [Output('time-backward-button', 'disabled'),
         Output('time-forward-button', 'disabled')],
         [Input('current-time-range', 'children')],
         [State('session-id', 'children')]
@@ -316,9 +335,9 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        time_infos = session_data['data_holder']["time_infos"]
+        time_infos = session_data['data_holder']['time_infos']
         if time_infos is not None:
-            list_len = len(time_infos["time_periods_list"])
+            list_len = len(time_infos['time_periods_list'])
             curr_index = time_infos["current_time_period"]
             if list_len==2:
                 return True, True

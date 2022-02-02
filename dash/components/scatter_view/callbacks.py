@@ -129,7 +129,7 @@ def register_callbacks(plogger):
                 overwrite_session_data_holder(session_id, dh)
             
             # if calculations have been made
-            if label_column in df.columns :
+            if label_column in df.columns:
                 # data has been hovered
                 if get_data(session_id)["selected_point"]["point"] is not None:
                     selection_infos = get_data(session_id)["selected_point"]

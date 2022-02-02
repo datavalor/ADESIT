@@ -38,13 +38,17 @@ def add_basic_histograms(
     session_infos,
     minmax=None,
     orientation = 'v',
-    add_trace_args = {}
+    add_trace_args = {},
+    bar_args = {}
 ):
     bins, bins_counts = compute_1d_histogram(df, column_name, resolution, session_infos, minmax=minmax)
 
     if orientation=='h': bins, bins_counts = bins_counts, bins
 
-    fig.add_trace(go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR, orientation=orientation), **add_trace_args)
+    fig.add_trace(
+        go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR, orientation=orientation, **bar_args), 
+        **add_trace_args
+    )
     return fig
 
 def add_advanced_histograms(

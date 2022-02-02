@@ -4,6 +4,7 @@ from dash import html
 from components import table as table_component
 from components import scatter_view as scatter_view_component
 from components import attributes as attributes_component
+from components import time_trace as time_trace_component
 
 from utils.dash_utils import Tooltip, hr_tooltip
 from .legend import gen_analysed_legend
@@ -29,6 +30,7 @@ def render():
                 dbc.Tab(table_component.render(), label="Table"),
                 dbc.Tab(scatter_view_component.render(), label="2D View"),
                 dbc.Tab(attributes_component.render(), label="Attributes"),
+                dbc.Tab(time_trace_component.render(), label="Time Trace"),
             ])
         ], 
         style={

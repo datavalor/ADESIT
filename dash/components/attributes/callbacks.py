@@ -1,6 +1,6 @@
 from click import style
 import dash
-from dash.dependencies import Input, Output, State, MATCH
+from dash.dependencies import Input, Output, State, MATCH, ALL
 from dash.exceptions import PreventUpdate
 
 from dash import html
@@ -13,14 +13,24 @@ from utils.cache_utils import *
 import utils.data_utils as data_utils
 import utils.viz.histogram_utils as histogram_utils
 
-def register_callbacks(app, plogger):
+def register_callbacks(plogger):
     logger = plogger
 
     def generate_attribute_histogram(attr, attr_name, data_holder):
         figure = go.Figure()
+        # if G12_COLUMN_NAME in df.columns:
         histogram_utils.add_basic_histograms(
             figure,
             data_holder["full_data"],
+            attr_name,
+            10,
+            data_holder,
+            minmax=attr.get_minmax(original=True),
+            bar_args={'opacity': 0.5}
+        )
+        histogram_utils.add_basic_histograms(
+            figure,
+            data_holder["data"],
             attr_name,
             10,
             data_holder,
@@ -30,6 +40,8 @@ def register_callbacks(app, plogger):
             title=f'{attr_name} ({attr.get_type()})',
             margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
             height = 300,
+            barmode='overlay',
+            showlegend=False,
         )
         if attr.is_numerical():
             attr_min, attr_max = attr.get_minmax(original=False)
@@ -45,15 +57,13 @@ def register_callbacks(app, plogger):
         return figure
 
     @dash.callback(
-        [Output({'type': 'attr_histogram', 'index': MATCH}, 'figure'),
-        Output({'type': 'minmax_changed', 'index': MATCH}, 'children')],
+        Output({'type': 'minmax_changed', 'index': MATCH}, 'children'),
         [Input({'type': 'minmax_slider', 'index': MATCH}, 'value'),
         Input({'type': 'minmax_slider', 'index': MATCH}, 'id')],
-        [State({'type': 'attr_histogram', 'index': MATCH}, 'figure'),
-        State('session-id', 'children')]
+        [State('session-id', 'children')]
     )
-    def attributes_sliders_update(slider_range, slider_id, current_figure, session_id):
-        logger.debug("attributes_sliders_update callback")
+    def attributes_minmax_update(slider_range, slider_id, session_id):
+        logger.debug("attributes_minmax_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate        
         
@@ -61,20 +71,46 @@ def register_callbacks(app, plogger):
         if dh is not None:
             attr_name=slider_id["index"]
             dh['user_columns'][attr_name].minmax = slider_range
-            attr = dh['user_columns'][attr_name]
-            figure = generate_attribute_histogram(attr, attr_name, dh)
+            # attr = dh['user_columns'][attr_name]
+            # figure = generate_attribute_histogram(attr, attr_name, dh)
             overwrite_session_data_holder(session_id, dh)
-            return figure, ""
+            return ""
         else:
             raise PreventUpdate
 
     @dash.callback(
+        Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
+        [Input('data_filters_have_changed', 'children')],
+        [State({'type': 'attr_histogram', 'index': ALL}, 'id'),
+        State('session-id', 'children')]
+    )
+    def attributes_histograms_update(filters_changed, hists_ids, session_id):
+        logger.debug("attributes_histograms_update callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate   
+        
+        dh = session_data['data_holder']
+        if dh is not None:
+            figures = []
+            for hist_id in hists_ids:
+                attr_name = hist_id['index']
+                attr = dh['user_columns'][attr_name]
+                figure = generate_attribute_histogram(attr, attr_name, dh)
+                figures.append(figure)
+            return figures
+        else:
+            raise PreventUpdate
+
+
+
+    @dash.callback(
         [Output('attrs-hist-div', 'children'),
         Output('sliders_added', 'children')],
-        [Input('data-loaded', 'children')],
+        [Input('data-loaded', 'children'),
+        Input('data-analysed', 'children')],
         [State('session-id', 'children')]
     )
-    def attributes_infos_tab_init(data_loaded, session_id):
+    def attributes_infos_tab_init(data_loaded, data_analysed, session_id):
         logger.debug("attributes_infos_tab_init callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate

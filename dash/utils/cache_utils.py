@@ -111,10 +111,10 @@ def gen_data_holder(df):
     df.insert(0, ADESIT_INDEX, df.index)
     data_holder =  {
         "data": df,
-        "full_data": df,
+        'full_data': df,
         "graph": None,
         'user_columns': columns,
-        "time_infos": None,
+        'time_infos': None,
         "X": [],
         "Y": []
     }

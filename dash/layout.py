@@ -10,6 +10,7 @@ from components import indicators as indicators_component
 from components import central_comp as central_comp_component
 from components import ce_viz as ce_viz_component
 from components import computation as computation_component
+
 from constants import *
 
 index_string = '''
