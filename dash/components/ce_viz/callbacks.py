@@ -30,19 +30,19 @@ def register_callbacks(plogger):
         
         if dh is not None and dh["data"] is not None:
             df=dh["data"]
-            user_cols=dh['user_columns']
-            for c in dh["X"]+dh["Y"]: user_cols.remove(c)
+            user_columns_names=list(dh['user_columns'].keys())
+            for c in dh["X"]+dh["Y"]: user_columns_names.remove(c)
 
             # Create column list for datatable
             column_id = [{"name": ["", ADESIT_INDEX], "id": ADESIT_INDEX}]
-            columns_other = [{"name": ["Others", column], "id": column} for column in user_cols]
+            columns_other = [{"name": ["Others", column], "id": column} for column in user_columns_names]
             columns_X = [{"name": ["Feature(s)", column], "id": column} for column in dh["X"]]
             columns_Y = [{"name": ["Target", column], "id": column} for column in dh["Y"]]
             columns = column_id+columns_other+columns_X+columns_Y
             
             # Forces others column to have white background
             white_back = []
-            for c in user_cols:
+            for c in user_columns_names:
                 white_back.append({
                     'if': { 'column_id': c },
                     'backgroundColor': 'white',
@@ -204,7 +204,7 @@ def register_callbacks(plogger):
             df = dh["data"]
             features = dh["X"]
             target = dh["Y"]
-            other = dh['user_columns']
+            other = list(dh['user_columns'].keys())
             for f in features: other.remove(f)
             for t in target: other.remove(t)
             return gen_content(df.loc[int(clicked_id)], clicked_id, features, target, other)

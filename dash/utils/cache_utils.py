@@ -36,6 +36,56 @@ default_data = {
     }
 }
 
+class AdesitAttribute:
+    def __init__(self, column):
+        if is_string_dtype(column):
+            try:
+                column = pd.to_datetime(column, infer_datetime_format=True)
+                self.type = DATETIME_COLUMN
+                self.minmax = [column.min(), column.max()]
+                self.resolution = find_resolution_of_attribute(column)
+            except ValueError:
+                self.type = CATEGORICAL_COLUMN
+                self.resolution = 1
+                le = preprocessing.LabelEncoder()
+                le.fit(column)
+                self.sorted_classes = sorted(le.classes_)
+                self.label_encoder = le
+                self.minmax = [0, len(le.classes_)-1]
+        elif is_numeric_dtype(column):
+            self.type = NUMERICAL_COLUMN
+            self.minmax = [column.min(), column.max()]
+            self.resolution = find_resolution_of_attribute(column)
+
+    def get_type(self):
+        return self.type
+
+    def is_numerical(self):
+        if self.type == NUMERICAL_COLUMN: return True
+        else: return False
+
+    def is_datetime(self):
+        if self.type == DATETIME_COLUMN: return True
+        else: return False
+    
+    def is_categorical(self):
+        if self.type == CATEGORICAL_COLUMN: return True
+        else: return False
+
+    def get_minmax(self, relative_margin=0, auto_margin=True):
+        min, max = self.minmax
+        abs_margin = (max-min)*relative_margin
+        if auto_margin:
+            if self.is_categorical():
+                min-=0.5
+                max+=0.5
+            else:
+                abs_margin = (max-min)*0.05
+        else:
+            abs_margin = (max-min)*relative_margin
+
+        return [min-abs_margin, max+abs_margin]
+
 def find_resolution_of_attribute(col):
     scol = np.sort(np.unique(col))
     diff = scol[1:]-scol[:-1]
@@ -44,54 +94,28 @@ def find_resolution_of_attribute(col):
 def gen_data_holder(df):
     # Proprocessing dataframe
     df = df.dropna()
-    cols_type = {}
-    cols_minmax = {}
-    cols_ncats = {}
-    cols_res = {}
+    columns = {}
     for c in df.columns:
-        if c in ['id', 'Id', 'ID']:
+        if c in ['id', 'Id', 'ID'] or not (is_string_dtype(df[c]) or is_numeric_dtype(df[c])):
             df = df.drop(columns=c)
-        elif is_string_dtype(df[c]):  
-            try:
-                cols_type[c] = DATETIME_COLUMN
-                df[c] = pd.to_datetime(df[c], infer_datetime_format=True)
-                cols_minmax[c] = [df[c].min(), df[c].max()]
-                cols_res[c] = find_resolution_of_attribute(df[c])
-            except ValueError:
-                cols_type[c] = CATEGORICAL_COLUMN
-                cols_res[c] = 1
-                le = preprocessing.LabelEncoder()
-                le.fit(df[c])
-                cols_ncats[c] = {
-                    "unique_values": sorted(le.classes_),
-                    "label_encoder": le,
-                }
-                cols_minmax[c] = [0, len(le.classes_)-1]
-        elif is_numeric_dtype(df[c]):
-            cols_type[c] = NUMERICAL_COLUMN
-            cols_minmax[c] = [df[c].min(), df[c].max()]
-            cols_res[c] = find_resolution_of_attribute(df[c])
         else:
-            df = df.drop(columns=c)
+            NewAttribute = AdesitAttribute(df[c])
+            columns[c] = NewAttribute
+            if NewAttribute.is_datetime():
+                df[c] = pd.to_datetime(df[c], infer_datetime_format=True)
 
-    cols = list(cols_type.keys())
-    df = df[cols]
+    df = df[list(columns.keys())]
     df = df.reset_index(drop=True)
     df.insert(0, ADESIT_INDEX, df.index)
     data_holder =  {
         "data": df,
         "full_data": df,
         "graph": None,
-        'user_columns': cols,
-        'columns_type': cols_type,
-        "columns_minmax": cols_minmax,
-        "columns_resolution": cols_res,
-        "categorical_columns_infos": cols_ncats,
+        'user_columns': columns,
         "time_infos": None,
         "X": [],
         "Y": []
     }
-    print(data_holder)
     return data_holder
 
 def get_data(session_id, pydata=False, clear=False, filename=None, contents=None, copy=None):    

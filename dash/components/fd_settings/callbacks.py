@@ -102,10 +102,8 @@ def register_callbacks(plogger):
         # Update tolerances
         dh=session_data['data_holder']
         if inputattr is not None and dh is not None:
-            ctypes = dh['columns_type']
-
             # Retrieve previous settings
-            new_attributes_settings = data_utils.parse_attributes_settings(inputtols, ctypes)
+            new_attributes_settings = data_utils.parse_attributes_settings(inputtols, dh['user_columns'])
             attributes_settings = get_data(session_id)["thresolds_settings"]
             if new_attributes_settings is not None:
                 for attr in new_attributes_settings.keys(): attributes_settings[attr] = new_attributes_settings[attr]
@@ -113,11 +111,10 @@ def register_callbacks(plogger):
             
             outuput_thresolds = []
             for attr in inputattr:
-                attr_type = ctypes[attr]
-                if attr_type is not None:
-                    if attr_type == CATEGORICAL_COLUMN:
+                if dh['user_columns'].get(attr, None) is not None:
+                    if dh['user_columns'][attr].is_categorical():
                         outuput_thresolds.append({'attribute': attr, 'absolute': 'is', 'relative': 'categorical...'})
-                    elif attr_type == NUMERICAL_COLUMN:
+                    elif dh['user_columns'][attr].is_numerical():
                         outuput_thresolds.append({'attribute': attr, 
                             'absolute': attributes_settings.get(attr, {"params":[0,0]})["params"][0], 
                             'relative': attributes_settings.get(attr, {"params":[0,0]})["params"][1]

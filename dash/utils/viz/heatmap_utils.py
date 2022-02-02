@@ -1,30 +1,30 @@
 import numpy as np
 
 import plotly.graph_objects as go
-from utils.figure_utils import gen_subplot_fig, adjust_layout, convert_from_numpy_edges
-import utils.histogram_utils as hist_gen
-import utils.data_utils as data_utils
-import utils.scatter_utils as scatter_utils
+from utils.viz.figure_utils import gen_subplot_fig, adjust_layout, convert_from_numpy_edges
+import utils.viz.histogram_utils as hist_gen
+import utils.viz.scatter_utils as scatter_utils
 import matplotlib
 
 from constants import *
 
-def get_data_and_res_for_histogram(df, axis, target_resolution, session_infos):
-    data=df[axis]
+def get_data_and_res_for_histogram(df, column_name, target_resolution, session_infos):
+    data=df[column_name]
     resolution = target_resolution
+    attr = session_infos['user_columns'][column_name]
     # if the data is categorical, we need to label encode the data
-    if data_utils.is_categorical(axis, session_infos): 
-        le = session_infos["categorical_columns_infos"][axis]["label_encoder"] 
+    if attr.is_categorical(): 
+        le = attr.label_encoder
         data = le.transform(data)
-        ncats = len(session_infos["categorical_columns_infos"][axis]["unique_values"])
+        ncats = len(attr.sorted_classes)
         resolution = np.arange(0,ncats+1)-0.5
     return data, resolution
 
-def create_bins_from_edges_from_histogram(edges, axis, session_infos):
+def create_bins_from_edges_from_histogram(edges, column_name, session_infos):
     bins = convert_from_numpy_edges(edges)
-    if data_utils.is_categorical(axis, session_infos): 
-        le = session_infos["categorical_columns_infos"][axis]["label_encoder"] 
-        bins = le.inverse_transform(np.array(bins, dtype=np.int))
+    attr = session_infos['user_columns'][column_name]
+    if attr.is_categorical():
+        bins = attr.label_encoder.inverse_transform(np.array(bins, dtype=np.int))
     return bins
 
 def compute_2d_histogram(df, xaxis_column_name, yaxis_column_name, resolution, session_infos, range=None):
@@ -33,8 +33,8 @@ def compute_2d_histogram(df, xaxis_column_name, yaxis_column_name, resolution, s
     ydata, yres = get_data_and_res_for_histogram(df, yaxis_column_name, resolution, session_infos)
     if range is None: 
         range=[
-            data_utils.attribute_min_max(xaxis_column_name, session_infos, rel_margin=0.05),
-            data_utils.attribute_min_max(yaxis_column_name, session_infos, rel_margin=0.05),
+            session_infos['user_columns'][xaxis_column_name].get_minmax(relative_margin=0.05),
+            session_infos['user_columns'][yaxis_column_name].get_minmax(relative_margin=0.05)
         ]
     H, xedges, yedges = np.histogram2d(xdata, ydata, bins=(xres, yres), range=range)
     xbins = create_bins_from_edges_from_histogram(xedges, xaxis_column_name, session_infos)
@@ -73,7 +73,8 @@ def basic_heatmap(df, xaxis_column_name, yaxis_column_name, resolution, session_
         marker_opacity=0.7,
         marker_line_width=1
     )
-    fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, resolution, session_infos, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_basic_histograms(fig, df, yaxis_column_name, resolution, session_infos, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
 
@@ -103,6 +104,7 @@ def advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, res
         marker_symbol="cross"
     )
     
-    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, resolution, session_infos, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, yaxis_column_name, resolution, session_infos, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig

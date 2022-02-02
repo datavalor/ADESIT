@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from constants import *
 from utils.cache_utils import *
 import utils.data_utils as data_utils
-import utils.histogram_utils as histogram_utils
+import utils.viz.histogram_utils as histogram_utils
 
 def register_callbacks(app, plogger):
     logger = plogger
@@ -29,7 +29,7 @@ def register_callbacks(app, plogger):
         
         dh = session_data['data_holder']
         if dh is not None:
-            dh['columns_minmax'][slider_id["index"]] = slider_range
+            dh['user_columns'][slider_id["index"]].minmax = slider_range
             overwrite_session_data_holder(session_id, dh)
             return dash.no_update, ""
         else:
@@ -50,43 +50,52 @@ def register_callbacks(app, plogger):
         if dh is not None:
             content = []
             current_row = []
-            for i, attr in enumerate(dh['user_columns']):
+            for i, (attr_name, attr) in enumerate(dh['user_columns'].items()):
                 if i>0 and i%4==0:
                     content.append(dbc.Row(current_row))
                     current_row = []
                 
                 figure = go.Figure()
-                histogram_utils.add_attribute_histogram(
+                histogram_utils.add_basic_histograms(
                     figure,
                     dh["data"],
-                    attr,
+                    attr_name,
                     10,
                     dh
                 )
                 figure.update_layout(
-                    title=f'{attr} ({dh["columns_type"][attr]})',
+                    title=f'{attr_name} ({attr.get_type()})',
                     margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
                     height = 300,
                 )
+                if attr.is_numerical():
+                    attr_min, attr_max = attr.get_minmax()
+                    figure.add_vrect(
+                        x0=attr_min, x1=attr_max,
+                        fillcolor="green", 
+                        opacity=0.25, 
+                        line_width=0
+                    )
+
                 col_content = html.Div([
                     dcc.Graph(
                         figure=figure,
                     )],
                     id={
                         'type': 'attr_histogram',
-                        'index': attr
+                        'index': attr_name
                     },
                     style={"height": 350}
                 )
-                if data_utils.is_numerical(attr, dh):
-                    attr_min, attr_max = dh["columns_minmax"][attr]
-                    res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(dh["columns_resolution"][attr]))
+                if attr.is_numerical():
+                    attr_min, attr_max = attr.get_minmax()
+                    res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(attr.resolution))
                     res = max(0.001, res)
                     col_content.children.append(
                         dcc.RangeSlider(
                             id={
                                 'type': 'minmax_slider',
-                                'index': attr
+                                'index': attr_name
                             },
                             min=attr_min,
                             max=attr_max,
@@ -99,16 +108,13 @@ def register_callbacks(app, plogger):
                         html.P(
                             id={
                                 'type': 'minmax_changed',
-                                'index': attr
+                                'index': attr_name
                             }
                         )
                     )
 
                 figure.update_xaxes(
-                    range=data_utils.attribute_min_max(
-                        attr, dh, 
-                        rel_margin=0.1
-                    )
+                    range=attr.get_minmax(auto_margin=True)
                 )
 
                 current_row.append(

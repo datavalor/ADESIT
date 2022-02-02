@@ -12,8 +12,8 @@ pd.options.mode.chained_assignment = None
 
 from constants import *
 from utils.cache_utils import *
-import utils.scatter_utils as scatter_gen
-import utils.heatmap_utils as heatmap_gen
+import utils.viz.scatter_utils as scatter_gen
+import utils.viz.heatmap_utils as heatmap_gen
 from utils.data_utils import which_proj_type
 
 def register_callbacks(plogger):
@@ -30,7 +30,6 @@ def register_callbacks(plogger):
 
         dh=session_data['data_holder']
         if dh is not None:
-            ctypes=dh['columns_type']
             options=[{'label': col, 'title' : col, 'value': col} for col in dh['user_columns']]
             if left_attrs:
                 for proj_name in PROJ_AXES:
@@ -41,7 +40,7 @@ def register_callbacks(plogger):
                     if '2' in proj_name:
                         ext="2"
                         if len(left_attrs)<3: disabled=True
-                    options.append({'label': f"__proj:{which_proj_type(left_attrs, ctypes)}_{ext}", 'title' : proj_name ,'value': proj_name, 'disabled': disabled})
+                    options.append({'label': f"__proj:{which_proj_type(left_attrs, dh['user_columns'])}_{ext}", 'title' : proj_name ,'value': proj_name, 'disabled': disabled})
             return options, options
         else:
             raise PreventUpdate
@@ -93,7 +92,6 @@ def register_callbacks(plogger):
         dh=session_data['data_holder']
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
             df=dh["data"]
-            ctypes = dh['columns_type']
             
             # handling projections if needed
             join_axes = [xaxis_column_name, yaxis_column_name]
@@ -103,7 +101,7 @@ def register_callbacks(plogger):
                 if len(left_attrs)<3 and PROJ_AXES[1] in join_axes:
                     raise PreventUpdate
 
-                proj_type = which_proj_type(left_attrs, ctypes)
+                proj_type = which_proj_type(left_attrs, dh['user_columns'])
                 if proj_type=="PCA": # only numerical => PCA
                     proj = PCA(n_components=2).fit_transform(df[left_attrs])
                 elif proj_type=="MCA": # only categorical => MCA

@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 
-from utils.figure_utils import gen_subplot_fig, adjust_layout
-import utils.histogram_utils as hist_gen
+from utils.viz.figure_utils import gen_subplot_fig, adjust_layout
+import utils.viz.histogram_utils as hist_gen
 from constants import *
 
 def gen_hovertemplate(df, session_infos):
@@ -70,12 +70,12 @@ def add_basic_scatter(
 def basic_scatter(df, xaxis_column_name, yaxis_column_name, resolution, session_infos):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     fig = add_basic_scatter(fig, df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=0.6, marker_color=NON_ANALYSED_COLOR) 
-    fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_basic_histograms(fig, df, xaxis_column_name, resolution, session_infos, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_basic_histograms(fig, df, yaxis_column_name, resolution, session_infos, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos)
     return fig
 
 def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, resolution, view='ALL', selection=False, session_infos=None):
-    _class = str(right_attrs[0])
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
 
     non_problematics_df = graph_df.loc[graph_df[label_column] == 0]
@@ -89,7 +89,8 @@ def advanced_scatter(graph_df, label_column, right_attrs, xaxis_column_name, yax
     
     fig = add_basic_scatter(fig, non_problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=nprob_opacity, marker_color=FREE_COLOR)
     fig = add_basic_scatter(fig, problematics_df, xaxis_column_name, yaxis_column_name, session_infos=session_infos, marker_opacity=prob_opacity, marker_color=CE_COLOR, marker_symbol="cross")
-    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, yaxis_column_name, resolution, session_infos)
+    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, xaxis_column_name, resolution, session_infos, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_advanced_histograms(fig, non_problematics_df, problematics_df, yaxis_column_name, resolution, session_infos, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, graph_df, xaxis_column_name, yaxis_column_name, session_infos)
 
     return fig

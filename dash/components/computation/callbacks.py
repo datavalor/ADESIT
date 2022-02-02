@@ -8,7 +8,7 @@ import multiprocessing as mp
 from constants import *
 from utils.cache_utils import *
 import utils.data_utils as data_utils
-import utils.indicator_utils as indicator_utils
+import utils.viz.indicator_utils as indicator_utils
 from utils.fastg3_utils import make_analysis
 
 def register_callbacks(plogger):
@@ -50,7 +50,7 @@ def register_callbacks(plogger):
         dh=session_data['data_holder']
         if dh is not None:
             df = dh["data"]
-            ctypes = dh['columns_type']
+
             # API Calculations if requested
             if changed_id=='analyse_btn.n_clicks' and left_attrs and right_attrs:
                 # Init calc df
@@ -60,8 +60,8 @@ def register_callbacks(plogger):
                 df_calc[G3_COLUMN_NAME] = 0                
                 
                 # Setting left and right tolerances
-                xparams=data_utils.parse_attributes_settings(left_tols, ctypes)
-                yparams=data_utils.parse_attributes_settings(right_tols, ctypes)
+                xparams=data_utils.parse_attributes_settings(left_tols, dh['user_columns'])
+                yparams=data_utils.parse_attributes_settings(right_tols, dh['user_columns'])
 
                 # Making analysis
                 manager = mp.Manager()
@@ -155,14 +155,12 @@ def register_callbacks(plogger):
 
         dh = session_data['data_holder']
         if dh is not None:
-            full_df = dh['full_data']
-
             # applying min_max filters
             query_lines = []
-            for attr in dh['user_columns']:
-                if data_utils.is_numerical(attr, dh):
-                    attr_range = dh['columns_minmax'][attr]
-                    query_lines.append(f'{attr_range[0]} <= `{attr}` <= {attr_range[1]}')
+            for (attr_name, attr) in dh['user_columns'].items():
+                if attr.is_numerical():
+                    attr_range = attr.get_minmax()
+                    query_lines.append(f'{attr_range[0]} <= `{attr_name}` <= {attr_range[1]}')
             query = " and ".join(query_lines)
             filtered_df = dh['full_data'].query(query)
 
@@ -198,9 +196,9 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         if dh is not None:
             time_cols_options = [{'label': 'No attribute selected', 'value': 'noattradesit'}]
-            for attr in dh['user_columns']:
-                if data_utils.is_datetime(attr, dh):
-                    time_cols_options.append({'label': attr, 'value': attr})
+            for (attr_name, attr) in dh['user_columns'].items():
+                if attr.is_datetime():
+                    time_cols_options.append({'label': attr_name, 'value': attr_name})
             return time_cols_options
         else:
             raise PreventUpdate

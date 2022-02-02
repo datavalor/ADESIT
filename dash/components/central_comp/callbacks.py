@@ -8,7 +8,6 @@ pd.options.mode.chained_assignment = None
 
 from constants import *
 from utils.cache_utils import *
-import utils.data_utils as data_utils
 
 def register_callbacks(plogger):
     logger = plogger
