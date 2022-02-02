@@ -1,6 +1,8 @@
 from dash import html
 from dash import dash_table
 
+import dash_bootstrap_components as dbc
+
 def render():
     return [
         html.Div("", style={'width': "100%", 'height': "10px"}),

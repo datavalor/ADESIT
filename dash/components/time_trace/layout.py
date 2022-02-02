@@ -5,6 +5,8 @@ from dash import html
 from utils.dash_utils import gen_modal
 
 def render():
-    return html.Div([],
-        id="time_trace_tab",
-    )
+    return [
+        html.Div([],
+            id="time_trace_tab",
+        )
+    ]
