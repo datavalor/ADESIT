@@ -48,7 +48,14 @@ def render(app, banner=True):
                 style={'paddingLeft': '2%', 'borderLeft': '1px solid', 'width': '80%', 'display' : 'inline-block', 'paddingRight': '2%', 'textAlign':'justify'}
             ),
         ], 
-        style={'backgroundColor': 'black', 'color': 'white', 'paddingTop': '30px', 'paddingBottom': '2%',  'borderRadius': '0px 0px 6px 6px'},
+        style={
+            'backgroundColor': 'black', 
+            'color': 'white', 
+            'paddingTop': '30px', 
+            'paddingBottom': '2%',  
+            'borderRadius': '0px 0px 6px 6px',
+            'marginTop' : '1%'
+        },
         id="collapse-pres",
         is_open=banner
     )

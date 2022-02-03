@@ -108,15 +108,6 @@ def gen_analysed_legend():
                     'width': '375px'
                 }
             ),
-            html.Div([
-                html.Span("Click on a point/line to analyse a specific tuple!"),
-                dbc.Button('CLEAR SELECTION', 
-                    color="primary", 
-                    id='clear-selection', 
-                    disabled=True,
-                    style={'display':'inline-block', 'marginLeft': '10px'}
-                ),
-            ], style= {'margin' : '0 auto', "marginTop": "5px"}),
         ]),
         style= {
            "width": "50%",

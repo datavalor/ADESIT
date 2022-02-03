@@ -91,6 +91,6 @@ def serve_layout(banner, app):
 
             html.Div([
                 ""
-            ], style={"width": "100%", "height": "200px"}),
+            ], style={"width": "100%", "height": "250px"}),
     ],
     fluid=True)

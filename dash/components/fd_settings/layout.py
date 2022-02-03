@@ -122,7 +122,6 @@ def render():
             ],style={'width' : '75%', 'display' : 'inline-block', 'paddingLeft' : '4%'}),
         
         ], style={
-            'marginTop' : '1%',
             'marginBottom' : '1%',
             'padding' : '1%',
             'borderLeft' : '10px solid',
