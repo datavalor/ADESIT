@@ -27,9 +27,9 @@ cache = None
 
 default_data = {
     'data_holder': None,
-    "graphs": {},
-    "thresolds_settings": {},
-    "table_data": None,
+    'graphs': {},
+    'thresolds_settings': {},
+    'table_data': None,
     "selected_point": {
         "point": None,
         "in_violation_with": []
@@ -110,9 +110,10 @@ def gen_data_holder(df):
     df = df.reset_index(drop=True)
     df.insert(0, ADESIT_INDEX, df.index)
     data_holder =  {
-        "data": df,
+        'data': df,
+        'indicators': None,
         'full_data': df,
-        "graph": None,
+        'graph': None,
         'user_columns': columns,
         'time_infos': None,
         "X": [],

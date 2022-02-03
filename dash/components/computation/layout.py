@@ -92,36 +92,27 @@ def render():
                         'height': '100%',
                         'width' : '20%', 
                         'display' : 'inline-block', 
-                        # 'borderLeft' : '2px solid gray',
                         'position': 'relative',
-                        # 'textAlign': "right",
-                        # 'float' : 'right',
                         'bottom' : '0'
-                        # 'marginTop': '20px'
                     }
                 ), 
             ],
             style={
                 "width": "950px",
-                # "marginLeft": "10px",
-                # "margin": "0 auto"
                 'margin': '0',
                 'position': 'absolute',
                 'top': '50%',
                 'left': '50%',
-                # -ms-transform: translate(-50%, -50%);
                 'transform': 'translate(-50%, -50%)'
             })
         ], 
         style={
-            # 'marginLeft' : '0%', 
-            # 'marginRight' : '0%',
             'height': '190px',
             'position': 'fixed',
             'bottom': '0',
             'left': '0',
             'width': '100%',
-            'zIndex': '1200',
+            'zIndex': '10',
             'backgroundColor' : 'RGB(249,249,249)',
             'boxShadow': '-2px -2px 10px 8px rgb(0 0 0 / 10%)'
         },

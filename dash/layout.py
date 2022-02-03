@@ -56,9 +56,11 @@ def serve_layout(banner, app):
     return dbc.Container(
         [
             html.Div(session_id, id='session-id', style={'display': 'none'}),
-            html.Span("", id='data-loaded', style={'display': 'none'}),
-            html.Span("", id='data-analysed', style={'display': 'none'}),
-            html.Span("", id="selection_changed", style={"display": "none"}),
+            html.P(id='data-loaded'),
+            html.P(id='data-analysed'),
+            html.P(id='selection_changed'),
+            html.P(id='sliders_added'),
+            html.P(id='data_filters_have_changed'),
             dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
 
             dbc.Alert(
@@ -67,8 +69,6 @@ def serve_layout(banner, app):
                 dismissable=True,
                 is_open=False,
                 color='danger',
-                # fade='True',
-                # duration=4000,
                 style={'position':'absolute', 'z-index': '99', 'top': '5%', 'left': '5%'}
             ),
 
@@ -78,8 +78,6 @@ def serve_layout(banner, app):
                 dismissable=True,
                 is_open=False,
                 color='danger',
-                # fade='True',
-                # duration=5000,
                 style={'position':'absolute', 'z-index': '99', 'top': '5%', 'left': '5%'}
             ),
 
@@ -94,8 +92,5 @@ def serve_layout(banner, app):
             html.Div([
                 ""
             ], style={"width": "100%", "height": "200px"}),
-            html.P(id='sliders_added'),
-            html.P(id='a_min_max_has_been_changed'),
-            html.P(id='data_filters_have_changed')
     ],
     fluid=True)

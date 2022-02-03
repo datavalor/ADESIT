@@ -49,7 +49,7 @@ def register_callbacks(plogger):
         if data is not None:
             dh = data.get('data_holder', None)
             n = len(dh["data"].index) if dh is not None else 0
-            return filename, data_utils.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
+            return '', data_utils.dataset_infos(filename, n, len(dh["data"].columns)), False, False, dash.no_update
         else:
             return dash.no_update, dash.no_update, dash.no_update, dash.no_update, True
         

@@ -70,21 +70,23 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         if dh is not None:
             attr_name=slider_id["index"]
-            dh['user_columns'][attr_name].minmax = slider_range
-            # attr = dh['user_columns'][attr_name]
-            # figure = generate_attribute_histogram(attr, attr_name, dh)
-            overwrite_session_data_holder(session_id, dh)
-            return ""
+            if dh['user_columns'][attr_name].get_minmax()!=slider_range:
+                dh['user_columns'][attr_name].minmax = slider_range
+                overwrite_session_data_holder(session_id, dh)
+                return ""
+            else:
+                raise PreventUpdate
         else:
             raise PreventUpdate
 
     @dash.callback(
         Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
-        [Input('data_filters_have_changed', 'children')],
+        [Input('attrs-hist-div', 'children'),
+        Input('data_filters_have_changed', 'children')],
         [State({'type': 'attr_histogram', 'index': ALL}, 'id'),
         State('session-id', 'children')]
     )
-    def attributes_histograms_update(filters_changed, hists_ids, session_id):
+    def attributes_histograms_update(hist_div_init, filters_changed, hists_ids, session_id):
         logger.debug("attributes_histograms_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate   
@@ -101,16 +103,13 @@ def register_callbacks(plogger):
         else:
             raise PreventUpdate
 
-
-
     @dash.callback(
         [Output('attrs-hist-div', 'children'),
         Output('sliders_added', 'children')],
-        [Input('data-loaded', 'children'),
-        Input('data-analysed', 'children')],
+        [Input('data-loaded', 'children')],
         [State('session-id', 'children')]
     )
-    def attributes_infos_tab_init(data_loaded, data_analysed, session_id):
+    def attributes_infos_tab_init(data_loaded, session_id):
         logger.debug("attributes_infos_tab_init callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -124,11 +123,9 @@ def register_callbacks(plogger):
                     content.append(dbc.Row(current_row))
                     current_row = []
                 
-                figure = generate_attribute_histogram(attr, attr_name, dh)
-
                 col_content = html.Div([
                     dcc.Graph(
-                        figure=figure,
+                        figure=go.Figure(),
                         id={
                             'type': 'attr_histogram',
                             'index': attr_name

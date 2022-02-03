@@ -106,6 +106,7 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         selected_points = session_data["selected_point"]
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
+            df = session_data['data_holder']['data']
             root=selected_points['point']
 
             nodes = {}
@@ -140,7 +141,7 @@ def register_callbacks(plogger):
                 elements.append({
                     'data': {
                         'id': modified_node_name[node], 
-                        'label': str(node)
+                        'label': str(df.loc[node][ADESIT_INDEX])
                     },
                     'classes': selected_class
                 })

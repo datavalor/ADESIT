@@ -1,12 +1,13 @@
 import dash_bootstrap_components as dbc
 from dash import html
+from dash import dcc
 
 from components import table as table_component
 from components import scatter_view as scatter_view_component
 from components import attributes as attributes_component
 from components import time_trace as time_trace_component
 
-from utils.dash_utils import Tooltip, hr_tooltip
+from .tab_help_content import tab_help_modal_titles, tab_help_modal_content
 from .legend import gen_analysed_legend
 from constants import *
 
@@ -31,8 +32,8 @@ def generate_help_button(tab_name):
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Header")),
-                dbc.ModalBody("This is the content of the modal"),
+                dbc.ModalHeader(dbc.ModalTitle(tab_help_modal_titles[tab_name])),
+                dbc.ModalBody(dcc.Markdown(tab_help_modal_content[tab_name])),
                 dbc.ModalFooter(
                     dbc.Button(
                         "Close", 
