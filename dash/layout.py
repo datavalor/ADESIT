@@ -64,6 +64,14 @@ def serve_layout(banner, app):
             html.P(id='data_filters_have_changed'),
             # dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
 
+            # dbc.Button(
+            #     'HEY',
+            #     id="adesit_about_button",
+            #     style={
+            #         'position': 'absolute',
+            #     }
+            # ),
+
             dbc.Alert(
                 f"Error while loading dataset. Note that there is a limit of {MAX_N_TUPLES} tuples and {MAX_N_ATTRS} attributes on this online version.",
                 id="alert-data_not_loaded",

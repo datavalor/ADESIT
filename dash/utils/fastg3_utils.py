@@ -1,6 +1,75 @@
 import fastg3.ncrisp as g3ncrisp
 
-def make_analysis(df, xparams, yparams, exact, return_dict):
+import multiprocessing as mp
+import numpy as np
+
+import constants
+from constants import *
+import utils.data_utils as data_utils
+
+def make_analysis(session_infos, left_tols, right_tols, g3_computation):
+    df = session_infos['data']['df'].copy()
+    df[G12_COLUMN_NAME] = 0
+    df[G3_COLUMN_NAME] = 0  
+
+    # Setting left and right tolerances
+    xparams=data_utils.parse_attributes_settings(left_tols, session_infos['user_columns'])
+    yparams=data_utils.parse_attributes_settings(right_tols, session_infos['user_columns'])
+
+    # Making analysis
+    manager = mp.Manager()
+    return_dict = manager.dict()
+    process = mp.Process(target=fastg3_analysis, args=(df, xparams, yparams, g3_computation=="exact", return_dict,))
+    process.daemon = True
+    process.start()
+    if constants.RESOURCE_LIMITED: 
+        process.join(VPE_TIMEOUT)
+        if process.is_alive():
+            process.terminate()
+            return None
+    else: 
+        process.join()
+
+    vps = return_dict["vps"]
+    involved_tuples = np.unique(np.array(vps))
+
+    if involved_tuples is None: 
+        return None
+    else: 
+        n_tuples = len(df.index)
+        indicators = {
+            'ncounterexamples': involved_tuples.size,
+            'g1': len(vps)/n_tuples**2,
+            'g2': involved_tuples.size/n_tuples
+        }
+        if g3_computation=='exact': 
+            cover = return_dict['g3_exact_cover']
+            indicators['g3_computation'] = 'exact'
+            g3 = len(cover)/n_tuples
+            if g3 is None: return None
+            indicators['g3']=g3
+        else:
+            cover = return_dict['g3_ub_cover']
+            indicators['g3_computation'] = 'approx'
+            indicators['g3']=[
+                return_dict['g3_lb'], 
+                len(cover)/n_tuples
+            ]
+        # Merging
+        df[G12_COLUMN_NAME][involved_tuples] = 1
+        df[G3_COLUMN_NAME][cover] = 1
+        data = {
+            'df': df,
+            'df_free': df.loc[df[G12_COLUMN_NAME] == 0],
+            'df_prob': df.loc[df[G12_COLUMN_NAME] > 0]
+        }
+    
+    return list(xparams.keys()), list(yparams.keys()), data, indicators, return_dict["vps_al"]
+    
+
+
+
+def fastg3_analysis(df, xparams, yparams, exact, return_dict):
     VPE = g3ncrisp.create_vpe_instance(
         df, 
         xparams, 

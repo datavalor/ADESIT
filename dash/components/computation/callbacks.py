@@ -8,7 +8,7 @@ import multiprocessing as mp
 from constants import *
 from utils.cache_utils import *
 import utils.data_utils as data_utils
-from utils.fastg3_utils import make_analysis
+import utils.fastg3_utils as fastg3_utils
 
 def register_callbacks(plogger):
     logger = plogger
@@ -41,73 +41,18 @@ def register_callbacks(plogger):
         if dh is not None:
             # API Calculations if requested
             if changed_id=='analyse_btn.n_clicks' and left_attrs and right_attrs:
-                df = dh['data']['df']
-                # Init calc df
-                df_calc = df.copy()
-                n_tuples = len(df_calc.index)
-                df_calc[G12_COLUMN_NAME] = 0
-                df_calc[G3_COLUMN_NAME] = 0                
-                
-                # Setting left and right tolerances
-                xparams=data_utils.parse_attributes_settings(left_tols, dh['user_columns'])
-                yparams=data_utils.parse_attributes_settings(right_tols, dh['user_columns'])
+                res = fastg3_utils.make_analysis(dh, left_tols, right_tols, g3_computation)
+                if res is None: return [True]+[dash.no_update]*4
+                else: X, Y, data, indicators, graph = res
 
-                # Making analysis
-                manager = mp.Manager()
-                return_dict = manager.dict()
-                process = mp.Process(target=make_analysis, args=(df, xparams, yparams, g3_computation=="exact", return_dict,))
-                process.daemon = True
-                process.start()
-                if constants.RESOURCE_LIMITED: 
-                    process.join(VPE_TIMEOUT)
-                    if process.is_alive():
-                        process.terminate()
-                        return [True]+[dash.no_update]*3
-                else: 
-                    process.join()
-
-                vps = return_dict["vps"]
-                involved_tuples = np.unique(np.array(vps))
-
-                # Creating figures
-                if involved_tuples is not None:
-                    indicators_dict = {
-                        'ncounterexamples': involved_tuples.size,
-                        'g1': len(vps)/n_tuples**2,
-                        'g2': involved_tuples.size/n_tuples
-                    }
-                    if g3_computation=='exact': 
-                        cover = return_dict['g3_exact_cover']
-                        indicators_dict['g3_computation'] = 'exact'
-                        g3 = len(cover)/n_tuples
-                        indicators_dict['g3']=g3
-                        if g3 is None: is_open=True
-                    else:
-                        cover = return_dict['g3_ub_cover']
-                        indicators_dict['g3_computation'] = 'approx'
-                        indicators_dict['g3']=[
-                            return_dict['g3_lb'], 
-                            len(cover)/n_tuples
-                        ]
-
-                    # Merging
-                    df_calc[G12_COLUMN_NAME][involved_tuples] = 1
-                    df_calc[G3_COLUMN_NAME][cover] = 1
-                    dh['data'] = {
-                        'df': df_calc,
-                        'df_free': df_calc.loc[df_calc[G12_COLUMN_NAME] == 0],
-                        'df_prob': df_calc.loc[df_calc[G12_COLUMN_NAME] > 0]
-                    }
-                    dh['X']=list(xparams.keys())
-                    dh['Y']=list(yparams.keys())
-                    dh['indicators'] = indicators_dict
-                    dh['graph'] = return_dict["vps_al"]
-                    overwrite_session_data_holder(session_id, dh, source='handle_analysis')
-                    overwrite_session_graphs(session_id)
-                    overwrite_session_selected_point(session_id)
-                    return is_open, '', False, False, {}
-                else:
-                    is_open=True
+                dh['X'], dh['Y'] = X, Y
+                dh['data'] = data
+                dh['indicators'] = indicators
+                dh['graph'] = graph
+                overwrite_session_data_holder(session_id, dh, source='handle_analysis')
+                overwrite_session_graphs(session_id)
+                overwrite_session_selected_point(session_id)
+                return is_open, '', False, False, {}
             return is_open, '', True, True, {'visibility' : 'hidden'}
         else:
             raise PreventUpdate

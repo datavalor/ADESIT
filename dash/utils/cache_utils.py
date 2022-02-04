@@ -167,7 +167,7 @@ def clear_session(session_id):
 
 def overwriters(name):
     def overwrite(session_id, data=default_data[name], source=''):
-        print(f'====================> Overwriting {name} from {source}')
+        logger.debug(f'====================> Overwriting {name} from {source}')
         session_data=get_data(session_id)
         session_data[name]=data
         clear_session(session_id)

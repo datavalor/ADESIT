@@ -6,55 +6,60 @@ def render():
     return html.Div(
         [
             html.Div([
-                html.Div([
-                    html.Strong("Time attribute:", style={
-                        "marginRight": "10px", 
-                        "verticalAlign": "top",
-                    }),
-                    dbc.Select(id='time-attribute-dropdown', 
-                        options=[
-                            {'label': 'No attribute selected', 'value': 'noattradesit'}
+                html.Div(
+                    dcc.Loading(
+                        [
+                            html.Strong("Time attribute:", style={
+                                "marginRight": "10px", 
+                                "verticalAlign": "top",
+                            }),
+                            dbc.Select(id='time-attribute-dropdown', 
+                                options=[
+                                    {'label': 'No attribute selected', 'value': 'noattradesit'}
+                                ],
+                                value='noattr',
+                                disabled=False,
+                                style={
+                                    'display': 'inline-block', 
+                                    'width': '200px',
+                                    'marginRight': '20px'
+                                }
+                            ),
+                            html.Strong("Group by:", style={
+                                "marginRight": "10px", 
+                                "verticalAlign": "top",
+                            }),
+                            dbc.Select(id='time-period-dropdown', 
+                                options=[
+                                    {'label': 'Don\'t group', 'value': 'nogroup'},
+                                ],
+                                value='nogroup',
+                                disabled=False,
+                                style={
+                                    'display': 'inline-block', 
+                                    'width': '150px'
+                                }
+                            ),
+                            html.Br(),
+                            html.Strong("Attribute period: "), html.Strong("N/A", id="time-range"),
+                            html.Br(),
+                            html.Strong("Current period: "), html.Strong("N/A", id="current-time-range"),
+                            html.Br(),
+                            dbc.Button(
+                                "←", id="time-backward-button", className="me-2", n_clicks=0,
+                                disabled=True
+                            ),
+                            html.Span("1", id="current-time-range-number"), 
+                            html.Span("/"),
+                            html.Span("1", id="max-time-range-number"),
+                            dbc.Button(
+                                "→", id="time-forward-button", className="me-2", n_clicks=0,
+                                disabled=True,
+                                style={"marginLeft":"10px"}
+                            )
                         ],
-                        value='noattr',
-                        disabled=False,
-                        style={
-                            'display': 'inline-block', 
-                            'width': '200px',
-                            'marginRight': '20px'
-                        }
-                    ),
-                    html.Strong("Group by:", style={
-                        "marginRight": "10px", 
-                        "verticalAlign": "top",
-                    }),
-                    dbc.Select(id='time-period-dropdown', 
-                        options=[
-                            {'label': 'Don\'t group', 'value': 'nogroup'},
-                        ],
-                        value='nogroup',
-                        disabled=False,
-                        style={
-                            'display': 'inline-block', 
-                            'width': '150px'
-                        }
-                    ),
-                    html.Br(),
-                    html.Strong("Attribute period: "), html.Strong("N/A", id="time-range"),
-                    html.Br(),
-                    html.Strong("Current period: "), html.Strong("N/A", id="current-time-range"),
-                    html.Br(),
-                    dbc.Button(
-                        "←", id="time-backward-button", className="me-2", n_clicks=0,
-                        disabled=True
-                    ),
-                    html.Span("1", id="current-time-range-number"), 
-                    html.Span("/"),
-                    html.Span("1", id="max-time-range-number"),
-                    dbc.Button(
-                        "→", id="time-forward-button", className="me-2", n_clicks=0,
-                        disabled=True,
-                        style={"marginLeft":"10px"}
-                    )], 
+                        type="circle", fullscreen=False
+                    ), 
                     style={ 
                         'width': '30%', 
                         'display': 'inline-block',
