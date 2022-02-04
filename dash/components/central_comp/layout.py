@@ -71,10 +71,10 @@ def render():
                 }
             ),
             dbc.Tabs([
-                dbc.Tab(generate_help_button('table')+table_component.render(), label="Table"),
-                dbc.Tab(generate_help_button('view2d')+scatter_view_component.render(), label="2D View"),
-                dbc.Tab(generate_help_button('attributes')+attributes_component.render(), label="Attributes"),
-                dbc.Tab(generate_help_button('timetrace')+time_trace_component.render(), label="Time Trace"),
+                dbc.Tab(generate_help_button('table')+table_component.render(), label="Table", tab_style={"cursor": "pointer"}),
+                dbc.Tab(generate_help_button('view2d')+scatter_view_component.render(), label="2D View", tab_style={"cursor": "pointer"}),
+                dbc.Tab(generate_help_button('attributes')+attributes_component.render(), label="Attributes", tab_style={"cursor": "pointer"}),
+                dbc.Tab(generate_help_button('timetrace')+time_trace_component.render(), label="Time Trace", tab_style={"cursor": "pointer"}),
             ])
         ], 
         style={

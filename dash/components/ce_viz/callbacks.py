@@ -171,7 +171,7 @@ def register_callbacks(plogger):
         if hovered_data is not None:
             hovered_id = str(hovered_data["id"])
             for i, el in enumerate(previous_elements):
-                if str(el['data']['df'].get('id', 'NO'))==hovered_id:
+                if str(el['data'].get('id', 'NO'))==hovered_id:
                     previous_elements[i]['classes'] = f'{el["classes"]} hovered'
                 else:
                     previous_elements[i]['classes'] = el['classes'].split(" ")[0]

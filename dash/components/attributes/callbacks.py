@@ -18,27 +18,39 @@ def register_callbacks(plogger):
 
     def generate_attribute_histogram(attr, attr_name, data_holder):
         figure = go.Figure()
-        # if G12_COLUMN_NAME in df.columns:
-        histogram_utils.add_basic_histograms(
-            figure,
-            data_holder,
-            attr_name,
-            10,
-            minmax=attr.get_minmax(original=True),
-            bar_args={'opacity': 0.5}
-        )
-        histogram_utils.add_basic_histograms(
-            figure,
-            data_holder,
-            attr_name,
-            10,
-            minmax=attr.get_minmax(original=True)
-        )
+
+        if data_holder['data']['df_prob'] is None:
+            histogram_utils.add_basic_histograms(
+                figure,
+                data_holder,
+                attr_name,
+                10,
+                minmax=attr.get_minmax(original=True),
+                bar_args={'opacity': 0.5},
+                df=data_holder['df_full']
+            )
+            histogram_utils.add_basic_histograms(
+                figure,
+                data_holder,
+                attr_name,
+                10,
+                minmax=attr.get_minmax(original=True)
+            )
+            barmode = 'overlay'
+        else:
+            histogram_utils.add_advanced_histograms(
+                figure,
+                data_holder,
+                attr_name,
+                10,
+                minmax=attr.get_minmax(original=True)
+            )
+            barmode = 'group'
         figure.update_layout(
             title=f'{attr_name} ({attr.get_type()})',
             margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
             height = 300,
-            barmode='overlay',
+            barmode=barmode,
             showlegend=False,
         )
         if attr.is_numerical():
@@ -46,7 +58,7 @@ def register_callbacks(plogger):
             figure.add_vrect(
                 x0=attr_min, x1=attr_max,
                 fillcolor="green", 
-                opacity=0.25, 
+                opacity=0.15, 
                 line_width=0
             )
         figure.update_xaxes(
@@ -63,7 +75,7 @@ def register_callbacks(plogger):
     def attributes_minmax_update(slider_range, slider_id, session_id):
         logger.debug("attributes_minmax_update callback")
         session_data = get_data(session_id)
-        if session_data is None: raise PreventUpdate        
+        if session_data is None: raise PreventUpdate      
         
         dh = session_data['data_holder']
         if dh is not None:
@@ -80,11 +92,12 @@ def register_callbacks(plogger):
     @dash.callback(
         Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
         [Input('attrs-hist-div', 'children'),
-        Input('data_filters_have_changed', 'children')],
+        Input('data_filters_have_changed', 'children'),
+        Input('data-analysed', 'children')],
         [State({'type': 'attr_histogram', 'index': ALL}, 'id'),
         State('session-id', 'children')]
     )
-    def attributes_histograms_update(hist_div_init, filters_changed, hists_ids, session_id):
+    def attributes_histograms_update(hist_div_init, filters_changed, data_analysed, hists_ids, session_id):
         logger.debug("attributes_histograms_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate   

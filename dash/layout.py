@@ -32,7 +32,8 @@ index_string = '''
         </style>
         </head>
 
-        <body style="font-family: Inter,sans-serif; scroll-behavior: smooth;">
+
+        <body style="font-family: sans-serif; font-size: medium;">
 
             <section id="tool" style="background-color: white;">
                 <div style ="max-width: 1700px; margin: 0 auto;">

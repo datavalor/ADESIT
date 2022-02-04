@@ -25,6 +25,7 @@ def register_callbacks(plogger):
 
     @dash.callback([Output('selection_changed', 'children'),
                 Output('ceviz_selection_infos', 'children'),
+                Output('selection-table-collapse', 'is_open'),
                 Output('selection-graph-collapse', 'is_open')],
                 [Input('data-analysed', 'children'),
                 Input('main-graph','clickData'),
@@ -44,14 +45,15 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         if dh is not None:
             df=dh['data']['df']
-            graph=dh["graph"]
+            graph=dh['graph']
             if df is not None and graph is not None:
                 changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
                 graph_is_open = True
+                table_is_open = True
                 if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children' or changed_id == 'data_filters_have_changed.children': 
                     selected_point_id = None
-                    graph_is_open = False
+                    graph_is_open, table_is_open = False, False
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None:
                     selected_point_id = active_cell['row_id']
                 elif changed_id == 'cytoscape_ce_graph.tapNodeData' and cytoData is not None:
@@ -82,7 +84,10 @@ def register_callbacks(plogger):
                 else:
                     ceviz_infos = "No tuple selected."
                 overwrite_session_selected_point(session_id, selection_infos)
-                return "", ceviz_infos, graph_is_open
+
+                if len(selection_infos['in_violation_with']) == 0: graph_is_open = False
+                return "", ceviz_infos, table_is_open, graph_is_open
+                    
             else:
                 raise PreventUpdate
         else:

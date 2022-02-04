@@ -30,9 +30,9 @@ default_data = {
     'graphs': {},
     'thresolds_settings': {},
     'table_data': None,
-    "selected_point": {
-        "point": None,
-        "in_violation_with": []
+    'selected_point': {
+        'point': None,
+        'in_violation_with': []
     }
 }
 
@@ -114,8 +114,8 @@ def gen_data_holder(df):
             'df': df,
             'df_free': None,
             'df_prob': None,
-            'df_full': df,
         },
+        'df_full': df,
         'indicators': None,
         'graph': None,
         'user_columns': columns,

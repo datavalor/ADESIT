@@ -7,8 +7,8 @@ from constants import *
 def gen_hovertemplate(df, session_infos):
     col_pos = {col: i for i, col in enumerate(df.columns)}
     # Fetching and grouping column names
-    features = session_infos["X"]
-    target = session_infos["Y"]
+    features = session_infos['X']
+    target = session_infos['Y']
     other = []
     for col in session_infos['user_columns']: 
         if col not in features and col not in target:
@@ -43,7 +43,8 @@ def add_basic_scatter(
         marker_line_width=0, 
         marker_opacity=1, 
         marker_color='black', 
-        data_key='df'
+        data_key='df',
+        hover=True
     ):
     df = session_infos['data'][data_key]
     marker = gen_marker(
@@ -61,7 +62,7 @@ def add_basic_scatter(
     }
     if session_infos is not None:
         params['customdata']=df.to_numpy()
-        params['hovertemplate']=gen_hovertemplate(df, session_infos)
+        if hover: params['hovertemplate']=gen_hovertemplate(df, session_infos)
     
     fig.add_trace(
         go.Scattergl(**params),
@@ -95,20 +96,31 @@ def advanced_scatter(session_infos, xaxis_column_name, yaxis_column_name, resolu
 
     return fig
 
-def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxis_column_name, prob_mark_symbol = "cross", selected=None):
-    if selected is not None:
-        selected_point=graph_df.loc[[selected[0]]]
-        if len(selected)>1:
+def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_name, yaxis_column_name, prob_mark_symbol = "cross"):
+    if selection_infos.get('point', None) is not None:
+        df = session_infos['data']['df']
+        selected_point={
+            'data': {
+                'df': df.loc[[selection_infos['point']]]
+            }
+        }
+        in_violation_with = selection_infos.get('in_violation_with', [])
+        if len(in_violation_with)>0:
             selection_color = SELECTED_COLOR_BAD
             selection_symbol = prob_mark_symbol
-            involved_points=graph_df.loc[selected[1:]]
+            involved_points={
+                'data': {
+                    'df': df.loc[in_violation_with]
+                }
+            }
             fig=add_basic_scatter(
                 fig, involved_points, xaxis_column_name, yaxis_column_name, 
                 marker_opacity=0.9, 
                 marker_color=CE_COLOR, 
                 marker_size=12, 
                 marker_line_width=2,
-                marker_symbol = selection_symbol
+                marker_symbol = selection_symbol,
+                hover=False
             )
         else:
             selection_color = SELECTED_COLOR_GOOD
@@ -119,7 +131,8 @@ def add_selection_to_scatter(fig, graph_df, right_attrs, xaxis_column_name, yaxi
             marker_color=selection_color, 
             marker_size=14,
             marker_line_width=2,
-            marker_symbol = selection_symbol
+            marker_symbol = selection_symbol,
+            hover=False
         )
         return fig
     else:

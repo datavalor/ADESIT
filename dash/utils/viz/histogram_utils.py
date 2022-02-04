@@ -9,10 +9,11 @@ def compute_1d_histogram(
     columnn_name, 
     resolution, 
     minmax=None,
-    data_key = 'df'
+    data_key = 'df',
+    df = None
 ):  
     attr = session_infos['user_columns'][columnn_name]
-    df = session_infos['data'][data_key]
+    if df is None: df=session_infos['data'][data_key]
 
     if attr.is_categorical():
         bins = attr.sorted_classes
@@ -46,9 +47,10 @@ def add_basic_histograms(
     minmax=None,
     orientation = 'v',
     add_trace_args = {},
-    bar_args = {}
+    bar_args = {},
+    df=None
 ):
-    bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax)
+    bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, df=df)
     if orientation=='h': bins, bins_counts = bins_counts, bins
     fig.add_trace(
         go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR, orientation=orientation, **bar_args), 
@@ -62,9 +64,10 @@ def add_advanced_histograms(
     column_name, 
     resolution, 
     orientation = 'v',
-    add_trace_args = {}
+    add_trace_args = {},
+    minmax=None
 ):
-    minmax=session_infos['user_columns'][column_name].get_minmax()
+    if minmax is None: minmax=session_infos['user_columns'][column_name].get_minmax()
     bins_free, bins_counts_free = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_free')
     bins_prob, bins_counts_prob = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_prob')
     
