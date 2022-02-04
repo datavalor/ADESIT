@@ -21,19 +21,17 @@ def register_callbacks(plogger):
         # if G12_COLUMN_NAME in df.columns:
         histogram_utils.add_basic_histograms(
             figure,
-            data_holder["full_data"],
+            data_holder,
             attr_name,
             10,
-            data_holder,
             minmax=attr.get_minmax(original=True),
             bar_args={'opacity': 0.5}
         )
         histogram_utils.add_basic_histograms(
             figure,
-            data_holder["data"],
+            data_holder,
             attr_name,
             10,
-            data_holder,
             minmax=attr.get_minmax(original=True)
         )
         figure.update_layout(

@@ -4,8 +4,16 @@ import numpy as np
 from utils.viz.figure_utils import convert_from_numpy_edges
 from constants import *
 
-def compute_1d_histogram(df, columnn_name, resolution, session_infos, minmax=None):
+def compute_1d_histogram(
+    session_infos, 
+    columnn_name, 
+    resolution, 
+    minmax=None,
+    data_key = 'df'
+):  
     attr = session_infos['user_columns'][columnn_name]
+    df = session_infos['data'][data_key]
+
     if attr.is_categorical():
         bins = attr.sorted_classes
         unique_values, count = np.unique(df[columnn_name], return_counts=True)
@@ -32,19 +40,16 @@ def compute_1d_histogram(df, columnn_name, resolution, session_infos, minmax=Non
 
 def add_basic_histograms(
     fig, 
-    df, 
+    session_infos, 
     column_name,
-    resolution, 
-    session_infos,
+    resolution,
     minmax=None,
     orientation = 'v',
     add_trace_args = {},
     bar_args = {}
 ):
-    bins, bins_counts = compute_1d_histogram(df, column_name, resolution, session_infos, minmax=minmax)
-
+    bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax)
     if orientation=='h': bins, bins_counts = bins_counts, bins
-
     fig.add_trace(
         go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR, orientation=orientation, **bar_args), 
         **add_trace_args
@@ -52,18 +57,16 @@ def add_basic_histograms(
     return fig
 
 def add_advanced_histograms(
-    fig, 
-    non_problematics_df, 
-    problematics_df, 
+    fig,
+    session_infos,
     column_name, 
     resolution, 
-    session_infos,
     orientation = 'v',
     add_trace_args = {}
 ):
     minmax=session_infos['user_columns'][column_name].get_minmax()
-    bins_free, bins_counts_free = compute_1d_histogram(non_problematics_df, column_name, resolution, session_infos, minmax=minmax)
-    bins_prob, bins_counts_prob = compute_1d_histogram(problematics_df, column_name, resolution, session_infos, minmax=minmax)
+    bins_free, bins_counts_free = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_free')
+    bins_prob, bins_counts_prob = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_prob')
     
     if orientation=='h': 
         bins_free, bins_counts_free = bins_counts_free, bins_free
@@ -77,4 +80,5 @@ def add_advanced_histograms(
         go.Bar(x=bins_prob, y=bins_counts_prob, name='Involved tuples', offsetgroup=1, marker_color=CE_COLOR, orientation=orientation),
         **add_trace_args
     )
+
     return fig

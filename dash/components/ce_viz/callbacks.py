@@ -27,9 +27,9 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         dh = session_data['data_holder']
         selection_info = session_data["selected_point"]
-        
-        if dh is not None and dh["data"] is not None:
-            df=dh["data"]
+
+        if dh is not None and dh['data']['df'] is not None:
+            df=dh['data']['df']
             user_columns_names=list(dh['user_columns'].keys())
             for c in dh["X"]+dh["Y"]: user_columns_names.remove(c)
 
@@ -106,7 +106,7 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         selected_points = session_data["selected_point"]
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
-            df = session_data['data_holder']['data']
+            df = session_data['data_holder']['data']['df']
             root=selected_points['point']
 
             nodes = {}
@@ -171,10 +171,10 @@ def register_callbacks(plogger):
         if hovered_data is not None:
             hovered_id = str(hovered_data["id"])
             for i, el in enumerate(previous_elements):
-                if str(el["data"].get("id", "NO"))==hovered_id:
-                    previous_elements[i]["classes"] = f'{el["classes"]} hovered'
+                if str(el['data']['df'].get('id', 'NO'))==hovered_id:
+                    previous_elements[i]['classes'] = f'{el["classes"]} hovered'
                 else:
-                    previous_elements[i]["classes"] = el["classes"].split(" ")[0]
+                    previous_elements[i]['classes'] = el['classes'].split(" ")[0]
             return previous_elements
         else:
             raise PreventUpdate
@@ -202,9 +202,9 @@ def register_callbacks(plogger):
         if changed_id=='cytoscape_ce_graph.mouseoverNodeData' and data is not None:
             clicked_id = data['label']
             dh = get_data(session_id)['data_holder']
-            df = dh["data"]
-            features = dh["X"]
-            target = dh["Y"]
+            df = dh['data']['df']
+            features = dh['X']
+            target = dh['Y']
             other = list(dh['user_columns'].keys())
             for f in features: other.remove(f)
             for t in target: other.remove(t)

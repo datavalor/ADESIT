@@ -47,7 +47,7 @@ def register_callbacks(plogger):
                 )
                 
                 # number of counterexamples
-                ncounterexamples = f"({indicators_dict['ncounterexamples']} tuples over {len(dh['data'].index)} are involved in at least one counterexample)"
+                ncounterexamples = f"({indicators_dict['ncounterexamples']} tuples over {len(dh['data']['df'].index)} are involved in at least one counterexample)"
                 
                 #g3
                 if indicators_dict['g3_computation']=='exact':

@@ -91,7 +91,7 @@ def register_callbacks(plogger):
         
         dh=session_data['data_holder']
         if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:          
-            df=dh["data"]
+            df=dh['data']['df']
             
             # handling projections if needed
             join_axes = [xaxis_column_name, yaxis_column_name]
@@ -125,7 +125,7 @@ def register_callbacks(plogger):
                     )
                     proj = famd.fit_transform(df[left_attrs])
                 df[PROJ_AXES]=proj
-                dh["data"]=df
+                dh['data']=df
                 overwrite_session_data_holder(session_id, dh)
             
             # if calculations have been made
@@ -135,24 +135,24 @@ def register_callbacks(plogger):
                     selection_infos = get_data(session_id)["selected_point"]
                     highlighted_points = [selection_infos["point"]]+selection_infos["in_violation_with"]
                     if(d2_viewmode=="scatter"):
-                        fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, selection=True, session_infos=dh)  
+                        fig=scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, selection=True)  
                     else:
-                        fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, nbins, dh)  
+                        fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
                     fig = scatter_gen.add_selection_to_scatter(fig, df, right_attrs, xaxis_column_name, yaxis_column_name, selected=highlighted_points)
                     return fig, False
 
                 # data has been analysed
                 if(d2_viewmode=="scatter"):
-                    fig=scatter_gen.advanced_scatter(df, label_column, right_attrs, xaxis_column_name, yaxis_column_name, nbins, view, session_infos=dh) 
+                    fig=scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, view) 
                 else:
-                    fig=heatmap_gen.advanced_heatmap(df, label_column, xaxis_column_name, yaxis_column_name, nbins, dh)  
+                    fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
                 return fig, True
             # if showing raw data
             else :
                 if(d2_viewmode=="scatter"):
-                    return scatter_gen.basic_scatter(df, xaxis_column_name, yaxis_column_name, nbins, dh), True
+                    return scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins), True
                 else:
-                    return heatmap_gen.basic_heatmap(df, xaxis_column_name, yaxis_column_name, nbins, dh), True
+                    return heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins), True
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}, True
         else:
@@ -176,28 +176,28 @@ def register_callbacks(plogger):
         label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
         dh=session_data['data_holder']
-        if dh is not None and str(selected_data)!="None":
+        if dh is not None and str(selected_data)!='None':
             points = selected_data.get("points")
-            data = dh["data"]
+            data = dh['data']['df']
             data[SELECTION_COLUMN_NAME] = 0
             selected_ids=[]
             for p in points:
                 if "customdata" in p:
-                    selected_ids.append(p["customdata"][0])
+                    selected_ids.append(p['customdata'][0])
                 elif "pointIndex" in p:
-                    selected_ids.append(p["pointIndex"])
-            # selected_ids=[p["customdata"][0] for p in points if "customdata" in p]
+                    selected_ids.append(p['pointIndex'])
+
             if label_column in data.columns:
                 n_involved = len(data.loc[selected_ids].loc[data[label_column] > 0].index)
             else: 
                 n_involved=0
             data[SELECTION_COLUMN_NAME][selected_ids]=1
-            dh["data"]=data
+            dh['data']['df']=data
             overwrite_session_data_holder(session_id, dh)
             percent = round(100*n_involved/len(selected_ids))
             return str(len(selected_ids)), f"{n_involved} ({percent}%)"
         else:
             if dh is not None:
-                dh["data"][SELECTION_COLUMN_NAME] = 0 
+                dh['data']['df'][SELECTION_COLUMN_NAME] = 0 
                 overwrite_session_data_holder(session_id, dh)
             return "0", "0"

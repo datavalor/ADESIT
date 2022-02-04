@@ -43,7 +43,7 @@ def register_callbacks(plogger):
         
         dh = session_data['data_holder']
         if dh is not None:
-            df=dh["data"]
+            df=dh['data']['df']
             graph=dh["graph"]
             if df is not None and graph is not None:
                 changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]

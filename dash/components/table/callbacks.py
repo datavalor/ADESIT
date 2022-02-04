@@ -69,7 +69,7 @@ def register_callbacks(plogger):
         
         dh=session_data['data_holder']
         if dh is not None:
-            data=dh["data"]
+            data=dh['data']['df']
 
             # select_problematics/non problematics according to mode and view
             if label_column in data.columns:

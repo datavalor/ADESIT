@@ -23,7 +23,7 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
             [{"secondary_y": False}, {"secondary_y": False}]]
     )
 
-def adjust_layout(fig, df, xaxis_column_name, yaxis_column_name, session_infos):
+def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
     fig.update_xaxes(range=session_infos['user_columns'][xaxis_column_name].get_minmax(auto_margin=True), row=2, col=1)
     fig.update_yaxes(range=session_infos['user_columns'][yaxis_column_name].get_minmax(auto_margin=True), row=2, col=1)
     fig.update_traces(opacity=0.9)

@@ -40,7 +40,7 @@ def register_callbacks(plogger):
 
         dh=session_data['data_holder']
         if dh is not None:
-            df = dh["data"]
+            df = dh['data']['df']
 
             # API Calculations if requested
             if changed_id=='analyse_btn.n_clicks' and left_attrs and right_attrs:
@@ -96,9 +96,11 @@ def register_callbacks(plogger):
                     # Merging
                     df_calc[G12_COLUMN_NAME][involved_tuples] = 1
                     df_calc[G3_COLUMN_NAME][cover] = 1
-                    dh["data"]=df_calc
-                    dh["X"]=list(xparams.keys())
-                    dh["Y"]=list(yparams.keys())
+                    dh['data']['df']=df_calc
+                    dh['data']['df_prob']=df_calc.loc[df_calc[G12_COLUMN_NAME] == 0]
+                    dh['data']['df_free']=df_calc.loc[df_calc[G12_COLUMN_NAME] > 0]
+                    dh['X']=list(xparams.keys())
+                    dh['Y']=list(yparams.keys())
                     dh['indicators'] = indicators_dict
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
@@ -144,14 +146,14 @@ def register_callbacks(plogger):
         dh = session_data['data_holder']
         if dh is not None:
             time_infos = dh['time_infos']
-            filtered_df = dh['full_data']
+            filtered_df = dh['data']['df_full']
 
             # the current time range may have already bin calculated in the past
             if 'current-time-range' in changed_id:
                 if time_infos is not None: #shouldn't be none but who knows...
                     curr_index = time_infos['current_time_period']
                     if time_infos['computation_cache']['data'][curr_index] is not None:
-                        dh['data'] = time_infos['computation_cache']['data'][curr_index]
+                        dh['data']['df'] = time_infos['computation_cache']['data']['df'][curr_index]
                         dh['indicators'] = time_infos['computation_cache']['indicators'][curr_index]
                         overwrite_session_data_holder(session_id, dh)
                         return ""
@@ -168,7 +170,7 @@ def register_callbacks(plogger):
                     attr_range = attr.get_minmax()
                     query_lines.append(f'{attr_range[0]} <= `{attr_name}` <= {attr_range[1]}')
             query = " and ".join(query_lines)
-            filtered_df = dh['full_data'].query(query)
+            filtered_df = dh['data']['df_full'].query(query)
 
             # applying time filters
             time_infos = dh['time_infos']
@@ -179,7 +181,7 @@ def register_callbacks(plogger):
                 period_min64, period_max64 = period_min.to_datetime64().view("int64"), period_max.to_datetime64().view("int64")
                 filtered_df=filtered_df.loc[period_min64:period_max64]                
 
-            dh['data'] = filtered_df
+            dh['data']['df'] = filtered_df
             dh['indicators'] = None
             overwrite_session_data_holder(session_id, dh)
             return ""
@@ -222,13 +224,13 @@ def register_callbacks(plogger):
 
         dh = session_data['data_holder']
         if dh is not None:
-            df = dh['full_data']
+            df = dh['data']['df_full']
             period_options = [{'label': 'Don\'t group', 'value': 'nogroup'}]
             if(time_attribute=='noattradesit'):
                 df.index = df[ADESIT_INDEX]
                 df = df.sort_index()
-                dh["data"] = df
-                dh['full_data'] = df
+                dh['data']['df'] = df
+                dh['data']['df_full'] = df
                 overwrite_session_data_holder(session_id, dh)
                 return period_options, "Attribute period: N/A"
             else:
@@ -249,8 +251,8 @@ def register_callbacks(plogger):
                 # saving data
                 df.index = df.index.astype("datetime64[ns]").view("int64")
                 df = df.sort_index()
-                dh["data"] = df
-                dh['full_data'] = df
+                dh['data']['df'] = df
+                dh['data']['df_full'] = df
                 overwrite_session_data_holder(session_id, dh)
 
                 return period_options, f'{time_min} → {time_max}'
@@ -293,13 +295,13 @@ def register_callbacks(plogger):
                     overwrite_session_data_holder(session_id, dh)
                     return f'N/A', "1", "1"
                 else:
-                    df = dh['full_data']
+                    df = dh['data']['df_full']
                     time_min, time_max = df.index.min(), df.index.max()
                     freq=DEFAULT_TIME_CUTS[time_period_value]["freq_symbol"]
                     list = pd.date_range(time_min, time_max, freq=freq)
-                    print(time_min, time_max)
-                    print(freq)
-                    print(list)
+                    # print(time_min, time_max)
+                    # print(freq)
+                    # print(list)
                     period_min, period_max = list[0], list[1]
                     dh['time_infos']= {
                         'time_periods_list': list,
