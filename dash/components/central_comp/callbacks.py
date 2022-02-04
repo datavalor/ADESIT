@@ -26,7 +26,8 @@ def register_callbacks(plogger):
     @dash.callback([Output('selection_changed', 'children'),
                 Output('ceviz_selection_infos', 'children'),
                 Output('selection-table-collapse', 'is_open'),
-                Output('selection-graph-collapse', 'is_open')],
+                Output('selection-graph-collapse', 'is_open'),
+                Output('clear-selection', 'disabled')],
                 [Input('data-analysed', 'children'),
                 Input('main-graph','clickData'),
                 Input('cytoscape_ce_graph', 'tapNodeData'),
@@ -51,6 +52,7 @@ def register_callbacks(plogger):
 
                 graph_is_open = True
                 table_is_open = True
+                clear_selection_disabled = False
                 if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children' or changed_id == 'data_filters_have_changed.children': 
                     selected_point_id = None
                     graph_is_open, table_is_open = False, False
@@ -82,11 +84,12 @@ def register_callbacks(plogger):
                     else:
                         ceviz_infos = f'Tuple {selected_point_id} is not involved in any counterexample.'
                 else:
-                    ceviz_infos = "No tuple selected."
+                    ceviz_infos = 'Click on a point/line to analyse a tuple!'
+                    clear_selection_disabled = True
                 overwrite_session_selected_point(session_id, selection_infos)
 
                 if len(selection_infos['in_violation_with']) == 0: graph_is_open = False
-                return "", ceviz_infos, table_is_open, graph_is_open
+                return "", ceviz_infos, table_is_open, graph_is_open, clear_selection_disabled
                     
             else:
                 raise PreventUpdate

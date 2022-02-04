@@ -66,8 +66,7 @@ def register_callbacks(plogger):
         else: raise PreventUpdate
 
     # Callback for Graph Output (f,g->e)
-    @dash.callback([Output('main-graph', 'figure'),
-                Output('clear-selection', 'disabled')],
+    @dash.callback(Output('main-graph', 'figure'),
                 [Input('data-loaded','children'),
                 Input('data-analysed', 'children'),
                 Input('2d-viewmode', 'value'),
@@ -126,7 +125,7 @@ def register_callbacks(plogger):
                     proj = famd.fit_transform(df[left_attrs])
                 df[PROJ_AXES]=proj
                 dh['data']['df']=df
-                overwrite_session_data_holder(session_id, dh)
+                overwrite_session_data_holder(session_id, dh, source='handle_graph')
             
             # if calculations have been made
             if label_column in df.columns:
@@ -137,22 +136,22 @@ def register_callbacks(plogger):
                     else:
                         fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
                     fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selected_point"], xaxis_column_name, yaxis_column_name)
-                    return fig, False
+                    return fig
 
                 # data has been analysed
                 if(d2_viewmode=="scatter"):
                     fig=scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, view) 
                 else:
                     fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
-                return fig, True
+                return fig
             # if showing raw data
             else :
                 if(d2_viewmode=="scatter"):
-                    return scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins), True
+                    return scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins)
                 else:
-                    return heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins), True
+                    return heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
-            return {}, True
+            return {}
         else:
             raise PreventUpdate
         

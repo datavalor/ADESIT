@@ -17,7 +17,7 @@ def render():
                     disabled=True,
                     style={'display':'inline-block', 'marginRight': '10px'}
                 ),
-                html.Span("Click on a point/line to analyse a specific tuple!"),
+                html.Span('Click on a point/line to analyse a tuple!', id="ceviz_selection_infos"),
             ], style= {'margin' : '0 auto', "marginTop": "5px"}),
             html.Div(
                 [
@@ -30,8 +30,7 @@ def render():
                                     style={'width': '50%', 'height': '100%', "float": "left"}
                                 ),
                                 html.Div(
-                                    [   
-                                        html.Div("No tuple seclected.", id="ceviz_selection_infos"),
+                                    [
                                         html.Strong("Hovered node content:"),
                                         html.Div(id="ceviz_hovered_node"),
                                         html.Div([

@@ -102,7 +102,7 @@ def register_callbacks(plogger):
                     dh['Y']=list(yparams.keys())
                     dh['indicators'] = indicators_dict
                     dh['graph'] = return_dict["vps_al"]
-                    overwrite_session_data_holder(session_id, dh)
+                    overwrite_session_data_holder(session_id, dh, source='handle_analysis')
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)
                     return is_open, '', False, False, {}
@@ -135,16 +135,14 @@ def register_callbacks(plogger):
     @dash.callback(
         Output('data_filters_have_changed', 'children'),
         [Input({'type': 'minmax_changed', 'index': ALL}, 'children'),
-        Input('current-time-range', 'children'),
-        Input('time-attribute-dropdown', 'value')],
+        Input('current-time-range', 'children')],
         [State('session-id', 'children')]
     )
-    def data_filters_changed(minmax_changed, time_changed, time_attribute, session_id):
-        logger.debug("data_filters_changed callback")
+    def data_filters_changed(minmax_changed, time_changed, session_id):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug(f'data_filters_changed callback because of {changed_id}')
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate        
-
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         dh = session_data['data_holder']
         if dh is not None:
@@ -158,7 +156,7 @@ def register_callbacks(plogger):
                     if time_infos['computation_cache']['data'][curr_index] is not None:
                         dh['data'] = time_infos['computation_cache']['data'][curr_index]
                         dh['indicators'] = time_infos['computation_cache']['indicators'][curr_index]
-                        overwrite_session_data_holder(session_id, dh)
+                        overwrite_session_data_holder(session_id, dh, source='data_filters_changed1')
                         return ""
 
             # if minmax changes, we need to reset all the computation cache
@@ -190,7 +188,7 @@ def register_callbacks(plogger):
                 'df_prob': None
             }
             dh['indicators'] = None
-            overwrite_session_data_holder(session_id, dh)
+            overwrite_session_data_holder(session_id, dh, source='data_filters_changed2')
             return ""
         else:
             raise PreventUpdate       
@@ -200,12 +198,14 @@ def register_callbacks(plogger):
     # ================= Time related callbacks =================
     # ==========================================================
     @dash.callback(
-        Output('time-attribute-dropdown', 'options'),
+        [Output('time-attribute-dropdown', 'options'),
+        Output('time-attribute-dropdown', 'value')],
         [Input('data-loaded','children')],
         [State('session-id', 'children')]
     )
     def handle_time_attribute_options(data_loaded, session_id):
-        logger.debug("handle_time_attribute_options callback")
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug(f'handle_time_attribute_options callback because of {changed_id}')
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
         
@@ -214,7 +214,7 @@ def register_callbacks(plogger):
             time_cols_options = [{'label': 'No attribute selected', 'value': 'noattradesit'}]
             for (attr_name, attr) in dh['user_columns'].items():
                 if attr.is_datetime(): time_cols_options.append({'label': attr_name, 'value': attr_name})
-            return time_cols_options
+            return time_cols_options, 'noattradesit'
         else:
             raise PreventUpdate
 
@@ -227,7 +227,8 @@ def register_callbacks(plogger):
         [State('session-id', 'children')]
     )
     def handle_time_period_options(time_attribute, session_id):
-        logger.debug("handle_time_attribute_options callback")
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug(f'handle_time_period_options callback because of {changed_id}')
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
@@ -240,7 +241,7 @@ def register_callbacks(plogger):
                 df = df.sort_index()
                 dh['data']['df'] = df
                 dh['df_full'] = df
-                overwrite_session_data_holder(session_id, dh)
+                overwrite_session_data_holder(session_id, dh, source='handle_time_period_options1')
                 return period_options, 'nogroup', "Attribute period: N/A", True
             else:
                 # setting time as index
@@ -259,14 +260,13 @@ def register_callbacks(plogger):
 
                 # saving data
                 df.index = df.index.astype("datetime64[ns]").view("int64")
-                print(df.index)
                 dh['data'] = {
                     'df': df,
                     'df_free': None,
                     'df_prob': None,
                 }
                 dh['df_full'] = df.copy()
-                overwrite_session_data_holder(session_id, dh)
+                overwrite_session_data_holder(session_id, dh, source='handle_time_period_options2')
 
                 return period_options, 'nogroup', f'{time_min} → {time_max}', False
         else:
@@ -282,7 +282,8 @@ def register_callbacks(plogger):
         [State('session-id', 'children')]
     )
     def handle_time_period_value(time_period_value, bf_nclicks, bb_nclicks, session_id):
-        logger.debug("handle_time_period_value callback")
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug(f'handle_time_period_value callback because of {changed_id}')
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
@@ -304,7 +305,7 @@ def register_callbacks(plogger):
                 if time_period_value=="nogroup":
                     if dh['time_infos'] is not None:
                         dh['time_infos'] = None
-                        overwrite_session_data_holder(session_id, dh)
+                        overwrite_session_data_holder(session_id, dh, source='handle_time_period_value1')
                     return f'N/A', "1", "1"
                 else:
                     df = dh['df_full']
@@ -321,7 +322,7 @@ def register_callbacks(plogger):
                             'indicators': [None]*(len(list)-1)
                         }
                     }
-            overwrite_session_data_holder(session_id, dh)
+            overwrite_session_data_holder(session_id, dh, source='handle_time_period_value2')
             time_infos = dh['time_infos']
             n_periods = len(time_infos['time_periods_list'])-1
             date_format = time_infos["date_format"]

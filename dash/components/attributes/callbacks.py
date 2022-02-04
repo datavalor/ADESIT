@@ -82,7 +82,7 @@ def register_callbacks(plogger):
             attr_name=slider_id["index"]
             if dh['user_columns'][attr_name].get_minmax()!=slider_range:
                 dh['user_columns'][attr_name].minmax = slider_range
-                overwrite_session_data_holder(session_id, dh)
+                overwrite_session_data_holder(session_id, dh, source='attributes_minmax_update')
                 return ""
             else:
                 raise PreventUpdate

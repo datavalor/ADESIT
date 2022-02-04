@@ -166,7 +166,8 @@ def clear_session(session_id):
     get_data(session_id, clear=True)
 
 def overwriters(name):
-    def overwrite(session_id, data=default_data[name]):
+    def overwrite(session_id, data=default_data[name], source=''):
+        print(f'====================> Overwriting {name} from {source}')
         session_data=get_data(session_id)
         session_data[name]=data
         clear_session(session_id)
