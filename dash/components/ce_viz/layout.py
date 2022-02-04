@@ -11,13 +11,13 @@ def render():
             html.Hr(),
             html.H5("Selection infos"),
             html.Div([
-                html.Span("Click on a point/line to analyse a specific tuple!"),
                 dbc.Button('CLEAR SELECTION', 
                     color="primary", 
                     id='clear-selection', 
                     disabled=True,
-                    style={'display':'inline-block', 'marginLeft': '10px'}
+                    style={'display':'inline-block', 'marginRight': '10px'}
                 ),
+                html.Span("Click on a point/line to analyse a specific tuple!"),
             ], style= {'margin' : '0 auto', "marginTop": "5px"}),
             html.Div(
                 [

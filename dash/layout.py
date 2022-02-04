@@ -62,7 +62,7 @@ def serve_layout(banner, app):
             html.P(id='selection_changed'),
             html.P(id='sliders_added'),
             html.P(id='data_filters_have_changed'),
-            dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
+            # dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
 
             dbc.Alert(
                 f"Error while loading dataset. Note that there is a limit of {MAX_N_TUPLES} tuples and {MAX_N_ATTRS} attributes on this online version.",
@@ -84,10 +84,12 @@ def serve_layout(banner, app):
 
             banner_component.render(app, banner=banner),
             fd_settings_component.render(),
-            computation_component.render(),
             indicators_component.render(),
             central_comp_component.render(),
             ce_viz_component.render(),
+
+
+            computation_component.render(),
 
 
             html.Div([

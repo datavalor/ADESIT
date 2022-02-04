@@ -15,8 +15,7 @@ def register_callbacks(plogger):
 
     # Callback for data update and calculations ()
     @dash.callback(
-        [Output('loading_screen','fullscreen'),
-        Output('alert-timeout', 'is_open'),
+        [Output('alert-timeout', 'is_open'),
         Output('data-analysed', 'children'),
         Output('mode', 'disabled'),
         Output('view', 'disabled'),
@@ -63,7 +62,7 @@ def register_callbacks(plogger):
                     process.join(VPE_TIMEOUT)
                     if process.is_alive():
                         process.terminate()
-                        return [dash.no_update, True]+[dash.no_update]*3
+                        return [True]+[dash.no_update]*3
                 else: 
                     process.join()
 
@@ -106,29 +105,32 @@ def register_callbacks(plogger):
                     overwrite_session_data_holder(session_id, dh)
                     overwrite_session_graphs(session_id)
                     overwrite_session_selected_point(session_id)
-                    return True, is_open, '', False, False, {}
+                    return is_open, '', False, False, {}
                 else:
                     is_open=True
-            return True, is_open, '', True, True, {'visibility' : 'hidden'}
+            return is_open, '', True, True, {'visibility' : 'hidden'}
         else:
             raise PreventUpdate
 
     @dash.callback(
-        [Output('collapse-viz', 'is_open'),
+        [Output('bottom-fixed-computation', 'style'),
+        Output('collapse-viz', 'is_open'),
         Output('collapse-stats', 'is_open'),
         Output('collapse-ceviz', 'is_open'),
         Output('collapse-legend', 'is_open')],
         [Input('data-loaded','children'),
-        Input('data-analysed','children')]
+        Input('data-analysed','children')],
+        [State('bottom-fixed-computation', 'style')]
     )
-    def update_collapses(data_loaded, data_analysed):
+    def update_collapses(data_loaded, data_analysed, bottom_style):
         logger.debug("update_collapses callback")
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         if changed_id == 'data-loaded.children':
-            return True, False, False, False
+            bottom_style['visibility'] = 'visible'
+            return bottom_style, True, False, False, False
         else:
-            return True, True, True, True
+            return dash.no_update, dash.no_update, True, True, True
 
     @dash.callback(
         Output('data_filters_have_changed', 'children'),
@@ -219,7 +221,8 @@ def register_callbacks(plogger):
     @dash.callback(
         [Output('time-period-dropdown', 'options'),
         Output('time-period-dropdown', 'value'),
-        Output('time-range', 'children')],
+        Output('time-range', 'children'),
+        Output('timetrace-tab', 'disabled')],
         [Input('time-attribute-dropdown', 'value')],
         [State('session-id', 'children')]
     )
@@ -238,7 +241,7 @@ def register_callbacks(plogger):
                 dh['data']['df'] = df
                 dh['df_full'] = df
                 overwrite_session_data_holder(session_id, dh)
-                return period_options, 'nogroup', "Attribute period: N/A"
+                return period_options, 'nogroup', "Attribute period: N/A", True
             else:
                 # setting time as index
                 df.index = df[time_attribute]
@@ -265,7 +268,7 @@ def register_callbacks(plogger):
                 dh['df_full'] = df.copy()
                 overwrite_session_data_holder(session_id, dh)
 
-                return period_options, 'nogroup', f'{time_min} → {time_max}'
+                return period_options, 'nogroup', f'{time_min} → {time_max}', False
         else:
             raise PreventUpdate
 

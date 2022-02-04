@@ -10,49 +10,45 @@ from components import time_trace as time_trace_component
 from .tab_help_content import tab_help_modal_titles, tab_help_modal_content
 from .legend import gen_analysed_legend
 from constants import *
+from utils.dash_utils import Tooltip
 
 def generate_help_button(tab_name):
     return [
         html.Div(
-            dbc.Button(
-                "How to use this tab", 
-                color="secondary", 
-                id={
-                    'type': 'modal_open_button',
-                    'index': tab_name
-                },
-                n_clicks=0,
+            html.I(
+                id=f'{tab_name}-help-thresolds',
+                className="fas fa-question-circle",
+                style={
+                    'display' : 'inline-block',
+                    'margin' :'5px',
+                    'float' :'right'
+                }
             ),
             style={
                 "marginTop": "10px",
                 "marginBottom": "10px",
                 "width": "100%",
-                "textAlign": "center",
             }
         ),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle(tab_help_modal_titles[tab_name])),
-                dbc.ModalBody(dcc.Markdown(tab_help_modal_content[tab_name])),
-                dbc.ModalFooter(
-                    dbc.Button(
-                        "Close", 
-                        id={
-                            'type': 'modal_close_button',
-                            'index': tab_name
-                        },
-                        className="ms-auto", 
-                        n_clicks=0
-                    )
-                ),
-            ],
-            id={
-                'type': 'modal',
-                'index': tab_name
-            },
-            is_open=False,
-        ),
+        Tooltip(children=[tab_help_modal_content[tab_name]], target=f'{tab_name}-help-thresolds')
     ]
+
+def create_tab(content, tab_name, tab_id):
+    return dbc.Tab(
+        dcc.Loading(
+            html.Div(
+                generate_help_button(tab_id)+content,
+                style={
+                    'height': '720px'
+                }
+            ),
+            type="circle", 
+            fullscreen=False,
+        ),
+        label=tab_name, 
+        tab_style={"cursor": "pointer"},
+        id=f'{tab_id}-tab'
+    )
 
 def render():
     return dbc.Collapse(
@@ -71,17 +67,15 @@ def render():
                 }
             ),
             dbc.Tabs([
-                dbc.Tab(generate_help_button('table')+table_component.render(), label="Table", tab_style={"cursor": "pointer"}),
-                dbc.Tab(generate_help_button('view2d')+scatter_view_component.render(), label="2D View", tab_style={"cursor": "pointer"}),
-                dbc.Tab(generate_help_button('attributes')+attributes_component.render(), label="Attributes", tab_style={"cursor": "pointer"}),
-                dbc.Tab(generate_help_button('timetrace')+time_trace_component.render(), label="Time Trace", tab_style={"cursor": "pointer"}),
+                create_tab(table_component.render(), 'Table', 'table'),
+                create_tab(scatter_view_component.render(), '2D View', 'view2d'),
+                create_tab(attributes_component.render(), 'Attributes', 'attributes'),
+                create_tab(time_trace_component.render(), 'Time Trace', 'timetrace'),
             ])
         ], 
         style={
             'marginLeft' : '0%', 
             'marginRight' : '0%',
-            'height': '865px'
-
         },
         id="collapse-viz",
         is_open=False

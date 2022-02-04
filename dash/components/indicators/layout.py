@@ -45,4 +45,4 @@ def render():
         },
         id="collapse-stats",
         is_open=False
-    ), id="loading_screen", type="circle", fullscreen=True)
+    ), type="circle", fullscreen=False)

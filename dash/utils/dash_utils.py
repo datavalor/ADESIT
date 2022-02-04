@@ -5,7 +5,6 @@ from dash import html
 hr_tooltip = html.Hr(style={'border': 'none', 'height': '2px', 'backgroundColor': '#FFF', 'marginTop': '2px', 'marginBottom': '2px'})
 
 def Tooltip(**kwargs):
-    #style = kwargs.pop('style')
     style_with_defaults = {'fontSize': '14px'}
     return dbc.Tooltip(style=style_with_defaults, **kwargs)
 

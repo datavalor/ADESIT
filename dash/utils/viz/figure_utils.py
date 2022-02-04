@@ -30,7 +30,7 @@ def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
     fig.update_layout(
         margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, 
         hovermode='closest', 
-        height = 550,
+        height = 650,
         showlegend=False,
         barmode='group'
     )

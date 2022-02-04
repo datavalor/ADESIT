@@ -2,8 +2,6 @@ import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
 
-from utils.dash_utils import gen_modal
-
 def render():
     return html.Div(
         [
@@ -114,7 +112,8 @@ def render():
             'width': '100%',
             'zIndex': '10',
             'backgroundColor' : 'RGB(249,249,249)',
-            'boxShadow': '-2px -2px 10px 8px rgb(0 0 0 / 10%)'
+            'boxShadow': '-2px -2px 10px 8px rgb(0 0 0 / 10%)',
+            'visibility' : 'hidden'
         },
         id="bottom-fixed-computation",
     )

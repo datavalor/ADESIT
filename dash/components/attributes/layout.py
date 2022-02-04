@@ -7,5 +7,10 @@ def render():
     return [
         html.Div([],
             id="attrs-hist-div",
+            style={
+                'overflowX': 'hidden',
+                'marginLeft' : '1%', 
+                'marginRight' : '1%',
+            },
         )
     ]
