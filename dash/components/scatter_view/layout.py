@@ -4,9 +4,10 @@ from dash import html
 def render():
     return [
         html.Div("", style={'width': "100%", 'height': "10px"}),
-        # Graph (e)
+
+        # Graph
         html.Div([
-                html.Div(dcc.Graph(id='main-graph', clear_on_unhover=True))
+                dcc.Graph(id='main-graph', clear_on_unhover=True)
             ], 
             style={
                 'textAlign' : 'center',
@@ -16,7 +17,7 @@ def render():
             }
         ),
         
-        # Main Commands Board (f)
+        # Main Commands Board
         html.Div([
             html.H5("View settings"),
             html.Div("Mode"),
