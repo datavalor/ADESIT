@@ -9,6 +9,8 @@ def render():
             id="attrs-hist-div",
             style={
                 'overflowX': 'hidden',
+                'overflowY': 'auto',
+                'height': '100%',
                 'marginLeft' : '1%', 
                 'marginRight' : '1%',
             },
