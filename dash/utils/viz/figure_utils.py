@@ -32,6 +32,6 @@ def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
         hovermode='closest', 
         height = 650,
         showlegend=False,
-        barmode='group'
+        barmode='stack'
     )
     return fig
