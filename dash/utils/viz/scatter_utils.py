@@ -106,7 +106,7 @@ def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_n
     if selection_infos.get('point', None) is not None:
         selected_point=selection_infos['point']
         in_violation_with = selection_infos['in_violation_with']
-        if len(in_violation_with.index)>0:
+        if not in_violation_with.empty:
             selection_color = SELECTED_COLOR_BAD
             selection_symbol = prob_mark_symbol
             involved_points={

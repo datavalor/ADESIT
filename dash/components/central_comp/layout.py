@@ -2,10 +2,10 @@ import dash_bootstrap_components as dbc
 from dash import html
 from dash import dcc
 
-from components import table as table_component
-from components import view2d as view2d_component
-from components import attributes as attributes_component
-from components import time_trace as time_trace_component
+from components import table_tab as table_tab_component
+from components import view2d_tab as view2d_tab_component
+from components import attributes_tab as attributes_tab_component
+from components import time_trace_tab as time_trace_tab_component
 
 from .tab_help_content import tab_help_modal_titles, tab_help_modal_content
 from .legend import gen_analysed_legend
@@ -67,10 +67,10 @@ def render():
                 }
             ),
             dbc.Tabs([
-                create_tab(table_component.render(), 'Table', 'table'),
-                create_tab(view2d_component.render(), '2D View', 'view2d'),
-                create_tab(attributes_component.render(), 'Attributes', 'attributes'),
-                create_tab(time_trace_component.render(), 'Time Trace', 'timetrace'),
+                create_tab(table_tab_component.render(), 'Table', 'table'),
+                create_tab(view2d_tab_component.render(), '2D View', 'view2d'),
+                create_tab(attributes_tab_component.render(), 'Attributes', 'attributes'),
+                create_tab(time_trace_tab_component.render(), 'Time Trace', 'timetrace'),
             ])
         ], 
         style={

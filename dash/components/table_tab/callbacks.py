@@ -132,9 +132,9 @@ def register_callbacks(plogger):
         [State('session-id', 'children')]
     )
     def style_selected_rows(selection_changed, session_id):
-        selection_infos = get_data(session_id)["selected_point"]
+        selection_infos = get_data(session_id)['selected_point']
         if selection_infos["point"] is not None:
-            selection_color = (SELECTED_COLOR_BAD, "black") if selection_infos["in_violation_with"] else (SELECTED_COLOR_GOOD, "white")
+            selection_color = (SELECTED_COLOR_BAD, "black") if not selection_infos["in_violation_with"].empty else (SELECTED_COLOR_GOOD, "white")
             style_data_conditional = default_style_data_conditional+[
                 {
                     "if": {
@@ -144,16 +144,16 @@ def register_callbacks(plogger):
                     "color": selection_color[1]
                 }
             ] 
-            for p in selection_infos["in_violation_with"]:
+            for idx, row in selection_infos['in_violation_with'].iterrows():
                 style_data_conditional.append({
                     "if": {
-                        "filter_query": f"{{id}} = {p}"
+                        "filter_query": f"{{id}} = {idx}"
                     },
                     "backgroundColor": CE_COLOR,
                     "color": "white",
                     'border': '4px solid black'
                 })
-            page = math.floor((selection_infos["point"]-1)/TABLE_MAX_ROWS)
+            page = math.floor((selection_infos["point"].name-1)/TABLE_MAX_ROWS)
             return style_data_conditional, page
         else:
             return default_style_data_conditional, dash.no_update

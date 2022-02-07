@@ -26,10 +26,9 @@ def register_callbacks(plogger):
 
         session_data = get_data(session_id)
         dh = session_data['data_holder']
-        selection_info = session_data["selected_point"]
-
+        point = session_data['selected_point']['point']
+        in_violation_with = session_data['selected_point']['in_violation_with']
         if dh is not None and dh['data']['df'] is not None:
-            df=dh['data']['df']
             user_columns_names=list(dh['user_columns'].keys())
             for c in dh["X"]+dh["Y"]: user_columns_names.remove(c)
 
@@ -49,15 +48,14 @@ def register_callbacks(plogger):
                     'color': 'black'
                 })
 
-            if selection_info["point"] is None:
+            if point is None:
                 output_df = pd.DataFrame(columns=[c["name"][1] for c in columns])
                 style_data_conditional = None
                 n_rows = 0
             else:
-                selected_points = [selection_info["point"]] + selection_info["in_violation_with"]
-                output_df = df.loc[selected_points][[c["name"][1] for c in columns]]
+                output_df = pd.concat([pd.DataFrame([point]), in_violation_with])
                 n_rows=len(output_df.index)
-                selection_color = SELECTED_COLOR_BAD if selection_info["in_violation_with"] else SELECTED_COLOR_GOOD
+                selection_color = SELECTED_COLOR_BAD if not in_violation_with.empty else SELECTED_COLOR_GOOD
                 style_data_conditional=[
                     {
                         'if': {'column_editable': False},
@@ -105,14 +103,15 @@ def register_callbacks(plogger):
 
         dh = session_data['data_holder']
         selected_points = session_data["selected_point"]
+        in_violation_with = selected_points["in_violation_with"]
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
             df = session_data['data_holder']['data']['df']
-            root=selected_points['point']
+            root = selected_points['point'].name
 
             nodes = {}
-            nodes [root] = 0        
+            nodes[root] = 0        
             edges = {}
-            if selected_points["in_violation_with"]:
+            if not in_violation_with.empty:
                 # Creates graph in a DFS fashion
                 graph=dh["graph"]
                 explored_list = {}
@@ -134,7 +133,7 @@ def register_callbacks(plogger):
             modified_node_name = {}
             for node, depth in nodes.items():
                 if node==root:
-                    selected_class = 'selected_node_bad' if selected_points["in_violation_with"] else 'selected_node_good'
+                    selected_class = 'selected_node_bad' if not in_violation_with.empty else 'selected_node_good'
                 else:
                     selected_class = 'ce_node'
                 modified_node_name[node] = f"{node}_{'{:.6f}'.format(random.random())}"

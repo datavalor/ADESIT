@@ -70,7 +70,7 @@ def register_callbacks(plogger):
             in_violation_with = selection_infos['in_violation_with']
             n_tuples = len(session_infos['data']['df'].index)
             if session_infos['data']['df_free'] is not None:
-                if len(in_violation_with.index)>0:
+                if not in_violation_with.empty:
                     point_line_color = SELECTED_COLOR_BAD
                 else:
                     point_line_color = SELECTED_COLOR_GOOD
@@ -82,7 +82,7 @@ def register_callbacks(plogger):
                 mode='lines', 
                 line=dict(color=point_line_color, width=3))
             )
-            for idx, row in in_violation_with.iterrows():
+            for _, row in in_violation_with.iterrows():
                 figure.add_trace(
                     go.Scatter(x=[row[attr_name],row[attr_name]], 
                     y=[0,n_tuples], 
