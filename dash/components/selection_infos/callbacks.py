@@ -41,12 +41,13 @@ def register_callbacks(plogger):
             
             # Forces others column to have white background
             white_back = []
-            for c in user_columns_names:
-                white_back.append({
-                    'if': { 'column_id': c },
-                    'backgroundColor': 'white',
-                    'color': 'black'
-                })
+            if dh['data']['df_free'] is not None:
+                for c in user_columns_names:
+                    white_back.append({
+                        'if': { 'column_id': c },
+                        'backgroundColor': 'white',
+                        'color': 'black'
+                    })
 
             if point is None:
                 output_df = pd.DataFrame(columns=[c["name"][1] for c in columns])
@@ -55,7 +56,10 @@ def register_callbacks(plogger):
             else:
                 output_df = pd.concat([pd.DataFrame([point]), in_violation_with])
                 n_rows=len(output_df.index)
-                selection_color = SELECTED_COLOR_BAD if not in_violation_with.empty else SELECTED_COLOR_GOOD
+                if dh['data']['df_free'] is not None:
+                    selection_color = (SELECTED_COLOR_BAD, 'black') if not in_violation_with.empty else (SELECTED_COLOR_GOOD, "white")
+                else:
+                    selection_color = (NON_ANALYSED_COLOR, 'white')
                 style_data_conditional=[
                     {
                         'if': {'column_editable': False},
@@ -63,9 +67,11 @@ def register_callbacks(plogger):
                         'color': 'white'
                     },
                     {
-                        'if': { 'row_index': 0 },
-                        'backgroundColor': selection_color,
-                        'color': 'black'
+                        'if': {
+                            "filter_query": f'{{id}} = {point.name}'
+                        }, 
+                        'backgroundColor': selection_color[0],
+                        'color': selection_color[1]
                     },
                     {
                         'if': { 'column_id': ADESIT_INDEX },
@@ -74,6 +80,8 @@ def register_callbacks(plogger):
                         'color': 'black'
                     },
                 ]+white_back
+
+            print(style_data_conditional)
 
             table = dash_table.DataTable(
                 data=output_df.to_dict('records'),
