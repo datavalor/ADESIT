@@ -45,15 +45,22 @@ def add_basic_histograms(
     column_name,
     resolution,
     minmax=None,
-    orientation = 'v',
-    add_trace_args = {},
-    bar_args = {},
-    df=None
+    orientation='v',
+    marker_color=NON_ANALYSED_COLOR,
+    df=None,
+    data_key='df',
+    computed_histogram=None,
+    add_trace_args={},
+    bar_args={},
 ):
-    bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, df=df)
+    if computed_histogram is None:
+        bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, df=df, data_key=data_key)
+    else:
+        bins, bins_counts = computed_histogram
+
     if orientation=='h': bins, bins_counts = bins_counts, bins
     fig.add_trace(
-        go.Bar(x=bins, y=bins_counts, marker_color=NON_ANALYSED_COLOR, orientation=orientation, **bar_args), 
+        go.Bar(x=bins, y=bins_counts, marker_color=marker_color, orientation=orientation, **bar_args), 
         **add_trace_args
     )
     return fig
@@ -68,20 +75,14 @@ def add_advanced_histograms(
     minmax=None
 ):
     if minmax is None: minmax=session_infos['user_columns'][column_name].get_minmax()
-    bins_free, bins_counts_free = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_free')
-    bins_prob, bins_counts_prob = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, data_key='df_prob')
-    
-    if orientation=='h': 
-        bins_free, bins_counts_free = bins_counts_free, bins_free
-        bins_prob, bins_counts_prob = bins_counts_prob, bins_prob
-
-    fig.add_trace(
-        go.Bar(x=bins_free, y=bins_counts_free, name='Free tuples', offsetgroup=0, marker_color=FREE_COLOR, orientation=orientation),
-        **add_trace_args
+    add_basic_histograms(
+        fig, session_infos, column_name, resolution, minmax=minmax, orientation=orientation, add_trace_args=add_trace_args,
+        data_key='df_free',
+        marker_color=FREE_COLOR
     )
-    fig.add_trace(
-        go.Bar(x=bins_prob, y=bins_counts_prob, name='Involved tuples', offsetgroup=1, marker_color=CE_COLOR, orientation=orientation),
-        **add_trace_args
+    add_basic_histograms(
+        fig, session_infos, column_name, resolution, minmax=minmax, orientation=orientation, add_trace_args=add_trace_args,
+        data_key='df_prob',
+        marker_color=CE_COLOR
     )
-
     return fig

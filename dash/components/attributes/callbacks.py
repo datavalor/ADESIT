@@ -16,57 +16,69 @@ import utils.viz.histogram_utils as histogram_utils
 def register_callbacks(plogger):
     logger = plogger
 
-    def generate_attribute_histogram(attr, attr_name, data_holder, selection=None):
+    def generate_attribute_histogram(attr, attr_name, data_holder):
         figure = go.Figure()
 
-        max_count = None
+        resolution, minmax = 10, attr.get_minmax(original=True)
         if attr.is_numerical():
             attr_min, attr_max = attr.get_minmax(original=False)
             figure.add_vrect(
                 x0=attr_min, x1=attr_max,
                 fillcolor="green", 
-                opacity=0.15, 
+                opacity=0.1, 
                 line_width=0
             )
+        
         if data_holder['data']['df_prob'] is None:
-            histogram_utils.add_basic_histograms(
-                figure,
-                data_holder,
-                attr_name,
-                10,
-                minmax=attr.get_minmax(original=True),
-                bar_args={'opacity': 0.5},
-                df=data_holder['df_full']
-            )
-            histogram_utils.add_basic_histograms(
-                figure,
-                data_holder,
-                attr_name,
-                10,
-                minmax=attr.get_minmax(original=True)
-            )
-            max_count = max(figure.data[0].y)
-            barmode = 'overlay'
+            histogram_utils.add_basic_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
+            upper_bound = list(figure.data[0].y)
         else:
-            histogram_utils.add_advanced_histograms(
-                figure,
-                data_holder,
-                attr_name,
-                10,
-                minmax=attr.get_minmax(original=True)
-            )
-            max_count = max([a+b for a,b in zip(figure.data[0].y, figure.data[1].y)])
-            barmode = 'stack'
+            histogram_utils.add_advanced_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
+            upper_bound = [a+b for a,b in zip(figure.data[0].y, figure.data[1].y)]
+
+        bins, bins_counts = histogram_utils.compute_1d_histogram(data_holder, attr_name, resolution, minmax=minmax, df=data_holder['df_full'])
+        for i in range(len(bins_counts)):
+            bins_counts[i]-=upper_bound[i]
+            upper_bound[i]=upper_bound[i]+bins_counts[i]
+        histogram_utils.add_basic_histograms(
+            figure,
+            data_holder,
+            attr_name,
+            resolution,
+            minmax=attr.get_minmax(original=True),
+            bar_args={'opacity': 0.5},
+            computed_histogram=[bins, bins_counts]
+        )
+
         figure.update_layout(
             title=f'{attr_name} ({attr.get_type()})',
             margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
-            height = 300,
-            barmode=barmode,
+            height=300,
+            barmode='stack',
             showlegend=False,
         )
-        figure.update_xaxes(range=attr.get_minmax(auto_margin=True))
-        figure.update_yaxes(range=[0, 1.1*max_count])
+        figure.update_xaxes(range=attr.get_minmax(original=True, auto_margin=True), fixedrange=True)
+        figure.update_yaxes(range=[0, 1.1*max(upper_bound)])#, fixedrange=True)
         return figure
+
+    def add_selection_to_histogram(figure, attr_name, point, in_violation_with, n_tuples):
+        point_color = SELECTED_COLOR_BAD if in_violation_with else SELECTED_COLOR_GOOD
+        figure.data = tuple([datum for datum in figure.data if type(datum) is not go.Scatter])
+        figure.add_trace(
+            go.Scatter(x=[point[attr_name],point[attr_name]], 
+            y=[0,n_tuples], 
+            mode='lines', 
+            line=dict(color=point_color, width=3))
+        )
+        for ipoint in in_violation_with:
+            figure.add_trace(
+                go.Scatter(x=[ipoint[attr_name],ipoint[attr_name]], 
+                y=[0,n_tuples], 
+                mode='lines', 
+                line=dict(color=CE_COLOR, width=2))
+            )
+        return figure
+
 
     @dash.callback(
         Output({'type': 'minmax_changed', 'index': MATCH}, 'children'),
@@ -110,35 +122,18 @@ def register_callbacks(plogger):
         
         dh = session_data['data_holder']
         if dh is not None:
+            figures = []
             if changed_id == 'selection_changed.children':
-                figures = []
                 df = dh['data']['df']
-                n_tuples = len(df.index)
                 selection = get_data(session_id)["selected_point"]
                 point = df.loc[selection['point']]
                 in_violation_with = [df.loc[p] for p in selection['in_violation_with']]
-                point_color = SELECTED_COLOR_BAD if in_violation_with else SELECTED_COLOR_GOOD
                 for hist_id, figure_dict in zip(hists_ids, hists_figures):
                     figure = go.Figure(figure_dict)
-                    figure.data = figure.data[:2]
                     attr_name = hist_id['index']
-                    figure.add_trace(
-                        go.Scatter(x=[point[attr_name],point[attr_name]], 
-                        y=[0,n_tuples], 
-                        mode='lines', 
-                        line=dict(color=point_color, width=3))
-                    )
-                    for ipoint in in_violation_with:
-                        figure.add_trace(
-                            go.Scatter(x=[ipoint[attr_name],ipoint[attr_name]], 
-                            y=[0,n_tuples], 
-                            mode='lines', 
-                            line=dict(color=CE_COLOR, width=2))
-                        )
+                    figure = add_selection_to_histogram(figure, attr_name, point, in_violation_with, len(df.index))
                     figures.append(figure)
-                return figures
             else: 
-                figures = []
                 for hist_id in hists_ids:
                     attr_name = hist_id['index']
                     attr = dh['user_columns'][attr_name]
