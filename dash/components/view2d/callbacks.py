@@ -1,10 +1,12 @@
 import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from plotly.subplots import make_subplots
 
 # Projection tools
 from sklearn.decomposition import PCA
 import prince
+import plotly.graph_objects as go
 
 # Miscellaneous
 import pandas as pd
@@ -14,6 +16,7 @@ from constants import *
 from utils.cache_utils import *
 import utils.viz.scatter_utils as scatter_gen
 import utils.viz.heatmap_utils as heatmap_gen
+import utils.viz.figure_utils as figure_utils
 from utils.data_utils import which_proj_type
 
 def register_callbacks(plogger):
@@ -79,8 +82,9 @@ def register_callbacks(plogger):
                 Input('data_filters_have_changed', 'children')],
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
+                State('main-graph', 'figure'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, current_time_range, left_attrs, right_attrs, session_id):
+    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, current_time_range, left_attrs, right_attrs, scatter_fig, session_id):
         logger.debug("handle_graph callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -129,27 +133,38 @@ def register_callbacks(plogger):
             
             # if calculations have been made
             if label_column in df.columns:
-                # data has been hovered
-                if get_data(session_id)["selected_point"]["point"] is not None:
-                    if(d2_viewmode=="scatter"):
-                        fig=scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, selection=True)  
-                    else:
-                        fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
+                if changed_id == 'selection_changed.children':
+                    fig = figure_utils.gen_subplot_fig(
+                        xaxis_column_name,
+                        yaxis_column_name,
+                        make_subplot_args={
+                            'figure': go.Figure(scatter_fig)
+                        }
+                    )
                     fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selected_point"], xaxis_column_name, yaxis_column_name)
-                    return fig
-
-                # data has been analysed
-                if(d2_viewmode=="scatter"):
-                    fig=scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, view) 
                 else:
-                    fig=heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
+                    if(d2_viewmode=="scatter"):
+                        fig = scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, view) 
+                    else:
+                        fig = heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
                 return fig
             # if showing raw data
-            else :
-                if(d2_viewmode=="scatter"):
-                    return scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins)
+            else:
+                if changed_id == 'selection_changed.children':
+                    fig = figure_utils.gen_subplot_fig(
+                        xaxis_column_name,
+                        yaxis_column_name,
+                        make_subplot_args={
+                            'figure': go.Figure(scatter_fig)
+                        }
+                    )
+                    fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selected_point"], xaxis_column_name, yaxis_column_name)
                 else:
-                    return heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)
+                    if(d2_viewmode=="scatter"):
+                        fig = scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins)
+                    else:
+                        fig = heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)
+                return fig
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}
         else:

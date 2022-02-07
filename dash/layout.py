@@ -8,8 +8,8 @@ from components import banner as banner_component
 from components import fd_settings as fd_settings_component
 from components import indicators as indicators_component
 from components import central_comp as central_comp_component
-from components import ce_viz as ce_viz_component
-from components import computation as computation_component
+from components import selection_infos as selection_infos_component
+from components import computation_footer as computation_footer_component
 
 from constants import *
 
@@ -62,15 +62,6 @@ def serve_layout(banner, app):
             html.P(id='selection_changed'),
             html.P(id='sliders_added'),
             html.P(id='data_filters_have_changed'),
-            # dcc.Loading(id="loading-screen1", type="circle", fullscreen=False),
-
-            # dbc.Button(
-            #     'HEY',
-            #     id="adesit_about_button",
-            #     style={
-            #         'position': 'absolute',
-            #     }
-            # ),
 
             dbc.Alert(
                 f"Error while loading dataset. Note that there is a limit of {MAX_N_TUPLES} tuples and {MAX_N_ATTRS} attributes on this online version.",
@@ -94,14 +85,15 @@ def serve_layout(banner, app):
             fd_settings_component.render(),
             indicators_component.render(),
             central_comp_component.render(),
-            ce_viz_component.render(),
+            selection_infos_component.render(),
 
 
-            computation_component.render(),
+            computation_footer_component.render(),
 
 
             html.Div([
                 ""
             ], style={"width": "100%", "height": "300px"}),
-    ],
-    fluid=True)
+        ],
+        fluid=True
+    )

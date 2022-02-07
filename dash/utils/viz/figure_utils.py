@@ -8,7 +8,7 @@ def convert_from_numpy_edges(edges):
         centers.append((edges[i]+edges[i+1])/2)
     return centers
 
-def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
+def gen_subplot_fig(xaxis_column_name, yaxis_column_name, make_subplot_args={}):
     return make_subplots(
         rows=2, cols=2,
         row_heights=[0.1,0.4],
@@ -20,7 +20,8 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name):
         x_title= str(xaxis_column_name),
         y_title= str(yaxis_column_name),
         specs=[[{"secondary_y": True}, {"secondary_y": False}],
-            [{"secondary_y": False}, {"secondary_y": False}]]
+            [{"secondary_y": False}, {"secondary_y": False}]],
+        **make_subplot_args
     )
 
 def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):

@@ -3,7 +3,7 @@ from dash import html
 from dash import dcc
 
 from components import table as table_component
-from components import scatter_view as scatter_view_component
+from components import view2d as view2d_component
 from components import attributes as attributes_component
 from components import time_trace as time_trace_component
 
@@ -68,7 +68,7 @@ def render():
             ),
             dbc.Tabs([
                 create_tab(table_component.render(), 'Table', 'table'),
-                create_tab(scatter_view_component.render(), '2D View', 'view2d'),
+                create_tab(view2d_component.render(), '2D View', 'view2d'),
                 create_tab(attributes_component.render(), 'Attributes', 'attributes'),
                 create_tab(time_trace_component.render(), 'Time Trace', 'timetrace'),
             ])

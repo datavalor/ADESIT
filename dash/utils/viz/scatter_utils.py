@@ -44,7 +44,8 @@ def add_basic_scatter(
         marker_opacity=1, 
         marker_color='black', 
         data_key='df',
-        hover=True
+        hover=True,
+        scatter_params = {}
     ):
     df = session_infos['data'][data_key]
     marker = gen_marker(
@@ -58,7 +59,8 @@ def add_basic_scatter(
         'x': df[xaxis_column_name], 
         'y': df[yaxis_column_name], 
         'mode': 'markers', 
-        'marker': marker
+        'marker': marker,
+        **scatter_params
     }
     if session_infos is not None:
         params['customdata']=df.to_numpy()
@@ -97,20 +99,19 @@ def advanced_scatter(session_infos, xaxis_column_name, yaxis_column_name, resolu
     return fig
 
 def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_name, yaxis_column_name, prob_mark_symbol = "cross"):
+    # Deleting previous selections
+    fig.data = tuple([datum for datum in fig.data if datum['name']!='selection'])
+
+    # Drawing points
     if selection_infos.get('point', None) is not None:
-        df = session_infos['data']['df']
-        selected_point={
-            'data': {
-                'df': df.loc[[selection_infos['point']]]
-            }
-        }
-        in_violation_with = selection_infos.get('in_violation_with', [])
-        if len(in_violation_with)>0:
+        selected_point=selection_infos['point']
+        in_violation_with = selection_infos['in_violation_with']
+        if len(in_violation_with.index)>0:
             selection_color = SELECTED_COLOR_BAD
             selection_symbol = prob_mark_symbol
             involved_points={
                 'data': {
-                    'df': df.loc[in_violation_with]
+                    'df': in_violation_with
                 }
             }
             fig=add_basic_scatter(
@@ -120,19 +121,33 @@ def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_n
                 marker_size=12, 
                 marker_line_width=2,
                 marker_symbol = selection_symbol,
-                hover=False
+                hover=False,
+                scatter_params = {
+                    'name': 'selection'
+                }
             )
         else:
-            selection_color = SELECTED_COLOR_GOOD
+            if session_infos['data']['df_free'] is not None:
+                selection_color = SELECTED_COLOR_GOOD
+            else:
+                selection_color = NON_ANALYSED_COLOR
             selection_symbol = "circle"
+        selected_point_data={
+            'data': {
+                'df': pd.DataFrame([selected_point])
+            }
+        }
         fig=add_basic_scatter(
-            fig, selected_point, xaxis_column_name, yaxis_column_name, 
+            fig, selected_point_data, xaxis_column_name, yaxis_column_name, 
             marker_opacity=0.9, 
             marker_color=selection_color, 
             marker_size=14,
             marker_line_width=2,
             marker_symbol = selection_symbol,
-            hover=False
+            hover=False,
+            scatter_params = {
+                'name': 'selection'
+            }
         )
         return fig
     else:

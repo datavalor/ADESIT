@@ -73,9 +73,9 @@ def register_callbacks(plogger):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         if changed_id == 'data-loaded.children':
             bottom_style['visibility'] = 'visible'
-            return bottom_style, True, False, False, False
+            return bottom_style, True, False, True, False
         else:
-            return dash.no_update, dash.no_update, True, True, True
+            return dash.no_update, dash.no_update, True, dash.no_update, True
 
     @dash.callback(
         Output('data_filters_have_changed', 'children'),

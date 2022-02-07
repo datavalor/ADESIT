@@ -7,7 +7,7 @@ def render():
 
         # Graph
         html.Div([
-                dcc.Graph(id='main-graph', clear_on_unhover=True)
+                dcc.Graph(figure={}, id='main-graph', clear_on_unhover=True)
             ], 
             style={
                 'textAlign' : 'center',

@@ -16,11 +16,11 @@ from components import banner as banner_component
 from components import fd_settings as fd_settings_component
 from components import indicators as indicators_component
 from components import table as table_component
-from components import ce_viz as ce_viz_component
+from components import selection_infos as selection_infos_component
 from components import central_comp as central_comp_component
-from components import scatter_view as scatter_view_component
+from components import view2d as view2d_component
 from components import attributes as attributes_component
-from components import computation as computation_component
+from components import computation_footer as computation_footer_component
 from components import time_trace as time_trace_component
 
 import constants
@@ -30,11 +30,11 @@ components = [
     fd_settings_component,
     indicators_component,
     table_component,
-    ce_viz_component,
+    selection_infos_component,
     central_comp_component,
-    scatter_view_component,
+    view2d_component,
     attributes_component,
-    computation_component,
+    computation_footer_component,
     time_trace_component
 ]
 

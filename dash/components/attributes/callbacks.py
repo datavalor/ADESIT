@@ -1,4 +1,3 @@
-from click import style
 import dash
 from dash.dependencies import Input, Output, State, MATCH, ALL
 from dash.exceptions import PreventUpdate
@@ -61,22 +60,35 @@ def register_callbacks(plogger):
         figure.update_yaxes(range=[0, 1.1*max(upper_bound)])#, fixedrange=True)
         return figure
 
-    def add_selection_to_histogram(figure, attr_name, point, in_violation_with, n_tuples):
-        point_color = SELECTED_COLOR_BAD if in_violation_with else SELECTED_COLOR_GOOD
+    def add_selection_to_histogram(figure, session_infos, attr_name, selection_infos):
+        # Deleting previous selections
         figure.data = tuple([datum for datum in figure.data if type(datum) is not go.Scatter])
-        figure.add_trace(
-            go.Scatter(x=[point[attr_name],point[attr_name]], 
-            y=[0,n_tuples], 
-            mode='lines', 
-            line=dict(color=point_color, width=3))
-        )
-        for ipoint in in_violation_with:
+
+        # Drawing lines
+        point = selection_infos['point']
+        if point is not None:
+            in_violation_with = selection_infos['in_violation_with']
+            n_tuples = len(session_infos['data']['df'].index)
+            if session_infos['data']['df_free'] is not None:
+                if len(in_violation_with.index)>0:
+                    point_line_color = SELECTED_COLOR_BAD
+                else:
+                    point_line_color = SELECTED_COLOR_GOOD
+            else:
+                point_line_color = NON_ANALYSED_COLOR
             figure.add_trace(
-                go.Scatter(x=[ipoint[attr_name],ipoint[attr_name]], 
+                go.Scatter(x=[point[attr_name],point[attr_name]], 
                 y=[0,n_tuples], 
                 mode='lines', 
-                line=dict(color=CE_COLOR, width=2))
+                line=dict(color=point_line_color, width=3))
             )
+            for idx, row in in_violation_with.iterrows():
+                figure.add_trace(
+                    go.Scatter(x=[row[attr_name],row[attr_name]], 
+                    y=[0,n_tuples], 
+                    mode='lines', 
+                    line=dict(color=CE_COLOR, width=2))
+                )
         return figure
 
 
@@ -124,14 +136,10 @@ def register_callbacks(plogger):
         if dh is not None:
             figures = []
             if changed_id == 'selection_changed.children':
-                df = dh['data']['df']
-                selection = get_data(session_id)["selected_point"]
-                point = df.loc[selection['point']]
-                in_violation_with = [df.loc[p] for p in selection['in_violation_with']]
                 for hist_id, figure_dict in zip(hists_ids, hists_figures):
                     figure = go.Figure(figure_dict)
                     attr_name = hist_id['index']
-                    figure = add_selection_to_histogram(figure, attr_name, point, in_violation_with, len(df.index))
+                    figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selected_point"])
                     figures.append(figure)
             else: 
                 for hist_id in hists_ids:

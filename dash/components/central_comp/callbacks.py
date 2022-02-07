@@ -47,7 +47,7 @@ def register_callbacks(plogger):
         if dh is not None:
             df=dh['data']['df']
             graph=dh['graph']
-            if df is not None and graph is not None:
+            if df is not None:
                 changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
                 graph_is_open = True
@@ -65,27 +65,39 @@ def register_callbacks(plogger):
                 elif changed_id == 'main-graph.clickData' and clickData is not None:
                     clickData=clickData['points'][0]
                     points=df.loc[(df[xaxis_column_name]==clickData['x']) & (df[yaxis_column_name]==clickData['y'])]
-                    all_points=list(points.index)
-                    involved_points=[point for point in all_points if point in graph]
+                    all_points_ids=list(points.index)
+                    if graph is not None:
+                        involved_points=[point for point in all_points_ids if point in graph]
+                    else:
+                        involved_points=[]
                     if involved_points: selected_point_id = involved_points[0]
-                    else: selected_point_id = all_points[0]
+                    else: selected_point_id = all_points_ids[0]
                 else:
                     raise PreventUpdate
 
                 # Getting and saving selected points
-                selection_infos = {
-                    "point": selected_point_id,
-                    "in_violation_with": []
-                }
                 if selected_point_id is not None:
-                    if selected_point_id in graph:
-                        selection_infos["in_violation_with"] = graph[selected_point_id]
-                        ceviz_infos = f'Tuple {selected_point_id} is involved in {len(selection_infos["in_violation_with"])} counterexamples.'
+                    selected_point = df.loc[selected_point_id]
+                    if graph is not None and selected_point_id in graph :
+                        involved_points_ids = [point_id for point_id in graph[selected_point_id]]
+                        in_violation_with = df.loc[involved_points_ids]
+                        ceviz_infos = f'Tuple {selected_point[ADESIT_INDEX]} is involved in {len(in_violation_with.index)} counterexamples.'
                     else:
-                        ceviz_infos = f'Tuple {selected_point_id} is not involved in any counterexample.'
+                        in_violation_with = pd.DataFrame()
+                        if graph is not None:
+                            ceviz_infos = f'Tuple {selected_point[ADESIT_INDEX]} is not involved in any counterexample.'
+                        else:
+                            ceviz_infos = f'Tuple {selected_point[ADESIT_INDEX]} selected.'
                 else:
-                    ceviz_infos = 'Click on a point/line to analyse a tuple!'
+                    selected_point = None
+                    in_violation_with = pd.DataFrame()
+                    ceviz_infos = 'Click on a point/line to select a tuple!'
                     clear_selection_disabled = True
+
+                selection_infos = {
+                    "point": selected_point,
+                    "in_violation_with": in_violation_with
+                }
                 overwrite_session_selected_point(session_id, selection_infos)
 
                 if len(selection_infos['in_violation_with']) == 0: graph_is_open = False

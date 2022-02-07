@@ -32,7 +32,7 @@ default_data = {
     'table_data': None,
     'selected_point': {
         'point': None,
-        'in_violation_with': []
+        'in_violation_with': pd.DataFrame()
     }
 }
 
