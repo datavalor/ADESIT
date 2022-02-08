@@ -5,7 +5,7 @@ help_infos = {
     'datasettings-help': [
         'In this section, you can upload your dataset and define the function you want to anaylse.',
         hr_tooltip,
-        'The function is defined as a functionnal dependency. Therefore, a function Y=f(X) will be defined as X->Y.' 
+        'The function is defined as a functionnal dependency. Therefore, a function Y=f(X) will be defined as X->Y.',
         hr_tooltip,
         'In a supervised learning problem, X corresponds to the features and Y the target.'
     ],

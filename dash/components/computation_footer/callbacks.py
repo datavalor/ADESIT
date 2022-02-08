@@ -163,6 +163,21 @@ def register_callbacks(plogger):
         else:
             raise PreventUpdate
 
+    dash.clientside_callback(
+        """
+        function(value) {
+            if(value==='noattradesit'){
+                return {'opacity': 0.2};
+            } else {
+                return {'opacity': 1};
+            }
+            
+        }
+        """,
+        Output('sub-time-elements', 'style'),
+        Input('time-attribute-dropdown', 'value'),
+    )
+
     @dash.callback(
         [Output('time-period-dropdown', 'options'),
         Output('time-period-dropdown', 'value'),
