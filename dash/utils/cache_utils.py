@@ -1,3 +1,4 @@
+from matplotlib.pyplot import table
 import pandas as pd
 pd.options.mode.chained_assignment = None 
 from pandas.api.types import is_string_dtype
@@ -29,7 +30,11 @@ default_data = {
     'data_holder': None,
     'graphs': {},
     'thresolds_settings': {},
-    'table_data': None,
+    'table_data': {
+        'df_table': None,
+        'pre_sdc': [],
+        'post_sdc': [],
+    },
     'selection_infos': {
         'point': None,
         'in_violation_with': pd.DataFrame()

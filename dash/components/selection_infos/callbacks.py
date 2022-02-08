@@ -14,6 +14,7 @@ pd.options.mode.chained_assignment = None
 from constants import *
 from utils.cache_utils import *
 from .cyto_utils import gen_cyto
+import utils.viz.table_utils as table_utils
 
 def register_callbacks(plogger):
     logger = plogger
@@ -29,66 +30,38 @@ def register_callbacks(plogger):
         point = session_data['selection_infos']['point']
         in_violation_with = session_data['selection_infos']['in_violation_with']
         if dh is not None and dh['data']['df'] is not None:
-            user_columns_names=list(dh['user_columns'].keys())
-            for c in dh["X"]+dh["Y"]: user_columns_names.remove(c)
-
-            # Create column list for datatable
-            column_id = [{"name": ["", ADESIT_INDEX], "id": ADESIT_INDEX}]
-            columns_other = [{"name": ["Others", column], "id": column} for column in user_columns_names]
-            columns_X = [{"name": ["Feature(s)", column], "id": column} for column in dh["X"]]
-            columns_Y = [{"name": ["Target", column], "id": column} for column in dh["Y"]]
-            columns = column_id+columns_other+columns_X+columns_Y
-            
-            # Forces others column to have white background
-            white_back = []
-            if dh['data']['df_free'] is not None:
-                for c in user_columns_names:
-                    white_back.append({
-                        'if': { 'column_id': c },
-                        'backgroundColor': 'white',
-                        'color': 'black'
-                    })
-
             if point is None:
-                output_df = pd.DataFrame(columns=[c["name"][1] for c in columns])
-                style_data_conditional = None
-                n_rows = 0
+                return dash_table.DataTable(id="ceviz_datatable")
             else:
-                output_df = pd.concat([pd.DataFrame([point]), in_violation_with])
-                n_rows=len(output_df.index)
+                tmp_df = pd.concat([pd.DataFrame([point]), in_violation_with])
+                by_data_type = True if dh['data']['df_free'] is None else False
+                columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, output_df=tmp_df, by_data_type=by_data_type)
+                
                 if dh['data']['df_free'] is not None:
                     selection_color = (SELECTED_COLOR_BAD, 'black') if not in_violation_with.empty else (SELECTED_COLOR_GOOD, "white")
                 else:
                     selection_color = (NON_ANALYSED_COLOR, 'white')
-                style_data_conditional=[
-                    {
-                        'if': {'column_editable': False},
-                        'backgroundColor': CE_COLOR,
-                        'color': 'white'
-                    },
+                middle_sdc=[
                     {
                         'if': {
-                            "filter_query": f'{{id}} = {point.name}'
+                            'state': 'any',
+                            'filter_query': f'{{id}} = {point.name}'
                         }, 
                         'backgroundColor': selection_color[0],
                         'color': selection_color[1]
-                    },
-                    {
-                        'if': { 'column_id': ADESIT_INDEX },
-                        'backgroundColor': 'white',
-                        'fontStyle': 'italic',
-                        'color': 'black'
-                    },
-                ]+white_back
+                    }
+                ]
 
+            n_rows=len(table_data['df_table'].index)
             table = dash_table.DataTable(
-                data=output_df.to_dict('records'),
+                data=table_data['df_table'].to_dict('records'),
                 id="ceviz_datatable",
                 columns=columns,
                 page_current=0,
                 page_size=TABLE_MAX_ROWS,
+                hidden_columns = hidden_columns,
                 page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
-                style_data_conditional=style_data_conditional,
+                style_data_conditional=table_data['pre_sdc']+middle_sdc+table_data['post_sdc'],
                 merge_duplicate_headers=True
             )
                

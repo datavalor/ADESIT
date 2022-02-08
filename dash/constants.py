@@ -8,7 +8,7 @@ CATEGORICAL_COLUMN = "categorical"
 DATETIME_COLUMN = "datetime"
 
 # ADESIT COLUMNS IN DATASET
-ADESIT_INDEX = "id"
+ADESIT_INDEX = "adesit_id"
 G12_COLUMN_NAME = "_violating_tuple"
 G3_COLUMN_NAME = "_g3_to_remove"
 SELECTION_COLUMN_NAME = "_selected"

@@ -45,13 +45,14 @@ def register_callbacks(plogger):
                 if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children' or changed_id == 'data_filters_have_changed.children': 
                     selected_point_id = None
                     graph_is_open, table_is_open = False, False
-                elif changed_id == 'viz_datatable.active_cell' and active_cell is not None:
+                elif changed_id == 'viz_datatable.active_cell' and active_cell is not None: # TABLE TAB LINE CLICK
+                    # print(active_cell)
                     selected_point_id = active_cell['row_id']
-                elif changed_id == 'cytoscape_ce_graph.tapNodeData' and cytoData is not None:
-                    selected_point_id = int(cytoData["label"])
-                elif changed_id == 'ceviz_datatable.active_cell' and active_cell_ce is not None:
+                elif changed_id == 'cytoscape_ce_graph.tapNodeData' and cytoData is not None: # CE GRAPH NODE CLICK
+                    selected_point_id = int(cytoData['label'])
+                elif changed_id == 'ceviz_datatable.active_cell' and active_cell_ce is not None: # CE TABLE LINE CLICK
                     selected_point_id = active_cell_ce['row_id']
-                elif changed_id == 'main-graph.clickData' and clickData is not None:
+                elif changed_id == 'main-graph.clickData' and clickData is not None: # 2D VIEW POINT CLICK
                     clickData=clickData['points'][0]
                     points=df.loc[(df[xaxis_column_name]==clickData['x']) & (df[yaxis_column_name]==clickData['y'])]
                     all_points_ids=list(points.index)

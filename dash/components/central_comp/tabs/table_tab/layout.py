@@ -1,7 +1,7 @@
 from dash import html
 from dash import dash_table
 
-from dash import dcc
+from constants import *
 
 def render():
     return [
@@ -10,7 +10,7 @@ def render():
                 [
                     dash_table.DataTable(
                         id="viz_datatable",
-                        page_size=15
+                        page_size=TABLE_MAX_ROWS
                     )
                 ], 
                 id="viz_table_container"

@@ -103,7 +103,7 @@ def render():
 
                 # Right-hand side of the 'DF' (d)
                 html.Div([
-                    html.Div("Target"),
+                    html.Div("Target(s)"),
                     dcc.Dropdown(id='right-attrs', 
                         multi=True, 
                         placeholder="Select the target",
