@@ -4,12 +4,25 @@ from dash import html
 from dash import dash_table
 
 from .cyto_utils import gen_cyto
+from .help import help_infos
+from utils.dash_utils import gen_help_tooltips
 
 def render():
     return dbc.Collapse(
         [
             html.Hr(),
-            html.H5("Selection infos"),
+            html.H5([
+                'Selection Infos', 
+                html.I(
+                    id="selection-help",
+                    className="fas fa-question-circle",
+                    style={
+                        'display' : 'inline-block',
+                        'margin' :'5px',
+                    }
+                ),
+            ]),
+
             html.Div([
                 dbc.Button('CLEAR SELECTION', 
                     color="primary", 
@@ -84,7 +97,8 @@ def render():
                         is_open=False
                     ),
                 ],
-            )
+            ),
+            *gen_help_tooltips(help_infos)
         ], 
         style={
             'marginLeft' : '0%', 

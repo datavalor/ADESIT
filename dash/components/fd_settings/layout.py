@@ -3,15 +3,25 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 
-from utils.dash_utils import Tooltip
+from .help import help_infos
+from utils.dash_utils import gen_help_tooltips
 
 def render():
     return html.Div(
         [
-            html.H5("Data and problem settings"),
+            html.H5([
+                'Data and Function Definition', 
+                html.I(
+                    id="datasettings-help",
+                    className="fas fa-question-circle",
+                    style={
+                        'display' : 'inline-block',
+                        'margin' :'5px',
+                    }
+                ),
+            ]),
 
             # File Input and params (b)
-        
             html.Div(
                 dcc.Loading(
                     [
@@ -50,6 +60,7 @@ def render():
                     'verticalAlign': 'top'
                 }
             ),
+
             # Setting features and class
             html.Div([
                 #  Left-hand side of the 'DF' (c)
@@ -60,20 +71,10 @@ def render():
                         placeholder="Select the features", 
                         disabled=True,
                         style={'marginBottom' : '10px',}),
-                    Tooltip(children=
-                        ['You need to define similarity thresolds for each attribute. They take the form:', 
-                            html.Br(), 
-                            'a±(abs+rel*|a|)', 
-                            html.Br(), 
-                            'Therefore, two values a and b are considered as equal if:', 
-                            html.Br(), 
-                            "|a-b|≤abs+rel*max(|a|,|b|)"
-                        ], 
-                        target='help-thresolds'),
                     html.Div(id="left-tols"),
                     html.I("Uncertainties"),
                     html.I(
-                        id="help-thresolds",
+                        id="thresolds-help",
                         className="fas fa-question-circle",
                         style={
                             'display' : 'inline-block',
@@ -130,6 +131,7 @@ def render():
                     ), 
                 ],style={'width' : '48%', 'verticalAlign': 'top', 'float': 'right', 'display' : 'inline-block'}),                       
             ],style={'width' : '75%', 'display' : 'inline-block', 'paddingLeft' : '4%'}),
+            *gen_help_tooltips(help_infos)
         
         ], style={
             'marginBottom' : '1%',

@@ -1,3 +1,4 @@
+from json import tool
 import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
@@ -23,3 +24,11 @@ def gen_modal(id, title="Modal header", content="This is content"):
         is_open=False,
         size="xl",
     )
+
+def gen_help_tooltips(help_infos):
+    tooltips = []
+    for id, content in help_infos.items():
+        print(id)
+        print(content)
+        tooltips.append(Tooltip(children=content, target=id))
+    return tooltips
