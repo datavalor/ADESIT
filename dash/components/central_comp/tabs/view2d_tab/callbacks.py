@@ -196,7 +196,7 @@ def register_callbacks(plogger):
             selected_ids=[]
             for p in points:
                 if "customdata" in p:
-                    selected_ids.append(p['customdata'][0])
+                    selected_ids.append(p['customdata'][-1])
                 elif "pointIndex" in p:
                     selected_ids.append(p['pointIndex'])
 

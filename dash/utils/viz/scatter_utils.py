@@ -63,6 +63,7 @@ def add_basic_scatter(
         **scatter_params
     }
     if session_infos is not None:
+        df['real_id'] = df.index
         params['customdata']=df.to_numpy()
         if hover: params['hovertemplate']=gen_hovertemplate(df, session_infos)
     
