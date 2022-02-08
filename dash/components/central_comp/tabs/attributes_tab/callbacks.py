@@ -152,8 +152,7 @@ def register_callbacks(plogger):
             raise PreventUpdate
 
     @dash.callback(
-        [Output('attrs-hist-div', 'children'),
-        Output('sliders_added', 'children')],
+        Output('attrs-hist-div', 'children'),
         [Input('data-loaded', 'children')],
         [State('session-id', 'children')]
     )
@@ -222,6 +221,6 @@ def register_callbacks(plogger):
             if current_row!=[]:
                 content.append(dbc.Row(current_row))
             
-            return content, ""
+            return content
         else:
             return PreventUpdate

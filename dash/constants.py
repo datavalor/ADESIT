@@ -1,5 +1,7 @@
 import pandas as pd
 
+ADESIT_VERSION = '2.0.0'
+
 # COLUMN TYPES
 NUMERICAL_COLUMN = "numerical"
 CATEGORICAL_COLUMN = "categorical"

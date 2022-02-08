@@ -1,6 +1,4 @@
-from json import tool
 import dash_bootstrap_components as dbc
-from dash import dcc
 from dash import html
 
 hr_tooltip = html.Hr(style={'border': 'none', 'height': '2px', 'backgroundColor': '#FFF', 'marginTop': '2px', 'marginBottom': '2px'})
@@ -13,14 +11,23 @@ def gen_modal(id, title="Modal header", content="This is content"):
     return dbc.Modal(
         [
             dbc.ModalHeader(title),
-            dbc.ModalBody(content),
+            dbc.ModalBody(content, style={'textAlign': 'justify'}),
             dbc.ModalFooter(
                 dbc.Button(
-                    "Close", id=f"{id}_close", className="ml-auto", n_clicks=0
+                    "Close", 
+                    id={
+                        'type': 'modal_close',
+                        'index': id
+                    }, 
+                    className="ml-auto", 
+                    n_clicks=0
                 )
             ),
         ],
-        id=id,
+        id={
+            'type': 'modal',
+            'index': id
+        },        
         is_open=False,
         size="xl",
     )

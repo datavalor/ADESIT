@@ -40,7 +40,6 @@
 
 .ceviz_hover_anim {
     animation: backcolor 1s 1;
-    /* padding: 10px; */
 }
 
 @keyframes backcolor {
