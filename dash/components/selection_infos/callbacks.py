@@ -26,8 +26,8 @@ def register_callbacks(plogger):
 
         session_data = get_data(session_id)
         dh = session_data['data_holder']
-        point = session_data['selected_point']['point']
-        in_violation_with = session_data['selected_point']['in_violation_with']
+        point = session_data['selection_infos']['point']
+        in_violation_with = session_data['selection_infos']['in_violation_with']
         if dh is not None and dh['data']['df'] is not None:
             user_columns_names=list(dh['user_columns'].keys())
             for c in dh["X"]+dh["Y"]: user_columns_names.remove(c)
@@ -81,8 +81,6 @@ def register_callbacks(plogger):
                     },
                 ]+white_back
 
-            print(style_data_conditional)
-
             table = dash_table.DataTable(
                 data=output_df.to_dict('records'),
                 id="ceviz_datatable",
@@ -110,7 +108,7 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate
 
         dh = session_data['data_holder']
-        selected_points = session_data["selected_point"]
+        selected_points = session_data["selection_infos"]
         in_violation_with = selected_points["in_violation_with"]
         if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
             df = session_data['data_holder']['data']['df']

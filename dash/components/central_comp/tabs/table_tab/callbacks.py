@@ -141,7 +141,7 @@ def register_callbacks(plogger):
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
-        selection_infos = get_data(session_id)['selected_point']
+        selection_infos = get_data(session_id)['selection_infos']
         dh=session_data['data_holder']
         if selection_infos['point'] is not None:
             if dh['data']['df_free'] is not None:

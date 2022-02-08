@@ -52,7 +52,7 @@ def register_callbacks(plogger):
         figure.update_layout(
             title=f'{attr_name} ({attr.get_type()})',
             margin={'l': 0, 'b': 0, 't': 60, 'r': 0},
-            height=300,
+            height=280,
             barmode='stack',
             showlegend=False,
         )
@@ -139,7 +139,7 @@ def register_callbacks(plogger):
                 for hist_id, figure_dict in zip(hists_ids, hists_figures):
                     figure = go.Figure(figure_dict)
                     attr_name = hist_id['index']
-                    figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selected_point"])
+                    figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selection_infos"])
                     figures.append(figure)
             else: 
                 for hist_id in hists_ids:
@@ -179,7 +179,7 @@ def register_callbacks(plogger):
                             'index': attr_name
                         },
                     )],
-                    style={"height": 350}
+                    style={"height": 330}
                 )
                 if attr.is_numerical():
                     attr_min, attr_max = attr.get_minmax()

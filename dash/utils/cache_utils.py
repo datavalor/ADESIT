@@ -30,7 +30,7 @@ default_data = {
     'graphs': {},
     'thresolds_settings': {},
     'table_data': None,
-    'selected_point': {
+    'selection_infos': {
         'point': None,
         'in_violation_with': pd.DataFrame()
     }

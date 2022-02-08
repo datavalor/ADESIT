@@ -146,7 +146,7 @@ def register_callbacks(plogger):
                             'figure': go.Figure(scatter_fig)
                         }
                     )
-                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selected_point"], xaxis_column_name, yaxis_column_name)
+                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selection_infos"], xaxis_column_name, yaxis_column_name)
                 return fig
             # if showing raw data
             else:
@@ -163,7 +163,7 @@ def register_callbacks(plogger):
                             'figure': go.Figure(scatter_fig)
                         }
                     )
-                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selected_point"], xaxis_column_name, yaxis_column_name)
+                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selection_infos"], xaxis_column_name, yaxis_column_name)
                     
                 return fig
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:

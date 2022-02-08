@@ -2,10 +2,10 @@ import dash_bootstrap_components as dbc
 from dash import html
 from dash import dcc
 
-from components import table_tab as table_tab_component
-from components import view2d_tab as view2d_tab_component
-from components import attributes_tab as attributes_tab_component
-from components import time_trace_tab as time_trace_tab_component
+from .tabs import table_tab as table_tab_component
+from .tabs import view2d_tab as view2d_tab_component
+from .tabs import attributes_tab as attributes_tab_component
+from .tabs import time_trace_tab as time_trace_tab_component
 
 from .tab_help_content import tab_help_modal_titles, tab_help_modal_content
 from .legend import gen_analysed_legend
@@ -39,7 +39,7 @@ def create_tab(content, tab_name, tab_id):
             html.Div(
                 generate_help_button(tab_id)+content,
                 style={
-                    'height': '720px'
+                    'height': '670px'
                 }
             ),
             type="circle", 

@@ -98,7 +98,7 @@ def register_callbacks(plogger):
                     "point": selected_point,
                     "in_violation_with": in_violation_with
                 }
-                overwrite_session_selected_point(session_id, selection_infos)
+                overwrite_session_selection_infos(session_id, selection_infos)
 
                 if len(selection_infos['in_violation_with']) == 0: graph_is_open = False
                 return "", ceviz_infos, table_is_open, graph_is_open, clear_selection_disabled

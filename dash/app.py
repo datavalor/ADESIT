@@ -18,13 +18,11 @@ from components import indicators as indicators_component
 from components import selection_infos as selection_infos_component
 from components import computation_footer as computation_footer_component
 
-
-
 from components import central_comp as central_comp_component
-from components import view2d_tab as view2d_tab_component
-from components import time_trace_tab as time_trace_tab_component
-from components import attributes_tab as attributes_tab_component
-from components import table_tab as table_tab_component
+from components.central_comp.tabs import view2d_tab as view2d_tab_component
+from components.central_comp.tabs import time_trace_tab as time_trace_tab_component
+from components.central_comp.tabs import attributes_tab as attributes_tab_component
+from components.central_comp.tabs import table_tab as table_tab_component
 
 import constants
 

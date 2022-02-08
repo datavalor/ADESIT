@@ -51,7 +51,7 @@ def register_callbacks(plogger):
                 dh['graph'] = graph
                 overwrite_session_data_holder(session_id, dh, source='handle_analysis')
                 overwrite_session_graphs(session_id)
-                overwrite_session_selected_point(session_id)
+                overwrite_session_selection_infos(session_id)
                 return is_open, '', False, False, {}
             return is_open, '', True, True, {'visibility' : 'hidden'}
         else:
