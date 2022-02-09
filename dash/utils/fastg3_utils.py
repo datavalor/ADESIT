@@ -61,10 +61,11 @@ def make_analysis(session_infos, left_tols, right_tols, g3_computation):
         data = {
             'df': df,
             'df_free': df.loc[df[G12_COLUMN_NAME] == 0],
-            'df_prob': df.loc[df[G12_COLUMN_NAME] > 0]
+            'df_prob': df.loc[df[G12_COLUMN_NAME] > 0],
+            'indicators': indicators
         }
     
-    return list(xparams.keys()), list(yparams.keys()), data, indicators, return_dict["vps_al"]
+    return list(xparams.keys()), list(yparams.keys()), data, return_dict["vps_al"]
     
 
 

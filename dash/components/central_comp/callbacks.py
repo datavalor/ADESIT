@@ -46,7 +46,6 @@ def register_callbacks(plogger):
                     selected_point_id = None
                     graph_is_open, table_is_open = False, False
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None: # TABLE TAB LINE CLICK
-                    # print(active_cell)
                     selected_point_id = active_cell['row_id']
                 elif changed_id == 'cytoscape_ce_graph.tapNodeData' and cytoData is not None: # CE GRAPH NODE CLICK
                     selected_point_id = int(cytoData['label'])

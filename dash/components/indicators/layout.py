@@ -88,8 +88,9 @@ def render():
         ]), 
         style={
             'marginLeft' : '0%', 
-            'marginRight' : '0%'
+            'marginRight' : '0%',
+            'display': 'none'
         },
-        id="collapse-stats",
-        is_open=False
+        id='collapse-indicators',
+        is_open=True
     ), type="circle", fullscreen=False)

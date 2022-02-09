@@ -7,8 +7,11 @@ def dataset_infos(name, ntuples, nattributes):
                 Number of attributes: {nattributes}
             '''
 
-def format_date_period(period_min, period_max, format):
-    return f'{period_min.strftime(format)} → {period_max.strftime(format)}'
+def format_date_period(period_min, period_max, format=None):
+    if format is not None:
+        return f'{period_min.strftime(format)} → {period_max.strftime(format)}'
+    else:
+        return f'{period_min} → {period_max}'
 
 def which_proj_type(Xattrs, user_columns):
     n_nums = sum([1 for attr in Xattrs if user_columns[attr].is_numerical()])

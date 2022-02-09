@@ -74,11 +74,13 @@ def data_preprocessing_for_table(session_infos, data_key='df', by_data_type=True
         pre_sdc = default_style_data_conditional
         post_sdc = white_back+[id_column_sdc]
 
-    hidden_columns = ['id']
+
+    output_df[TABLE_ROWNUM_NAME] = output_df.reset_index(drop=True).index
+    hidden_columns = [TABLE_ROWNUM_NAME]
     if G12_COLUMN_NAME in output_df.columns:
             hidden_columns.append(G12_COLUMN_NAME)
             columns = columns+[{'name': ['system', G12_COLUMN_NAME], 'id': G12_COLUMN_NAME}]   
-    columns = columns+[{'name': ['system', 'real id'], 'id': 'id'}]
+    columns = columns+[{'name': ['system', TABLE_ROWNUM_NAME], 'id': TABLE_ROWNUM_NAME}]
     columns = [{'name': ['', 'id'], 'id': ADESIT_INDEX, "hideable":False}]+columns
     output_df['id'] = output_df.index
     output_df = output_df[[c['id'] for c in columns]]

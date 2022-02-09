@@ -23,5 +23,7 @@ Comming soon.
     ''',
     'dataexploration-help': [
         'With this section, you can explore the dataset visually in view of counterexamples.'
-    ]
+    ],
+    'free-tuple-help': 'Tuple involved in no counterexample.',
+    'involved-tuple-help': 'Tuple involved in at least 1 counterexample.'
 }

@@ -28,14 +28,18 @@ def register_callbacks(plogger):
                 line_width=0
             )
         
+
+        bins, bins_counts = histogram_utils.compute_1d_histogram(data_holder, attr_name, resolution, minmax=minmax, df=data_holder['df_full'])
         if data_holder['data']['df_prob'] is None:
             histogram_utils.add_basic_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
             upper_bound = list(figure.data[0].y)
-        else:
+        elif data_holder['data']['df'] is not None:
             histogram_utils.add_advanced_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
             upper_bound = [a+b for a,b in zip(figure.data[0].y, figure.data[1].y)]
+        else:
+            upper_bound = [0]*len(bins_counts)
 
-        bins, bins_counts = histogram_utils.compute_1d_histogram(data_holder, attr_name, resolution, minmax=minmax, df=data_holder['df_full'])
+
         for i in range(len(bins_counts)):
             bins_counts[i]-=upper_bound[i]
             upper_bound[i]=upper_bound[i]+bins_counts[i]
@@ -68,7 +72,7 @@ def register_callbacks(plogger):
         point = selection_infos['point']
         if point is not None:
             in_violation_with = selection_infos['in_violation_with']
-            n_tuples = len(session_infos['data']['df'].index)
+            n_tuples = len(session_infos['df_full'].index)
             if session_infos['data']['df_free'] is not None:
                 if not in_violation_with.empty:
                     point_line_color = SELECTED_COLOR_BAD
@@ -117,15 +121,14 @@ def register_callbacks(plogger):
 
     @dash.callback(
         Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
-        [Input('attrs-hist-div', 'children'),
-        Input('data_filters_have_changed', 'children'),
+        [Input('data_filters_have_changed', 'children'),
         Input('data-analysed', 'children'),
         Input('selection_changed', 'children')],
         [State({'type': 'attr_histogram', 'index': ALL}, 'id'),
         State({'type': 'attr_histogram', 'index': ALL}, 'figure'),
         State('session-id', 'children')]
     )
-    def attributes_histograms_update(hist_div_init, filters_changed, data_analysed, selection_changed, hists_ids, hists_figures, session_id):
+    def attributes_histograms_update(filters_changed, data_analysed, selection_changed, hists_ids, hists_figures, session_id):
         logger.debug("attributes_histograms_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate  

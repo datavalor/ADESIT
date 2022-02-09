@@ -26,7 +26,7 @@ dataset_names={
 logger=logging.getLogger('adesit_callbacks')
 cache = None
 
-default_data = {
+default_session_data = {
     'data_holder': None,
     'graphs': {},
     'thresolds_settings': {},
@@ -39,6 +39,24 @@ default_data = {
         'point': None,
         'in_violation_with': pd.DataFrame()
     }
+}
+
+default_time_infos = {
+    'time_attribute': None,
+    'time_minmax': [],
+    'time_periods_list': [],
+    'current_time_period': None,
+    'date_format': None,
+    'computation_cache': {
+        'data': []
+    }  
+}
+
+default_data = {
+    'df': None,
+    'df_free': None,
+    'df_prob': None,
+    'indicators': None
 }
 
 class AdesitAttribute:
@@ -115,16 +133,12 @@ def gen_data_holder(df):
     df = df.reset_index(drop=True)
     df.insert(0, ADESIT_INDEX, df.index)
     data_holder =  {
-        'data': {
-            'df': df,
-            'df_free': None,
-            'df_prob': None,
-        },
-        'df_full': df,
-        'indicators': None,
+        'data': default_data,  #contains the current df to be analysed and displayed (included in df_minmax)
+        'df_minmax': None, #contains the df after attributes minmax filters (included in df_full)
+        'df_full': df, #contains full df as uploaded by the user
         'graph': None,
         'user_columns': columns,
-        'time_infos': None,
+        'time_infos': default_time_infos,
         "X": [],
         "Y": []
     }
@@ -157,7 +171,7 @@ def get_data(session_id, pydata=False, clear=False, filename=None, contents=None
         else:
             return None
 
-        final_data = default_data
+        final_data = default_session_data
         final_data['data_holder']=gen_data_holder(df)
         return final_data
 
@@ -171,7 +185,7 @@ def clear_session(session_id):
     get_data(session_id, clear=True)
 
 def overwriters(name):
-    def overwrite(session_id, data=default_data[name], source=''):
+    def overwrite(session_id, data=default_session_data[name], source=''):
         logger.debug(f'====================> Overwriting {name} from {source}')
         session_data=get_data(session_id)
         session_data[name]=data
@@ -179,5 +193,5 @@ def overwriters(name):
         get_data(session_id, copy=session_data)
     return overwrite
 
-for k in default_data:
+for k in default_session_data:
     exec(f"overwrite_session_{k}=overwriters('{k}')")

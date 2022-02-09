@@ -8,9 +8,10 @@ CATEGORICAL_COLUMN = "categorical"
 DATETIME_COLUMN = "datetime"
 
 # ADESIT COLUMNS IN DATASET
-ADESIT_INDEX = "adesit_id"
+ADESIT_INDEX = "id"
 G12_COLUMN_NAME = "_violating_tuple"
 G3_COLUMN_NAME = "_g3_to_remove"
+TABLE_ROWNUM_NAME = "adesit_row_num"
 SELECTION_COLUMN_NAME = "_selected"
 PROJ_AXES = ['__PROJ1', '__PROJ2']
 SUFFIX_OF_ENCODED_COLS = "__LEADESIT"

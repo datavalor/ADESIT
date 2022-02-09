@@ -26,7 +26,10 @@ def render():
         # Commands Board
         html.Div([
             html.Div("Y-Axis"),
-            dcc.Dropdown(id='time_trace_yaxis',style={'width' : '100%', 'marginBottom' : '10px'}),
+            dbc.Select(
+                id='timetrace-yaxis-dropdown', 
+                style={'width' : '100%', 'marginBottom' : '10px'},
+            ),
 
         ], style={
             'width': '29%',

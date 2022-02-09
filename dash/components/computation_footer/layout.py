@@ -83,22 +83,31 @@ def render():
                         'display': 'inline-block',
                         "textAlign": "center",
                         'width': '80%',
-                        # 'marginTop': '20px'
                     }
                 ),
                 html.Div([
-                    dcc.Dropdown(
+                    html.I(
+                        id='g3-computation-help',
+                        className="fas fa-question-circle",
+                        style={
+                            'display' : 'inline-block',
+                            'margin' :'5px',
+                        }
+                    ),
+                    html.Strong("g3 computation:"),
+                    dbc.Select(
                         id = "g3_computation",
+                        className = 'dropup',
                         options=[
-                            {'label': 'g3 approximation', 'value': 'approx'},
-                            {'label': 'g3 exact', 'value': 'exact'}
+                            {'label': 'auto', 'value': 'auto'},
+                            {'label': 'approximation', 'value': 'approx'},
+                            {'label': 'exact', 'value': 'exact'}
                         ],
-                        value='approx',
+                        value='auto',
                         disabled=True,
-                        clearable=False, 
                         style={
                             'width' : '100%',
-                            'marginBottom' : '5px'
+                            'marginBottom' : '5px',
                         }
                     ),
                     dbc.Button('Analyse', 
@@ -114,7 +123,8 @@ def render():
                         'width' : '20%', 
                         'display' : 'inline-block', 
                         'position': 'relative',
-                        'bottom' : '0'
+                        # 'bottom' : '0',
+                        'verticalAlign': 'top'
                     }
                 ), 
             ],

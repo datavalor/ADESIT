@@ -7,5 +7,9 @@ help_infos = {
     By selecting one of them, you are informing ADESIT that your dataset is a time series and new analysis tools will be available.
 
     This is optional.
+    ''',
+    'g3-computation-help': '''
+    Computing the learnability indicator (1-g3) is a NP-Complete problem related to the Minimum Vertex Cover. 
+    You can choose to compute it exactly (for medium size datasets), approximately (for large ones) or let us choose for you!
     '''
 }

@@ -29,7 +29,7 @@ def register_callbacks(plogger):
 
         dh=session_data['data_holder']
         if dh is not None:
-            indicators_dict = dh['indicators']
+            indicators_dict = dh['data']['indicators']
             if indicators_dict is not None:
                 g1, g2 = indicators_dict['g1'], indicators_dict['g2']
                 #g1, g2

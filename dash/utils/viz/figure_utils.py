@@ -17,8 +17,8 @@ def gen_subplot_fig(xaxis_column_name, yaxis_column_name, make_subplot_args={}):
         shared_yaxes = True,
         horizontal_spacing=0.01, 
         vertical_spacing=0.03,
-        x_title= str(xaxis_column_name),
-        y_title= str(yaxis_column_name),
+        x_title= xaxis_column_name,
+        y_title= yaxis_column_name,
         specs=[[{"secondary_y": True}, {"secondary_y": False}],
             [{"secondary_y": False}, {"secondary_y": False}]],
         **make_subplot_args

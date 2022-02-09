@@ -44,7 +44,6 @@ def register_callbacks(plogger):
                 middle_sdc=[
                     {
                         'if': {
-                            'state': 'any',
                             'filter_query': f'{{id}} = {point.name}'
                         }, 
                         'backgroundColor': selection_color[0],

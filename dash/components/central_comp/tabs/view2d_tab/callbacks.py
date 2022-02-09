@@ -70,7 +70,7 @@ def register_callbacks(plogger):
 
     # Callback for Graph Output (f,g->e)
     @dash.callback(Output('main-graph', 'figure'),
-                [Input('data-loaded','children'),
+                [Input('data_filters_have_changed', 'children'),
                 Input('data-analysed', 'children'),
                 Input('2d-viewmode', 'value'),
                 Input('heatmap_resolution_slider', 'value'),
@@ -78,22 +78,21 @@ def register_callbacks(plogger):
                 Input('y-axis', 'value'),
                 Input('view','value'),
                 Input('mode','value'),
-                Input('selection_changed', 'children'),
-                Input('data_filters_have_changed', 'children')],
+                Input('selection_changed', 'children')],
                 [State('left-attrs','value'),
                 State('right-attrs','value'),
                 State('main-graph', 'figure'),
                 State('session-id', 'children')])
-    def handle_graph(data_updated, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, current_time_range, left_attrs, right_attrs, scatter_fig, session_id):
+    def handle_graph(data_filtered, data_analysed, d2_viewmode, nbins, xaxis_column_name, yaxis_column_name, view, mode, selection_changed, left_attrs, right_attrs, scatter_fig, session_id):
         logger.debug("handle_graph callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
+        # label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
         dh=session_data['data_holder']
-        if changed_id != 'data-loaded.children' and dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:
+        if dh is not None and yaxis_column_name is not None and xaxis_column_name is not None:
             df=dh['data']['df']
             
             # handling projections if needed
@@ -109,63 +108,39 @@ def register_callbacks(plogger):
                     proj = PCA(n_components=2).fit_transform(df[left_attrs])
                 elif proj_type=="MCA": # only categorical => MCA
                     mca = prince.MCA(
-                        n_components=2,
-                        n_iter=3,
-                        copy=True,
-                        check_input=True,
-                        engine='auto',
-                        random_state=42
+                        n_components=2, n_iter=3, copy=True, check_input=True, engine='auto', random_state=42
                     )
                     proj = mca.fit_transform(df[left_attrs])
                 else: # mixed types => FAMD
                     famd = prince.FAMD(
-                        n_components=2,
-                        n_iter=3,
-                        copy=True,
-                        check_input=True,
-                        engine='auto',
-                        random_state=27
+                        n_components=2, n_iter=3, copy=True, check_input=True, engine='auto', random_state=27
                     )
                     proj = famd.fit_transform(df[left_attrs])
                 df[PROJ_AXES]=proj
                 dh['data']['df']=df
                 overwrite_session_data_holder(session_id, dh, source='handle_graph')
             
-            # if calculations have been made
-            if label_column in df.columns:
-                if changed_id != 'selection_changed.children':
+            if changed_id != 'selection_changed.children':
+                if dh['data']['df_free'] is not None:
                     if(d2_viewmode=="scatter"):
                         fig = scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, nbins, view) 
                     else:
                         fig = heatmap_gen.advanced_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)  
                 else:
-                    fig = figure_utils.gen_subplot_fig(
-                        xaxis_column_name,
-                        yaxis_column_name,
-                        make_subplot_args={
-                            'figure': go.Figure(scatter_fig)
-                        }
-                    )
-                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selection_infos"], xaxis_column_name, yaxis_column_name)
-                return fig
-            # if showing raw data
-            else:
-                if changed_id != 'selection_changed.children':
                     if(d2_viewmode=="scatter"):
                         fig = scatter_gen.basic_scatter(dh, xaxis_column_name, yaxis_column_name, nbins)
                     else:
                         fig = heatmap_gen.basic_heatmap(dh, xaxis_column_name, yaxis_column_name, nbins)
-                else:
-                    fig = figure_utils.gen_subplot_fig(
-                        xaxis_column_name,
-                        yaxis_column_name,
-                        make_subplot_args={
-                            'figure': go.Figure(scatter_fig)
-                        }
-                    )
-                fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selection_infos"], xaxis_column_name, yaxis_column_name)
-                    
-                return fig
+            else:
+                fig = figure_utils.gen_subplot_fig(
+                    xaxis_column_name,
+                    yaxis_column_name,
+                    make_subplot_args={
+                        'figure': go.Figure(scatter_fig)
+                    }
+                )
+            fig = scatter_gen.add_selection_to_scatter(fig, dh, get_data(session_id)["selection_infos"], xaxis_column_name, yaxis_column_name)
+            return fig
         elif dh is not None and yaxis_column_name is None and xaxis_column_name is None:
             return {}
         else:

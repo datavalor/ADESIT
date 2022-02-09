@@ -48,8 +48,8 @@ def register_callbacks(plogger):
 
         if data is not None:
             dh = data.get('data_holder', None)
-            n = len(dh['data']['df'].index) if dh is not None else 0
-            return '', data_utils.dataset_infos(filename, n, len(dh['data']['df'].columns)), False, False, dash.no_update
+            n = len(dh['df_full'].index) if dh is not None else 0
+            return '', data_utils.dataset_infos(filename, n, len(dh['user_columns'])), False, False, dash.no_update
         else:
             return dash.no_update, dash.no_update, dash.no_update, dash.no_update, True
         
@@ -70,9 +70,9 @@ def register_callbacks(plogger):
 
         dh=session_data['data_holder']
         if dh is not None:
-            df_parsed=dh['data']['df']
-            user_cols=dh['user_columns']
-            options=[{'label': str(col), 'title' : str(df_parsed.dtypes[str(col)]), 'value': str(col)} for col in user_cols]
+            options = []
+            for attr_name, attr in dh['user_columns'].items():
+                options.append({'label': attr_name, 'title': attr.get_type(), 'value': attr_name})
             return options, options, None, None
         else:
             return [], [], None, None

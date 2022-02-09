@@ -78,7 +78,7 @@ def render():
                         className="fas fa-question-circle",
                         style={
                             'display' : 'inline-block',
-                            'margin' :'5px'}
+                            'margin' : '5px'}
                     ),
                     dash_table.DataTable(
                         id='thresold_table_features',

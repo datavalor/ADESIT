@@ -18,15 +18,12 @@ def register_callbacks(plogger):
 
     # Callback for Table Output (b,c,d,e,f,g->h) 
     @dash.callback(Output('viz_table_container', 'children'),
-                [Input('data-loaded','children'),
-                Input('main-graph','selectedData'),
+                [Input('data_filters_have_changed', 'children'),
                 Input('view','value'),
                 Input('mode','value'),
-                Input('data-analysed', 'children'),
-                Input('time-period-dropdown', 'options'),
-                Input('data_filters_have_changed', 'children')],
+                Input('data-analysed', 'children')],
                 [State('session-id', 'children')])
-    def handle_table(data_updated, selected_data, view, mode, analysed, time_period_options, filters_changed, session_id):
+    def handle_table(data_filtered, view, mode, analysed, session_id):
         logger.debug("handle_table callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -34,7 +31,7 @@ def register_callbacks(plogger):
         # label_column = G12_COLUMN_NAME if mode == 'color_involved' else G3_COLUMN_NAME
         
         dh=session_data['data_holder']
-        if dh is not None:
+        if dh is not None and dh['data']['df'] is not None:
             # select_problematics/non problematics according to mode and view
             data_key = 'df'
             if dh['data']['df_free'] is not None:
@@ -126,7 +123,9 @@ def register_callbacks(plogger):
                     }
                 )
             sdc += table_infos['post_sdc']
-            page = math.floor((selection_infos["point"].name-1)/TABLE_MAX_ROWS)
+            # table_data = table_infos['df_table']
+            row_num = table_infos['df_table'].loc[selection_infos["point"].name][TABLE_ROWNUM_NAME]
+            page = math.floor((row_num-1)/TABLE_MAX_ROWS)
             return sdc, page
         else:
             return table_infos['pre_sdc']+table_infos['post_sdc'], dash.no_update
