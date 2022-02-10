@@ -36,3 +36,13 @@ def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
         barmode='stack'
     )
     return fig
+
+def choose_selected_point_style(session_infos, selection_infos):
+    if session_infos['data']['df_free'] is not None:
+        if not selection_infos['in_violation_with'].empty:
+            selection_style = (SELECTED_COLOR_BAD, SELECTED_COLOR_BAD_OUTLINE, 'cross')
+        else:
+            selection_style = (SELECTED_COLOR_GOOD, SELECTED_COLOR_GOOD_OUTLINE, 'circle')
+    else:
+        selection_style = (SELECTED_NON_ANALYSED_COLOR, SELECTED_NON_ANALYSED_COLOR_OUTLINE, 'circle')
+    return selection_style

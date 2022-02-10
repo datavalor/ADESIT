@@ -11,6 +11,7 @@ from constants import *
 from utils.cache_utils import *
 import utils.data_utils as data_utils
 import utils.viz.histogram_utils as histogram_utils
+import utils.viz.figure_utils as figure_utils
 
 def register_callbacks(plogger):
     logger = plogger
@@ -73,13 +74,7 @@ def register_callbacks(plogger):
         if point is not None:
             in_violation_with = selection_infos['in_violation_with']
             n_tuples = len(session_infos['df_full'].index)
-            if session_infos['data']['df_free'] is not None:
-                if not in_violation_with.empty:
-                    point_line_color = SELECTED_COLOR_BAD
-                else:
-                    point_line_color = SELECTED_COLOR_GOOD
-            else:
-                point_line_color = NON_ANALYSED_COLOR
+            point_line_color = figure_utils.choose_selected_point_style(session_infos, selection_infos)[0]
             figure.add_trace(
                 go.Scatter(x=[point[attr_name],point[attr_name]], 
                 y=[0,n_tuples], 
@@ -121,7 +116,7 @@ def register_callbacks(plogger):
 
     @dash.callback(
         Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
-        [Input('data_filters_have_changed', 'children'),
+        [Input('data_updated', 'children'),
         Input('data-analysed', 'children'),
         Input('selection_changed', 'children')],
         [State({'type': 'attr_histogram', 'index': ALL}, 'id'),

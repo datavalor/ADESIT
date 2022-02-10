@@ -20,7 +20,7 @@ def register_callbacks(plogger):
         Output('mode', 'disabled'),
         Output('view', 'disabled'),
         Output('select-infos-after-analysis', 'style')],
-        [Input('data_filters_have_changed', 'children'),
+        [Input('data_updated', 'children'),
         Input('analyse_btn','n_clicks')],
         [State('left-attrs','value'),
         State('right-attrs','value'),
@@ -83,7 +83,7 @@ def register_callbacks(plogger):
             return dash.no_update, dash.no_update, indicators_stats, dash.no_update, True
 
     @dash.callback(
-        Output('data_filters_have_changed', 'children'),
+        Output('data_updated', 'children'),
         [Input({'type': 'minmax_changed', 'index': ALL}, 'children'),
         Input('time-period-dropdown', 'value'),
         Input('current-time-range', 'children')],

@@ -38,9 +38,9 @@ def register_callbacks(plogger):
                 columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, output_df=tmp_df, by_data_type=by_data_type)
                 
                 if dh['data']['df_free'] is not None:
-                    selection_color = (SELECTED_COLOR_BAD, 'black') if not in_violation_with.empty else (SELECTED_COLOR_GOOD, "white")
+                    selection_color = (SELECTED_COLOR_BAD, SELECTED_COLOR_BAD_OUTLINE) if not in_violation_with.empty else (SELECTED_COLOR_GOOD, SELECTED_COLOR_GOOD_OUTLINE)
                 else:
-                    selection_color = (NON_ANALYSED_COLOR, 'white')
+                    selection_color = (SELECTED_NON_ANALYSED_COLOR, SELECTED_NON_ANALYSED_COLOR_OUTLINE)
                 middle_sdc=[
                     {
                         'if': {

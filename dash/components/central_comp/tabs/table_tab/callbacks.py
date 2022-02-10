@@ -12,13 +12,14 @@ pd.options.mode.chained_assignment = None
 from constants import *
 import utils.viz.table_utils as table_utils
 from utils.cache_utils import *
+import utils.viz.figure_utils as figure_utils
 
 def register_callbacks(plogger):
     logger = plogger
 
     # Callback for Table Output (b,c,d,e,f,g->h) 
     @dash.callback(Output('viz_table_container', 'children'),
-                [Input('data_filters_have_changed', 'children'),
+                [Input('data_updated', 'children'),
                 Input('view','value'),
                 Input('mode','value'),
                 Input('data-analysed', 'children')],
@@ -97,18 +98,15 @@ def register_callbacks(plogger):
         table_infos = session_data['table_data']
         dh=session_data['data_holder']
         if selection_infos['point'] is not None:
-            if dh['data']['df_free'] is not None:
-                selection_color = (SELECTED_COLOR_BAD, 'black') if not selection_infos['in_violation_with'].empty else (SELECTED_COLOR_GOOD, "white")
-            else:
-                selection_color = (NON_ANALYSED_COLOR, 'white')
+            selection_style = figure_utils.choose_selected_point_style(dh, selection_infos)[:2]
             sdc = table_infos['pre_sdc']
             sdc.append(
                 {
                     'if': {
                         'filter_query': f'{{id}} = {selection_infos["point"].name}'
                     }, 
-                    'backgroundColor': selection_color[0],
-                    'color': selection_color[1]
+                    'backgroundColor': selection_style[0],
+                    'color': selection_style[1]
                 }
             )
             for idx, _ in selection_infos['in_violation_with'].iterrows():

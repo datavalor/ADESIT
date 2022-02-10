@@ -23,7 +23,7 @@ def register_callbacks(plogger):
                 Input('clear-selection','n_clicks'),
                 Input('viz_datatable', 'active_cell'),
                 Input('ceviz_datatable', 'active_cell'),
-                Input('data_filters_have_changed', 'children')],
+                Input('data_updated', 'children')],
                 [State('x-axis', 'value'),
                 State('y-axis', 'value'),
                 State('session-id', 'children')])
@@ -42,7 +42,7 @@ def register_callbacks(plogger):
                 graph_is_open = True
                 table_is_open = True
                 clear_selection_disabled = False
-                if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children' or changed_id == 'data_filters_have_changed.children': 
+                if changed_id == 'clear-selection.n_clicks' or changed_id == 'data-analysed.children' or changed_id == 'data_updated.children': 
                     selected_point_id = None
                     graph_is_open, table_is_open = False, False
                 elif changed_id == 'viz_datatable.active_cell' and active_cell is not None: # TABLE TAB LINE CLICK

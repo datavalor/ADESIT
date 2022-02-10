@@ -70,7 +70,7 @@ def register_callbacks(plogger):
 
     # Callback for Graph Output (f,g->e)
     @dash.callback(Output('main-graph', 'figure'),
-                [Input('data_filters_have_changed', 'children'),
+                [Input('data_updated', 'children'),
                 Input('data-analysed', 'children'),
                 Input('2d-viewmode', 'value'),
                 Input('heatmap_resolution_slider', 'value'),
