@@ -67,7 +67,7 @@ def register_callbacks(plogger):
 
     def add_selection_to_histogram(figure, session_infos, attr_name, selection_infos):
         # Deleting previous selections
-        figure.data = tuple([datum for datum in figure.data if type(datum) is not go.Scatter])
+        figure.data = tuple([datum for datum in figure.data if datum['name']!='selection'])
 
         # Drawing lines
         point = selection_infos['point']
@@ -76,17 +76,23 @@ def register_callbacks(plogger):
             n_tuples = len(session_infos['df_full'].index)
             point_line_color = figure_utils.choose_selected_point_style(session_infos, selection_infos)[0]
             figure.add_trace(
-                go.Scatter(x=[point[attr_name],point[attr_name]], 
-                y=[0,n_tuples], 
-                mode='lines', 
-                line=dict(color=point_line_color, width=3))
+                go.Scatter(
+                    x=[point[attr_name], point[attr_name]], 
+                    y=[0,n_tuples], 
+                    mode='lines', 
+                    line=dict(color=point_line_color, width=3),
+                    name='selection'
+                ),
             )
             for _, row in in_violation_with.iterrows():
                 figure.add_trace(
-                    go.Scatter(x=[row[attr_name],row[attr_name]], 
-                    y=[0,n_tuples], 
-                    mode='lines', 
-                    line=dict(color=CE_COLOR, width=2))
+                    go.Scatter(
+                        x=[row[attr_name],row[attr_name]], 
+                        y=[0,n_tuples], 
+                        mode='lines', 
+                        line=dict(color=CE_COLOR, width=2),
+                        name='selection'
+                    ),
                 )
         return figure
 

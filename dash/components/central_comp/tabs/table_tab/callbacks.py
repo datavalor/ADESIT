@@ -106,7 +106,8 @@ def register_callbacks(plogger):
                         'filter_query': f'{{id}} = {selection_infos["point"].name}'
                     }, 
                     'backgroundColor': selection_style[0],
-                    'color': selection_style[1]
+                    'color': selection_style[1],
+                    'border': '3px solid black'
                 }
             )
             for idx, _ in selection_infos['in_violation_with'].iterrows():
@@ -117,7 +118,7 @@ def register_callbacks(plogger):
                     },
                     'backgroundColor': CE_COLOR,
                     'color': 'white',
-                    'border': '4px solid black'
+                    'border': '3px solid black'
                     }
                 )
             sdc += table_infos['post_sdc']

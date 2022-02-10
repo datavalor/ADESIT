@@ -42,7 +42,8 @@ def add_basic_scatter(
         marker_args  = {},
         data_key='df',
         hover=True,
-        scatter_params = {}
+        scatter_args = {},
+        add_trace_args = {}
     ):
     df = session_infos['data'][data_key]
     marker = gen_marker(**marker_args)
@@ -51,7 +52,7 @@ def add_basic_scatter(
         'y': df[yaxis_column_name], 
         'mode': 'markers', 
         'marker': marker,
-        **scatter_params
+        **scatter_args
     }
     if session_infos is not None:
         df['real_id'] = df.index
@@ -60,7 +61,7 @@ def add_basic_scatter(
     
     fig.add_trace(
         go.Scattergl(**params),
-        row=2, col=1
+        **add_trace_args
     )
     return fig
 
@@ -71,7 +72,7 @@ def basic_scatter(session_infos, xaxis_column_name, yaxis_column_name, resolutio
         'color': NON_ANALYSED_COLOR,
         'line_width': 0
     }
-    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=marker_args) 
+    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=marker_args, add_trace_args={'row': 2, 'col': 1}) 
     fig = hist_gen.add_basic_histograms(fig, session_infos, xaxis_column_name, resolution, add_trace_args={'row': 1, 'col': 1})
     fig = hist_gen.add_basic_histograms(fig, session_infos, yaxis_column_name, resolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
@@ -91,14 +92,14 @@ def advanced_scatter(session_infos, xaxis_column_name, yaxis_column_name, resolu
         'color': FREE_COLOR,
         'line_width': 0
     }
-    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=free_marker_args, data_key='df_free')
+    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=free_marker_args, data_key='df_free', add_trace_args={'row': 2, 'col': 1})
     prob_marker_args = {
         'opacity': prob_opacity,
         'color': CE_COLOR,
         'line_width': 0,
         'symbol': 'cross'
     }
-    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=prob_marker_args , data_key='df_prob')
+    fig = add_basic_scatter(fig, session_infos, xaxis_column_name, yaxis_column_name, marker_args=prob_marker_args , data_key='df_prob', add_trace_args={'row': 2, 'col': 1})
     fig = hist_gen.add_advanced_histograms(fig, session_infos, xaxis_column_name, resolution, add_trace_args={'row': 1, 'col': 1})
     fig = hist_gen.add_advanced_histograms(fig, session_infos, yaxis_column_name, resolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
@@ -130,9 +131,10 @@ def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_n
                     'symbol': 'cross'
                 },
                 hover=False,
-                scatter_params = {
+                scatter_args = {
                     'name': 'selection'
-                }
+                },
+                add_trace_args={'row': 2, 'col': 1}
             )
 
         selection_style = figure_utils.choose_selected_point_style(session_infos, selection_infos)
@@ -152,9 +154,10 @@ def add_selection_to_scatter(fig, session_infos, selection_infos, xaxis_column_n
                 'symbol': selection_style[2]
             },
             hover=False,
-            scatter_params = {
+            scatter_args = {
                 'name': 'selection'
-            }
+            },
+            add_trace_args={'row': 2, 'col': 1}
         )
         return fig
     else:

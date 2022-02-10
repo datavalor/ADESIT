@@ -25,11 +25,27 @@ def render():
         
         # Commands Board
         html.Div([
-            html.Div("Y-Axis"),
+            dbc.Label('Y-Axis'),
             dbc.Select(
                 id='timetrace-yaxis-dropdown', 
                 style={'width' : '100%', 'marginBottom' : '10px'},
             ),
+            dbc.Label('Display options'),
+            dbc.Checklist(
+                options=[
+                    {"label": "Show time cuts", "value": 0},
+                    {"label": "Follow time period", "value": 1},
+                ],
+                value=[],
+                id="time-trace-viz-switches",
+                switch=True,
+            ),
+            dbc.Button(
+                'Center on current time period', id="time-trace-center-button", className="me-2", n_clicks=0,
+                style={
+                    'width': '100%'
+                }
+            )
 
         ], style={
             'width': '29%',

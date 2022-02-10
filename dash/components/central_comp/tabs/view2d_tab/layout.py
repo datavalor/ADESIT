@@ -20,7 +20,7 @@ def render():
         # Main Commands Board
         html.Div([
             html.H5("View settings"),
-            html.Div("Mode"),
+            html.Label("Mode"),
             dcc.Dropdown(
                 id='2d-viewmode',
                 options=[
@@ -33,7 +33,7 @@ def render():
             ),
             
             html.Div([
-                html.Div("Number of bins (numeric attributes)", id="slider_label"),
+                html.Label("Number of bins (numeric attributes)"),
                 dcc.Slider(
                     id='heatmap_resolution_slider',
                     min=5,
@@ -48,9 +48,9 @@ def render():
 
             html.Hr(),
 
-            html.Div("X-Axis"),
+            html.Label("X-Axis"),
             dcc.Dropdown(id='x-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
-            html.Div("Y-Axis"),
+            html.Label("Y-Axis"),
             dcc.Dropdown(id='y-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
             
             html.Hr(),
