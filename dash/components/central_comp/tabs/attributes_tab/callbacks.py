@@ -29,7 +29,6 @@ def register_callbacks(plogger):
                 line_width=0
             )
         
-
         bins, bins_counts = histogram_utils.compute_1d_histogram(data_holder, attr_name, resolution, minmax=minmax, df=data_holder['df_full'])
         if data_holder['data']['df_prob'] is None:
             histogram_utils.add_basic_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
@@ -99,8 +98,10 @@ def register_callbacks(plogger):
 
     @dash.callback(
         Output({'type': 'minmax_changed', 'index': MATCH}, 'children'),
-        [Input({'type': 'minmax_slider', 'index': MATCH}, 'value'),
-        Input({'type': 'minmax_slider', 'index': MATCH}, 'id')],
+        [
+            Input({'type': 'minmax_slider', 'index': MATCH}, 'value'),
+            Input({'type': 'minmax_slider', 'index': MATCH}, 'id')
+        ],
         [State('session-id', 'children')]
     )
     def attributes_minmax_update(slider_range, slider_id, session_id):
@@ -109,27 +110,28 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate      
         
         dh = session_data['data_holder']
-        if dh is not None:
-            attr_name=slider_id["index"]
-            if dh['user_columns'][attr_name].get_minmax()!=slider_range:
-                dh['user_columns'][attr_name].minmax = slider_range
-                overwrite_session_data_holder(session_id, dh, source='attributes_minmax_update')
-                return ""
-            else:
-                raise PreventUpdate
-        else:
-            raise PreventUpdate
+        if dh is None: raise PreventUpdate
+
+        attr_name=slider_id["index"]
+        if dh['user_columns'][attr_name].get_minmax()==slider_range: raise PreventUpdate
+        
+        dh['user_columns'][attr_name].minmax = slider_range
+        overwrite_session_data_holder(session_id, dh, source='attributes_minmax_update')
+        return ""
 
     @dash.callback(
         Output({'type': 'attr_histogram', 'index': ALL}, 'figure'),
-        [Input('data_updated', 'children'),
-        Input('data-analysed', 'children'),
-        Input('selection_changed', 'children')],
-        [State({'type': 'attr_histogram', 'index': ALL}, 'id'),
-        State({'type': 'attr_histogram', 'index': ALL}, 'figure'),
-        State('session-id', 'children')]
+        [
+            Input('data_updated', 'children'),
+            Input('selection_changed', 'children')
+        ],
+        [
+            State({'type': 'attr_histogram', 'index': ALL}, 'id'),
+            State({'type': 'attr_histogram', 'index': ALL}, 'figure'),
+            State('session-id', 'children')
+        ]
     )
-    def attributes_histograms_update(filters_changed, data_analysed, selection_changed, hists_ids, hists_figures, session_id):
+    def attributes_histograms_update(filters_changed, selection_changed, hists_ids, hists_figures, session_id):
         logger.debug("attributes_histograms_update callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate  
@@ -137,23 +139,22 @@ def register_callbacks(plogger):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0] 
         
         dh = session_data['data_holder']
-        if dh is not None:
-            figures = []
-            if changed_id == 'selection_changed.children':
-                for hist_id, figure_dict in zip(hists_ids, hists_figures):
-                    figure = go.Figure(figure_dict)
-                    attr_name = hist_id['index']
-                    figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selection_infos"])
-                    figures.append(figure)
-            else: 
-                for hist_id in hists_ids:
-                    attr_name = hist_id['index']
-                    attr = dh['user_columns'][attr_name]
-                    figure = generate_attribute_histogram(attr, attr_name, dh)
-                    figures.append(figure)
-            return figures
-        else:
-            raise PreventUpdate
+        if dh is None: raise PreventUpdate
+
+        figures = []
+        for hist_id, figure_dict in zip(hists_ids, hists_figures):
+            attr_name = hist_id['index']
+            attr = dh['user_columns'][attr_name]
+            selection_infos = session_data['selection_infos']
+            selection_changed = (changed_id == 'selection_changed.children')
+            if not selection_changed or (selection_changed and selection_infos['background_needs_update']):
+                figure = generate_attribute_histogram(attr, attr_name, dh)
+            else:
+                figure = go.Figure(figure_dict)
+            if selection_changed:
+                figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selection_infos"])
+            figures.append(figure)
+        return figures
 
     @dash.callback(
         Output('attrs-hist-div', 'children'),
@@ -166,65 +167,65 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate
 
         dh = session_data['data_holder']
-        if dh is not None:
-            content = []
-            current_row = []
-            for i, (attr_name, attr) in enumerate(dh['user_columns'].items()):
-                if i>0 and i%4==0:
-                    content.append(dbc.Row(current_row))
-                    current_row = []
-                
-                col_content = html.Div([
-                    dcc.Graph(
-                        figure=go.Figure(),
-                        id={
-                            'type': 'attr_histogram',
-                            'index': attr_name
-                        },
-                    )],
-                    style={"height": 330}
-                )
-                if attr.is_numerical():
-                    attr_min, attr_max = attr.get_minmax()
-                    res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(attr.resolution))
-                    res = max(0.001, res)
-                    col_content.children.append(
-                        html.Div(
-                            dcc.RangeSlider(
-                                id={
-                                    'type': 'minmax_slider',
-                                    'index': attr_name
-                                },
-                                min=attr_min,
-                                max=attr_max,
-                                step=res,
-                                value=[attr_min, attr_max],
-                                tooltip={"placement": "bottom", "always_visible": True},
-                            ),
-                            style={
-                                'paddingLeft': '10px'
-                            }
-                        )
-                    )
-                    col_content.children.append(
-                        html.P(
-                            id={
-                                'type': 'minmax_changed',
-                                'index': attr_name
-                            }
-                        )
-                    )
+        if dh is None: raise PreventUpdate
 
-                current_row.append(
-                    dbc.Col(
-                        col_content, 
-                        md=3
-                    )
-                )
-
-            if current_row!=[]:
+        content = []
+        current_row = []
+        for i, (attr_name, attr) in enumerate(dh['user_columns'].items()):
+            if i>0 and i%4==0:
                 content.append(dbc.Row(current_row))
+                current_row = []
             
-            return content
-        else:
-            return PreventUpdate
+            col_content = html.Div([
+                dcc.Graph(
+                    figure=go.Figure(),
+                    id={
+                        'type': 'attr_histogram',
+                        'index': attr_name
+                    },
+                    # responsive=False
+                )],
+                style={"height": 330}
+            )
+            if attr.is_numerical():
+                attr_min, attr_max = attr.get_minmax()
+                res = min(data_utils.find_res(attr_min), data_utils.find_res(attr_max), data_utils.find_res(attr.resolution))
+                res = max(0.001, res)
+                col_content.children.append(
+                    html.Div(
+                        dcc.RangeSlider(
+                            id={
+                                'type': 'minmax_slider',
+                                'index': attr_name
+                            },
+                            min=attr_min,
+                            max=attr_max,
+                            step=res,
+                            value=[attr_min, attr_max],
+                            tooltip={"placement": "bottom", "always_visible": True},
+                        ),
+                        style={
+                            'paddingLeft': '10px'
+                        }
+                    )
+                )
+                col_content.children.append(
+                    html.P(
+                        id={
+                            'type': 'minmax_changed',
+                            'index': attr_name
+                        }
+                    )
+                )
+
+            current_row.append(
+                dbc.Col(
+                    col_content, 
+                    md=3
+                )
+            )
+
+        if current_row!=[]:
+            content.append(dbc.Row(current_row))
+        
+        return content

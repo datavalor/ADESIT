@@ -9,7 +9,7 @@ def render():
             html.Div(
                 [
                     dash_table.DataTable(
-                        id="viz_datatable",
+                        id="main-datatable",
                         page_size=TABLE_MAX_ROWS
                     )
                 ], 

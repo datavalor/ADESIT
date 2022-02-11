@@ -19,9 +19,11 @@ import utils.viz.table_utils as table_utils
 def register_callbacks(plogger):
     logger = plogger
 
-    @dash.callback(Output('ceviz_table_container', 'children'),
-                Input('selection_changed', 'children'),
-                [State('session-id', 'children')])
+    @dash.callback(
+        Output('ceviz_table_container', 'children'),
+        Input('selection_changed', 'children'),
+        State('session-id', 'children')
+    )
     def handle_ceviz_table(selection_changed, session_id):
         logger.debug("handle_ceviz_table callback")
 
@@ -31,7 +33,7 @@ def register_callbacks(plogger):
         in_violation_with = session_data['selection_infos']['in_violation_with']
         if dh is not None and dh['data']['df'] is not None:
             if point is None:
-                return dash_table.DataTable(id="ceviz_datatable")
+                return dash_table.DataTable(id="selection-datatable")
             else:
                 tmp_df = pd.concat([pd.DataFrame([point]), in_violation_with])
                 by_data_type = True if dh['data']['df_free'] is None else False
@@ -54,7 +56,7 @@ def register_callbacks(plogger):
             n_rows=len(table_data['df_table'].index)
             table = dash_table.DataTable(
                 data=table_data['df_table'].to_dict('records'),
-                id="ceviz_datatable",
+                id="selection-datatable",
                 columns=columns,
                 page_current=0,
                 page_size=TABLE_MAX_ROWS,
@@ -70,9 +72,11 @@ def register_callbacks(plogger):
 
     @dash.callback(
         Output('cyto_container', 'children'),
-        [Input('selection_changed', 'children'),
-        Input('graph_depth_slider', 'value')],
-        [State('session-id', 'children')]
+        [
+            Input('selection_changed', 'children'),
+            Input('graph_depth_slider', 'value')
+        ],
+        State('session-id', 'children')
     )
     def handle_ceviz_cyto(selection_changed, max_depth, session_id):
         logger.debug("handle_ceviz_cyto callback")
@@ -80,9 +84,9 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate
 
         dh = session_data['data_holder']
-        selected_points = session_data["selection_infos"]
-        in_violation_with = selected_points["in_violation_with"]
-        if dh is not None and dh["graph"] is not None and selected_points is not None and selected_points['point'] is not None:
+        selected_points = session_data['selection_infos']
+        in_violation_with = selected_points['in_violation_with']
+        if dh is not None and dh['data']['graph'] is not None and selected_points is not None and selected_points['point'] is not None:
             df = session_data['data_holder']['data']['df']
             root = selected_points['point'].name
 
@@ -91,7 +95,7 @@ def register_callbacks(plogger):
             edges = {}
             if not in_violation_with.empty:
                 # Creates graph in a DFS fashion
-                graph=dh["graph"]
+                graph=dh['data']['graph']
                 explored_list = {}
                 q = queue.LifoQueue()
                 q.put(root)
@@ -139,8 +143,8 @@ def register_callbacks(plogger):
 
     @dash.callback(
         Output('cytoscape_ce_graph', 'elements'),
-        [Input('cytoscape_ce_graph', 'mouseoverNodeData')],
-        [State('cytoscape_ce_graph', 'elements')]
+        Input('cytoscape_ce_graph', 'mouseoverNodeData'),
+        State('cytoscape_ce_graph', 'elements')
     )
     def highlightHoveredNode(hovered_data, previous_elements):
         logger.debug("handle_hovered_ceviz_cyto callback")

@@ -36,13 +36,13 @@ def compute_2d_histogram(
     session_infos, 
     xaxis_column_name, 
     yaxis_column_name, 
-    resolution, 
+    xresolution, yresolution,
     range=None,
     data_key = 'df'
 ):
     # We need to get the label encoded columns if the axis is categorical
-    xdata, xres = get_data_and_res_for_histogram(session_infos, xaxis_column_name, resolution, data_key=data_key)
-    ydata, yres = get_data_and_res_for_histogram(session_infos, yaxis_column_name, resolution, data_key=data_key)
+    xdata, xres = get_data_and_res_for_histogram(session_infos, xaxis_column_name, xresolution, data_key=data_key)
+    ydata, yres = get_data_and_res_for_histogram(session_infos, yaxis_column_name, yresolution, data_key=data_key)
     if range is None: 
         range=[
             session_infos['user_columns'][xaxis_column_name].get_minmax(relative_margin=0.05),
@@ -75,48 +75,64 @@ def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
 
     return fig
 
-def basic_heatmap(session_infos, xaxis_column_name, yaxis_column_name, resolution):
+def basic_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
-    H, xbins, ybins = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, resolution)
+    H, xbins, ybins = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution)
     fig = add_basic_heatmap(fig, H, xbins, ybins)
     fig = scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name, 
-        marker_color="white", 
-        marker_opacity=0.7,
-        marker_line_width=1
+        marker_args = {
+            'opacity': 0.7,
+            'color': 'white',
+            'size': 6,
+            'line_width': 1,
+            'line_color': 'black',
+            'symbol': 'circle'
+        },
+        add_trace_args={'row': 2, 'col': 1}
     )
-    fig = hist_gen.add_basic_histograms(fig, session_infos, xaxis_column_name, resolution, add_trace_args={'row': 1, 'col': 1})
-    fig = hist_gen.add_basic_histograms(fig, session_infos, yaxis_column_name, resolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
+    fig = hist_gen.add_basic_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_basic_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
     return fig
 
-def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, resolution):
+def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
 
-    H_np, xbins_np, ybins_np = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, resolution, data_key='df_free')
-    H_pr, xbins_pr, ybins_pr = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, resolution, data_key='df_prob')
+    H_np, xbins_np, ybins_np = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution, data_key='df_free')
+    H_pr, xbins_pr, ybins_pr = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution, data_key='df_prob')
 
     fig = add_basic_heatmap(fig, H_np, xbins_np, ybins_np, hue=FREE_COLOR)
     fig = add_basic_heatmap(fig, H_pr, xbins_pr, ybins_pr, hue=CE_COLOR)
 
     fig = scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name, 
-        marker_color='white', 
-        marker_opacity=0.7,
-        marker_line_width=1,
-        marker_symbol='circle',
-        data_key='df_free'
+        marker_args = {
+            'opacity': 0.7,
+            'color': 'white',
+            'size': 6,
+            'line_width': 1,
+            'line_color': 'black',
+            'symbol': 'circle'
+        },
+        data_key='df_free',
+        add_trace_args={'row': 2, 'col': 1}
     )
     fig = scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name,
-        marker_color="white", 
-        marker_opacity=0.7,
-        marker_line_width=1,
-        marker_symbol='cross',
+        marker_args = {
+            'opacity': 0.7,
+            'color': 'white',
+            'size': 6,
+            'line_width': 1,
+            'line_color': 'black',
+            'symbol': 'cross'
+        },
+        add_trace_args={'row': 2, 'col': 1},
         data_key='df_prob'
     )
     
-    fig = hist_gen.add_advanced_histograms(fig, session_infos, xaxis_column_name, resolution, add_trace_args={'row': 1, 'col': 1})
-    fig = hist_gen.add_advanced_histograms(fig, session_infos, yaxis_column_name, resolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
+    fig = hist_gen.add_advanced_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
+    fig = hist_gen.add_advanced_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
     fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
     return fig

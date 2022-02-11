@@ -11,7 +11,7 @@ def render():
         # Graph
         html.Div([
                 dcc.Graph(
-                    id='time_trace_graph', 
+                    id='timetrace-graph', 
                     clear_on_unhover=True
                 )
             ], 
@@ -35,8 +35,9 @@ def render():
                 options=[
                     {"label": "Show time cuts", "value": 0},
                     {"label": "Follow time period", "value": 1},
+                    {"label": "Show markers", "value": 2}
                 ],
-                value=[],
+                value=[1,2],
                 id="time-trace-viz-switches",
                 switch=True,
             ),

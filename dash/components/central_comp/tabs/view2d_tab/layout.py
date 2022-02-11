@@ -7,7 +7,7 @@ def render():
 
         # Graph
         html.Div([
-                dcc.Graph(figure={}, id='main-graph', clear_on_unhover=True)
+                dcc.Graph(figure={}, id='view2d-graph', clear_on_unhover=True)
             ], 
             style={
                 'textAlign' : 'center',
@@ -31,27 +31,48 @@ def render():
                 style={'width' : '100%', 'marginBottom' : '10px'},
                 clearable=False
             ),
-            
-            html.Div([
-                html.Label("Number of bins (numeric attributes)"),
+
+            html.Hr(),
+
+            html.Label("X-Axis"),
+            dcc.Dropdown(id='view2d-xaxis-dropdown',style={'width' : '100%', 'marginBottom' : '10px'}),
+            html.Label("Bins"),
+            html.Span(
                 dcc.Slider(
-                    id='heatmap_resolution_slider',
+                    id='view2d_xaxis_resolution_slider',
                     min=5,
                     max=30,
                     step=1,
                     value=10,
                     marks={n:str(n) for n in list(range(5, 35, 5))},
                     disabled=False
-                )
-            ]
+                ),
+                style={
+                    'width' : '90%',
+                    'float' : 'right'
+                }
             ),
 
             html.Hr(),
 
-            html.Label("X-Axis"),
-            dcc.Dropdown(id='x-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
             html.Label("Y-Axis"),
-            dcc.Dropdown(id='y-axis',style={'width' : '100%', 'marginBottom' : '10px'}),
+            dcc.Dropdown(id='view2d-yaxis-dropdown',style={'width' : '100%', 'marginBottom' : '10px'}),
+            html.Label("Bins"),
+            html.Span(
+                dcc.Slider(
+                    id='view2d_yaxis_resolution_slider',
+                    min=5,
+                    max=30,
+                    step=1,
+                    value=10,
+                    marks={n:str(n) for n in list(range(5, 35, 5))},
+                    disabled=False
+                ),
+                style={
+                    'width' : '90%',
+                    'float' : 'right'
+                }
+            ),
             
             html.Hr(),
 

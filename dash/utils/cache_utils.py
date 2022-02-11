@@ -28,14 +28,14 @@ cache = None
 
 default_session_data = {
     'data_holder': None,
-    'graphs': {},
     'thresolds_settings': {},
     'table_data': {
-        'df_table': None,
-        'pre_sdc': [],
+        'df_table': None, # df displayed in the table
+        'pre_sdc': [], # style data conditionnal 
         'post_sdc': [],
     },
     'selection_infos': {
+        'background_needs_update': True,
         'point': None,
         'in_violation_with': pd.DataFrame()
     }
@@ -53,10 +53,11 @@ default_time_infos = {
 }
 
 default_data = {
-    'df': None,
-    'df_free': None,
-    'df_prob': None,
-    'indicators': None
+    'df': None, # df to be displayed and analysed
+    'df_free': None, # set of tuples which are involved in no counterexamples
+    'df_prob': None, # set of tuples which are involved in at least one counterexample
+    'indicators': None, # indicators g1, g2, g3
+    'graph': None # counterexamples graph
 }
 
 class AdesitAttribute:
@@ -136,11 +137,10 @@ def gen_data_holder(df):
         'data': default_data,  #contains the current df to be analysed and displayed (included in df_minmax)
         'df_minmax': None, #contains the df after attributes minmax filters (included in df_full)
         'df_full': df, #contains full df as uploaded by the user
-        'graph': None,
-        'user_columns': columns,
+        'user_columns': columns, 
         'time_infos': default_time_infos,
-        "X": [],
-        "Y": []
+        'X': [], # set of features
+        'Y': [] # set of targets
     }
     return data_holder
 

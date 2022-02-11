@@ -57,9 +57,10 @@ def serve_layout(banner, app):
         [
             html.P(session_id, id='session-id', style={'display': 'none'}),
             html.P(id='data-loaded', style={'display': 'none'}),
-            html.P(id='data-analysed', style={'display': 'none'}),
+            html.P(id='data-analysed-prop', style={'display': 'none'}),
             html.P(id='selection_changed', style={'display': 'none'}),
             html.P(id='data_updated', style={'display': 'none'}),
+            html.P(id='view2d_axes_have_changed', style={'display': 'none'}),
 
             dbc.Alert(
                 f"Error while loading dataset. Note that there is a limit of {MAX_N_TUPLES} tuples and {MAX_N_ATTRS} attributes on this online version.",

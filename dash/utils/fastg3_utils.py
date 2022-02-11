@@ -7,14 +7,10 @@ import constants
 from constants import *
 import utils.data_utils as data_utils
 
-def make_analysis(session_infos, left_tols, right_tols, g3_computation):
-    df = session_infos['data']['df'].copy()
+def make_analysis(df, xparams, yparams, g3_computation):
+    df = df.copy()
     df[G12_COLUMN_NAME] = 0
     df[G3_COLUMN_NAME] = 0  
-
-    # Setting left and right tolerances
-    xparams=data_utils.parse_attributes_settings(left_tols, session_infos['user_columns'])
-    yparams=data_utils.parse_attributes_settings(right_tols, session_infos['user_columns'])
 
     # Making analysis
     manager = mp.Manager()
@@ -33,10 +29,18 @@ def make_analysis(session_infos, left_tols, right_tols, g3_computation):
     vps = return_dict["vps"]
     involved_tuples = np.unique(np.array(vps))
 
+    n_tuples = len(df.index)
     if involved_tuples is None: 
         return None
+    elif len(df.index)==0:
+        data = {
+            'df': df,
+            'df_free': None,
+            'df_prob': None,
+            'indicators': None,
+            'graph': None
+        }
     else: 
-        n_tuples = len(df.index)
         indicators = {
             'ncounterexamples': involved_tuples.size,
             'g1': len(vps)/n_tuples**2,
@@ -62,10 +66,11 @@ def make_analysis(session_infos, left_tols, right_tols, g3_computation):
             'df': df,
             'df_free': df.loc[df[G12_COLUMN_NAME] == 0],
             'df_prob': df.loc[df[G12_COLUMN_NAME] > 0],
-            'indicators': indicators
+            'indicators': indicators,
+            'graph': return_dict['vps_al']
         }
     
-    return list(xparams.keys()), list(yparams.keys()), data, return_dict["vps_al"]
+    return data
     
 
 

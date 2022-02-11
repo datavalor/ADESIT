@@ -26,7 +26,7 @@ def render():
             html.Div([
                 dbc.Button('CLEAR SELECTION', 
                     color="primary", 
-                    id='clear-selection', 
+                    id='clear-selection-button', 
                     disabled=True,
                     style={'display':'inline-block', 'marginRight': '10px'}
                 ),
@@ -84,7 +84,7 @@ def render():
                         html.Div(
                             [
                                 dash_table.DataTable(
-                                        id="ceviz_datatable",
+                                        id="selection-datatable",
                                         page_size=15
                                 ),
                             ],

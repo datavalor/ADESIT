@@ -15,7 +15,7 @@ def register_callbacks(plogger):
         Output('g2_indicator', 'figure'),
         Output('g1_indicator', 'figure'),
         Output('ntuples_involved', 'children')],
-        [Input('data-analysed', 'children'),
+        [Input('data-analysed-prop', 'children'),
         Input('data_updated', 'children')],
         [State('learnability_indicator', 'figure'),
         State('g2_indicator', 'figure'),

@@ -1,4 +1,8 @@
+import dash
+import math
+
 from constants import *
+import utils.viz.figure_utils as figure_utils
 
 default_style_data_conditional = [
     {
@@ -92,3 +96,35 @@ def data_preprocessing_for_table(session_infos, data_key='df', by_data_type=True
     } 
 
     return columns, hidden_columns, table_data
+
+def generate_selection_sdc(session_infos, selection_infos, table_data):
+    if selection_infos['point'] is None: return table_data['pre_sdc']+table_data['post_sdc'], dash.no_update
+
+    selection_style = figure_utils.choose_selected_point_style(session_infos, selection_infos)[:2]
+    sdc = table_data['pre_sdc']
+    sdc.append(
+        {
+            'if': {
+                'filter_query': f'{{id}} = {selection_infos["point"].name}'
+            }, 
+            'backgroundColor': selection_style[0],
+            'color': selection_style[1],
+            'border': '3px solid black'
+        }
+    )
+    for idx, _ in selection_infos['in_violation_with'].iterrows():
+        sdc.append(
+            {
+            'if': {
+                'filter_query': f'{{id}} = {idx}'
+            },
+            'backgroundColor': CE_COLOR,
+            'color': 'white',
+            'border': '3px solid black'
+            }
+        )
+    sdc += table_data['post_sdc']
+    row_num = table_data['df_table'].loc[selection_infos["point"].name][TABLE_ROWNUM_NAME]
+    page = math.floor((row_num)/TABLE_MAX_ROWS)
+
+    return sdc, page
