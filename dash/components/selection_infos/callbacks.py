@@ -84,81 +84,82 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate
 
         dh = session_data['data_holder']
+        if dh is None: raise PreventUpdate
+
         selected_points = session_data['selection_infos']
         in_violation_with = selected_points['in_violation_with']
-        if dh is not None and dh['data']['graph'] is not None and selected_points is not None and selected_points['point'] is not None:
-            df = session_data['data_holder']['data']['df']
-            root = selected_points['point'].name
-
-            nodes = {}
-            nodes[root] = 0        
-            edges = {}
-            if not in_violation_with.empty:
-                # Creates graph in a DFS fashion
-                graph=dh['data']['graph']
-                explored_list = {}
-                q = queue.LifoQueue()
-                q.put(root)
-                while not q.empty():
-                    v = q.get()
-                    depth = nodes[v]
-                    if v not in explored_list:
-                        explored_list[v]=True
-                        for w in graph[v]:
-                            if depth+1 <= max_depth:
-                                if w not in nodes: nodes[w]=depth+1
-                                norm_edge = tuple(sorted([v,w]))
-                                if norm_edge not in edges: edges[norm_edge]=depth+1
-                                q.put(w)
-            
-            elements = []
-            modified_node_name = {}
-            for node, depth in nodes.items():
-                if node==root:
-                    selected_class = 'selected_node_bad' if not in_violation_with.empty else 'selected_node_good'
-                else:
-                    selected_class = 'ce_node'
-                modified_node_name[node] = f"{node}_{'{:.6f}'.format(random.random())}"
-                elements.append({
-                    'data': {
-                        'id': modified_node_name[node], 
-                        'label': str(df.loc[node][ADESIT_INDEX])
-                    },
-                    'classes': selected_class
-                })
-
-            for edge, depth in edges.items():
-                if depth>1: edge_class = 'undirect_edges'
-                else: edge_class = 'direct_edges'
-                elements.append({
-                    'data': {
-                        'source': modified_node_name[edge[0]], 
-                        'target': modified_node_name[edge[1]]
-                    },
-                    'classes': edge_class
-                })
-            return gen_cyto(elements, {'name': 'breadthfirst', 'roots': f'[id = "{modified_node_name[root]}"]'})
-        else:
+        if dh['data']['graph'] is None or selected_points is None or selected_points['point'] is None:
             return gen_cyto()
+
+        df = session_data['data_holder']['data']['df']
+        root = selected_points['point'].name
+
+        nodes = {}
+        nodes[root] = 0        
+        edges = {}
+        if not in_violation_with.empty:
+            # Creates graph in a DFS fashion
+            graph=dh['data']['graph']
+            explored_list = {}
+            q = queue.LifoQueue()
+            q.put(root)
+            while not q.empty():
+                v = q.get()
+                depth = nodes[v]
+                if v not in explored_list:
+                    explored_list[v]=True
+                    for w in graph[v]:
+                        if depth+1 <= max_depth:
+                            if w not in nodes: nodes[w]=depth+1
+                            norm_edge = tuple(sorted([v,w]))
+                            if norm_edge not in edges: edges[norm_edge]=depth+1
+                            q.put(w)
+        
+        elements = []
+        modified_node_name = {}
+        for node, depth in nodes.items():
+            if node==root:
+                selected_class = 'selected_node_bad' if not in_violation_with.empty else 'selected_node_good'
+            else:
+                selected_class = 'ce_node'
+            modified_node_name[node] = f"{node}_{'{:.6f}'.format(random.random())}"
+            elements.append({
+                'data': {
+                    'id': modified_node_name[node], 
+                    'label': str(df.loc[node][ADESIT_INDEX])
+                },
+                'classes': selected_class
+            })
+
+        for edge, depth in edges.items():
+            if depth>1: edge_class = 'undirect_edges'
+            else: edge_class = 'direct_edges'
+            elements.append({
+                'data': {
+                    'source': modified_node_name[edge[0]], 
+                    'target': modified_node_name[edge[1]]
+                },
+                'classes': edge_class
+            })
+        return gen_cyto(elements, {'name': 'breadthfirst', 'roots': f'[id = "{modified_node_name[root]}"]'})            
 
     @dash.callback(
         Output('cytoscape_ce_graph', 'elements'),
         Input('cytoscape_ce_graph', 'mouseoverNodeData'),
         State('cytoscape_ce_graph', 'elements')
     )
-    def highlightHoveredNode(hovered_data, previous_elements):
-        logger.debug("handle_hovered_ceviz_cyto callback")
+    def highlight_hovered_node(hovered_data, previous_elements):
+        logger.debug("highlight_hovered_node callback")
 
-        if hovered_data is not None:
-            hovered_id = str(hovered_data["id"])
-            for i, el in enumerate(previous_elements):
-                if str(el['data'].get('id', 'NO'))==hovered_id:
-                    previous_elements[i]['classes'] = f'{el["classes"]} hovered'
-                else:
-                    previous_elements[i]['classes'] = el['classes'].split(" ")[0]
-            return previous_elements
-        else:
-            raise PreventUpdate
+        if hovered_data is None: raise PreventUpdate
+
+        hovered_id = str(hovered_data["id"])
+        for i, el in enumerate(previous_elements):
+            if str(el['data'].get('id', 'NO'))==hovered_id:
+                previous_elements[i]['classes'] = f'{el["classes"]} hovered'
+            else:
+                previous_elements[i]['classes'] = el['classes'].split(" ")[0]
+        return previous_elements
 
     @dash.callback(
         Output('ceviz_hovered_node', 'children'),
@@ -168,7 +169,16 @@ def register_callbacks(plogger):
         ],
         State('session-id', 'children')
     )
-    def displayHoveredNodeData(data, selec, session_id):
+    def displayed_hovered_node_data(data, selec, session_id):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug("displayed_hovered_node_data callback")
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
+        if changed_id=='selection_changed.children' or data is None: return ""
+        dh = session_data['data_holder']
+        if dh is None: raise PreventUpdate
+
         def gen_content(tuple, id, features=[], target=[], other=[]):
             content = []
             content.append(html.Div(f"[id]: {id}"))
@@ -183,16 +193,13 @@ def register_callbacks(plogger):
                 content.append(html.Div(f"{o}: {val}"))
             return content
 
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        if changed_id=='cytoscape_ce_graph.mouseoverNodeData' and data is not None:
-            clicked_id = data['label']
-            dh = get_data(session_id)['data_holder']
-            df = dh['data']['df']
-            features = dh['X']
-            target = dh['Y']
-            other = list(dh['user_columns'].keys())
-            for f in features: other.remove(f)
-            for t in target: other.remove(t)
-            return gen_content(df.loc[int(clicked_id)], clicked_id, features, target, other)
-        else:
-            return ""
+
+        clicked_id = data['label']
+        df = dh['data']['df']
+        features = dh['X']
+        target = dh['Y']
+        other = list(dh['user_columns'].keys())
+        for f in features: other.remove(f)
+        for t in target: other.remove(t)
+        return gen_content(df.loc[int(clicked_id)], clicked_id, features, target, other)
+            

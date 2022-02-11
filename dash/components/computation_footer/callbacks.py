@@ -73,7 +73,7 @@ def register_callbacks(plogger):
                 )
             data = time_infos['computation_cache'][time_infos['current_time_period']]
         else:
-            data = fastg3_utils.make_analysis(dh['data']['df'], xparams, yparams, choose_g3_computation_method(g3_computation, len(dh['data']['df'].index)))
+            data = fastg3_utils.make_analysis(dh['data']['df'], xparams, yparams, g3_computation)
 
         if data is None: 
             return [True]+[dash.no_update]*4
