@@ -56,6 +56,7 @@ def compute_2d_histogram(
 
 def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
     RBG_3digits_str = ",".join([str(round(n,2)) for n in matplotlib.colors.to_rgb(hue)])
+    print()
     colorscale=[
         [0.0, f'rgba({RBG_3digits_str},0)'],
         [1.0, f'rgba({RBG_3digits_str},1)'],
@@ -73,13 +74,11 @@ def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
         col=1
     )
 
-    return fig
-
 def basic_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution):
     fig = gen_subplot_fig(xaxis_column_name, yaxis_column_name)
     H, xbins, ybins = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution)
-    fig = add_basic_heatmap(fig, H, xbins, ybins)
-    fig = scatter_utils.add_basic_scatter(
+    add_basic_heatmap(fig, H, xbins, ybins)
+    scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name, 
         marker_args = {
             'opacity': 0.7,
@@ -91,9 +90,9 @@ def basic_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresoluti
         },
         add_trace_args={'row': 2, 'col': 1}
     )
-    fig = hist_gen.add_basic_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
-    fig = hist_gen.add_basic_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
-    fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
+    hist_gen.add_basic_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
+    hist_gen.add_basic_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
+    adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
     return fig
 
 def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution):
@@ -102,10 +101,10 @@ def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresol
     H_np, xbins_np, ybins_np = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution, data_key='df_free')
     H_pr, xbins_pr, ybins_pr = compute_2d_histogram(session_infos, xaxis_column_name, yaxis_column_name, xresolution, yresolution, data_key='df_prob')
 
-    fig = add_basic_heatmap(fig, H_np, xbins_np, ybins_np, hue=FREE_COLOR)
-    fig = add_basic_heatmap(fig, H_pr, xbins_pr, ybins_pr, hue=CE_COLOR)
+    add_basic_heatmap(fig, H_np, xbins_np, ybins_np, hue=FREE_COLOR)
+    add_basic_heatmap(fig, H_pr, xbins_pr, ybins_pr, hue=CE_COLOR)
 
-    fig = scatter_utils.add_basic_scatter(
+    scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name, 
         marker_args = {
             'opacity': 0.7,
@@ -118,7 +117,7 @@ def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresol
         data_key='df_free',
         add_trace_args={'row': 2, 'col': 1}
     )
-    fig = scatter_utils.add_basic_scatter(
+    scatter_utils.add_basic_scatter(
         fig, session_infos, xaxis_column_name, yaxis_column_name,
         marker_args = {
             'opacity': 0.7,
@@ -132,7 +131,7 @@ def advanced_heatmap(session_infos, xaxis_column_name, yaxis_column_name, xresol
         data_key='df_prob'
     )
     
-    fig = hist_gen.add_advanced_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
-    fig = hist_gen.add_advanced_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
-    fig = adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
+    hist_gen.add_advanced_histograms(fig, session_infos, xaxis_column_name, xresolution, add_trace_args={'row': 1, 'col': 1})
+    hist_gen.add_advanced_histograms(fig, session_infos, yaxis_column_name, yresolution, orientation='h', add_trace_args={'row': 2, 'col': 2})
+    adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name)
     return fig

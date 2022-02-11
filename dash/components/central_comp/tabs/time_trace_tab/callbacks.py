@@ -71,12 +71,13 @@ def register_callbacks(plogger):
         if time_attribute is None: return go.Figure()
         if yaxis_name is None: raise PreventUpdate
 
-
+        selection_infos = get_data(session_id)["selection_infos"]
+        background_needs_update = selection_infos['background_needs_update']
         actions = {
             #[reload_figure, update_minmax]
             'timetrace-yaxis-dropdown.value': [True, False],
             'data_updated.children': [True, (1 in viz_switches)],
-            'selection_changed.children': [False, True],
+            'selection_changed.children': [background_needs_update, True],
             'time-trace-viz-switches.value': [True, False],
             'time-trace-center-button.n_clicks': [False, True]
         }
@@ -86,7 +87,8 @@ def register_callbacks(plogger):
 
         # reloading figure
         if actions[changed_id][0]:
-            rangeslider_utils.add_basic_rangeslider(go.Figure(), dh, yaxis_name, show_markers=(2 in viz_switches))
+            fig = go.Figure()
+            rangeslider_utils.add_basic_rangeslider(fig, dh, yaxis_name, show_markers=(2 in viz_switches))
         else:
             del time_trace_fig['layout']
             fig = go.Figure(time_trace_fig)
@@ -101,7 +103,7 @@ def register_callbacks(plogger):
         selection_utils.add_selection_as_vertical_lines(
             fig, 
             dh, 
-            get_data(session_id)["selection_infos"],
+            selection_infos,
             time_attribute,
             yaxis_name
         )

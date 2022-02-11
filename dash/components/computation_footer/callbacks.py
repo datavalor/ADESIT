@@ -104,7 +104,8 @@ def register_callbacks(plogger):
             indicators_stats['display'] = 'none'
             return bottom_style, True, indicators_stats, True, False
         else:
-            del indicators_stats['display']
+            if 'display' in indicators_stats:
+                del indicators_stats['display']
             return dash.no_update, dash.no_update, indicators_stats, dash.no_update, True
 
     @dash.callback(
