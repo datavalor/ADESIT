@@ -12,6 +12,7 @@ from utils.cache_utils import *
 import utils.data_utils as data_utils
 import utils.viz.histogram_utils as histogram_utils
 import utils.viz.figure_utils as figure_utils
+import utils.viz.selection_utils as selection_utils
 
 def register_callbacks(plogger):
     logger = plogger
@@ -31,7 +32,7 @@ def register_callbacks(plogger):
         
         bins, bins_counts = histogram_utils.compute_1d_histogram(data_holder, attr_name, resolution, minmax=minmax, df=data_holder['df_full'])
         if data_holder['data']['df_prob'] is None:
-            histogram_utils.add_basic_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
+            histogram_utils.add_basic_histograms(figure, data_holder, attr_name, resolution, minmax=minmax, set_bar_minmax=False)
             upper_bound = list(figure.data[0].y)
         elif data_holder['data']['df'] is not None:
             histogram_utils.add_advanced_histograms(figure, data_holder, attr_name, resolution, minmax=minmax)
@@ -50,7 +51,8 @@ def register_callbacks(plogger):
             resolution,
             minmax=attr.get_minmax(original=True),
             bar_args={'opacity': 0.5},
-            computed_histogram=[bins, bins_counts]
+            computed_histogram=[bins, bins_counts],
+            set_bar_minmax=False
         )
 
         figure.update_layout(
@@ -63,38 +65,6 @@ def register_callbacks(plogger):
         figure.update_xaxes(range=attr.get_minmax(original=True, auto_margin=True), fixedrange=True)
         figure.update_yaxes(range=[0, 1.1*max(upper_bound)])#, fixedrange=True)
         return figure
-
-    def add_selection_to_histogram(figure, session_infos, attr_name, selection_infos):
-        # Deleting previous selections
-        figure.data = tuple([datum for datum in figure.data if datum['name']!='selection'])
-
-        # Drawing lines
-        point = selection_infos['point']
-        if point is not None:
-            in_violation_with = selection_infos['in_violation_with']
-            n_tuples = len(session_infos['df_full'].index)
-            point_line_color = figure_utils.choose_selected_point_style(session_infos, selection_infos)[0]
-            figure.add_trace(
-                go.Scatter(
-                    x=[point[attr_name], point[attr_name]], 
-                    y=[0,n_tuples], 
-                    mode='lines', 
-                    line=dict(color=point_line_color, width=3),
-                    name='selection'
-                ),
-            )
-            for _, row in in_violation_with.iterrows():
-                figure.add_trace(
-                    go.Scatter(
-                        x=[row[attr_name],row[attr_name]], 
-                        y=[0,n_tuples], 
-                        mode='lines', 
-                        line=dict(color=CE_COLOR, width=2),
-                        name='selection'
-                    ),
-                )
-        return figure
-
 
     @dash.callback(
         Output({'type': 'minmax_changed', 'index': MATCH}, 'children'),
@@ -152,7 +122,8 @@ def register_callbacks(plogger):
             else:
                 figure = go.Figure(figure_dict)
             if selection_changed:
-                figure = add_selection_to_histogram(figure, dh, attr_name, get_data(session_id)["selection_infos"])
+                n_tuples = len(dh['df_full'].index)
+                selection_utils.add_selection_as_vertical_lines(figure, dh, get_data(session_id)["selection_infos"], attr_name, '', minmax=[0, n_tuples])
             figures.append(figure)
         return figures
 
@@ -183,7 +154,6 @@ def register_callbacks(plogger):
                         'type': 'attr_histogram',
                         'index': attr_name
                     },
-                    # responsive=False
                 )],
                 style={"height": 330}
             )

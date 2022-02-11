@@ -24,8 +24,8 @@ def register_callbacks(plogger):
         Input('selection_changed', 'children'),
         State('session-id', 'children')
     )
-    def handle_ceviz_table(selection_changed, session_id):
-        logger.debug("handle_ceviz_table callback")
+    def handle_selection_table(selection_changed, session_id):
+        logger.debug("handle_selection_table callback")
 
         session_data = get_data(session_id)
         dh = session_data['data_holder']
@@ -160,10 +160,14 @@ def register_callbacks(plogger):
         else:
             raise PreventUpdate
 
-    @dash.callback(Output('ceviz_hovered_node', 'children'),
-                  [Input('cytoscape_ce_graph', 'mouseoverNodeData'),
-                  Input('selection_changed', 'children')],
-                  [State('session-id', 'children')])
+    @dash.callback(
+        Output('ceviz_hovered_node', 'children'),
+        [
+            Input('cytoscape_ce_graph', 'mouseoverNodeData'),
+            Input('selection_changed', 'children')
+        ],
+        State('session-id', 'children')
+    )
     def displayHoveredNodeData(data, selec, session_id):
         def gen_content(tuple, id, features=[], target=[], other=[]):
             content = []

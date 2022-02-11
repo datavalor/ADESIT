@@ -32,8 +32,6 @@ def add_basic_rangeslider(
             'size': 5
         }
         scatter_utils.add_basic_scatter(fig, session_infos, time_infos['time_attribute'], yaxis_column_name, marker_args=marker_args)
-    
-    return fig
 
 def update_rangeslider_layout(fig, session_infos, yaxis_column_name, show_cuts, custom_xrange=None, custom_yrange=None):
     ti = session_infos['time_infos']
@@ -92,7 +90,7 @@ def update_rangeslider_layout(fig, session_infos, yaxis_column_name, show_cuts, 
     fig.update_xaxes(range=xrange)
     fig.update_yaxes(range=yrange)
 
-    return fig.update_layout(
+    fig.update_layout(
         margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, 
         hovermode='closest', 
         height = 650,
@@ -101,36 +99,3 @@ def update_rangeslider_layout(fig, session_infos, yaxis_column_name, show_cuts, 
         xaxis_title=ti['time_attribute'],
         yaxis_title=yaxis_column_name
     )
-
-def add_selection_to_rangeslider(figure, session_infos, selection_infos, xaxis_column_name, yaxis_column_name):
-    # Deleting previous selections
-    figure.data = tuple([datum for datum in figure.data if datum['name']!='selection'])
-
-    # Drawing points
-    point = selection_infos['point']
-    if point is not None:
-        in_violation_with = selection_infos['in_violation_with']
-        min, max = session_infos['user_columns'][yaxis_column_name].get_minmax(auto_margin=True)
-        point_line_color = figure_utils.choose_selected_point_style(session_infos, selection_infos)[0]
-        figure.add_trace(
-            go.Scatter(
-                x=[point[xaxis_column_name],point[xaxis_column_name]], 
-                y=[min, max], 
-                mode='lines', 
-                line=dict(color=point_line_color, width=3),
-                name='selection'
-            )
-        )
-        for _, row in in_violation_with.iterrows():
-            figure.add_trace(
-                go.Scatter(
-                    x=[row[xaxis_column_name],row[xaxis_column_name]], 
-                    y=[min, max], 
-                    mode='lines', 
-                    line=dict(color=CE_COLOR, width=2),
-                    name='selection'
-                )
-            )
-        return figure
-    else:
-        return figure

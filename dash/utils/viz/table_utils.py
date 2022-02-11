@@ -22,7 +22,7 @@ default_style_data_conditional = [
         },
         'backgroundColor': SELECTED_COLOR_GOOD,
         'color': 'white',
-        'border': '3px solid black'
+        # 'border': '3px solid black'
     },
     {
         'if': {
@@ -31,7 +31,7 @@ default_style_data_conditional = [
         },
         'backgroundColor': SELECTED_COLOR_BAD,
         'color': 'white',
-        'border': '3px solid black'
+        # 'border': '3px solid black'
     }
 ]
 

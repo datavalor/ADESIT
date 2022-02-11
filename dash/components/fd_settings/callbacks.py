@@ -19,18 +19,24 @@ def register_callbacks(plogger):
     logger = plogger
 
     @dash.callback(
-        [Output('data-loaded','children'),
-        Output('dataset_confirm', 'children'),
-        Output('left-attrs', 'disabled'),
-        Output('right-attrs', 'disabled'),
-        Output('alert-data_not_loaded', 'is_open')],
-        [Input('toy-dataset-iris','n_clicks'),
-        Input('toy-dataset-housing','n_clicks'),
-        Input('toy-dataset-diamonds','n_clicks'),
-        Input('toy-dataset-kidney','n_clicks'),
-        Input('upload-form', 'contents')],
-        [State('upload-form', 'filename'),
-        State('session-id', 'children')]
+        [
+            Output('data-loaded','children'),
+            Output('dataset_confirm', 'children'),
+            Output('left-attrs', 'disabled'),
+            Output('right-attrs', 'disabled'),
+            Output('alert-data_not_loaded', 'is_open')
+        ],
+        [
+            Input('toy-dataset-iris','n_clicks'),
+            Input('toy-dataset-housing','n_clicks'),
+            Input('toy-dataset-diamonds','n_clicks'),
+            Input('toy-dataset-kidney','n_clicks'),
+            Input('upload-form', 'contents')
+        ],
+        [
+            State('upload-form', 'filename'),
+            State('session-id', 'children')
+        ]
     )
     def handle_data(iris, housing, diamonds, kidney, contents, filename, session_id):
         logger.debug('handle_data callback')
@@ -56,12 +62,14 @@ def register_callbacks(plogger):
 
     # Callback for Dimensions (attribute) options in dropdowns (b->c,d,f)
     @dash.callback(
-        [Output('right-attrs', 'options'),
-        Output('left-attrs', 'options'),
-        Output('right-attrs', 'value'),
-        Output('left-attrs', 'value')],
-        [Input('data-loaded','children')],
-        [State('session-id', 'children')]
+        [
+            Output('right-attrs', 'options'),
+            Output('left-attrs', 'options'),
+            Output('right-attrs', 'value'),
+            Output('left-attrs', 'value')
+        ],
+        Input('data-loaded','children'),
+        State('session-id', 'children')
     )
     def update_options(data_loaded, session_id):
         logger.debug("update_options  callback")
@@ -72,21 +80,28 @@ def register_callbacks(plogger):
         if dh is not None:
             options = []
             for attr_name, attr in dh['user_columns'].items():
-                options.append({'label': attr_name, 'title': attr.get_type(), 'value': attr_name})
+                if not attr.is_datetime():
+                    options.append({'label': attr_name, 'title': attr.get_type(), 'value': attr_name})
             return options, options, None, None
         else:
             return [], [], None, None
 
     # Callback for Left Tolerances Output ()
     @dash.callback(
-        [Output('thresold_table_features', 'data'),
-        Output('thresold_table_target', 'data')],
-        [Input('data-loaded','children'),
-        Input('left-attrs','value'),
-        Input('right-attrs','value')],
-        [State('thresold_table_features', 'data'),
-        State('thresold_table_target', 'data'),
-        State('session-id', 'children')]
+        [
+            Output('thresold_table_features', 'data'),
+            Output('thresold_table_target', 'data')
+        ],
+        [
+            Input('data-loaded','children'),
+            Input('left-attrs','value'),
+            Input('right-attrs','value')
+        ],
+        [
+            State('thresold_table_features', 'data'),
+            State('thresold_table_target', 'data'),
+            State('session-id', 'children')
+        ]
     )
     def handle_thresolds(data_loaded, left_attrs, right_attrs, fthresolds, tthresolds, session_id):
         logger.debug("handle_thresolds callback")
@@ -129,10 +144,14 @@ def register_callbacks(plogger):
 
     # Callback for Analyse button state
     @dash.callback(
-        [Output('analyse_btn', 'disabled'),
-        Output('g3_computation', 'disabled')],
-        [Input('left-attrs','value'),
-        Input('right-attrs','value')]
+        [
+            Output('analyse_btn', 'disabled'),
+            Output('g3_computation', 'disabled')
+        ],
+        [
+            Input('left-attrs','value'),
+            Input('right-attrs','value')
+        ]
     )
     def handle_analyse_btn_state(left_attrs, right_attrs):
         logger.debug("analyse_btn_state callback")

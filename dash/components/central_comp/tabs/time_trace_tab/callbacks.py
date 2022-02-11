@@ -8,6 +8,7 @@ from utils.cache_utils import *
 from constants import *
 import utils.viz.rangeslider_utils  as rangeslider_utils
 import utils.viz.scatter_utils as scatter_utils
+import utils.viz.selection_utils as selection_utils
 
 def register_callbacks(plogger):
     logger = plogger
@@ -85,7 +86,7 @@ def register_callbacks(plogger):
 
         # reloading figure
         if actions[changed_id][0]:
-            fig = rangeslider_utils.add_basic_rangeslider(go.Figure(), dh, yaxis_name, show_markers=(2 in viz_switches))
+            rangeslider_utils.add_basic_rangeslider(go.Figure(), dh, yaxis_name, show_markers=(2 in viz_switches))
         else:
             del time_trace_fig['layout']
             fig = go.Figure(time_trace_fig)
@@ -97,13 +98,13 @@ def register_callbacks(plogger):
             custom_xrange, custom_yrange=curr_x_range, None
 
         # adding selection
-        rangeslider_utils.add_selection_to_rangeslider(
+        selection_utils.add_selection_as_vertical_lines(
             fig, 
             dh, 
             get_data(session_id)["selection_infos"],
             time_attribute,
             yaxis_name
         )
-        fig = rangeslider_utils.update_rangeslider_layout(fig, dh, yaxis_name, show_cuts=(0 in viz_switches), custom_xrange=custom_xrange, custom_yrange=custom_yrange)
+        rangeslider_utils.update_rangeslider_layout(fig, dh, yaxis_name, show_cuts=(0 in viz_switches), custom_xrange=custom_xrange, custom_yrange=custom_yrange)
         return fig
             

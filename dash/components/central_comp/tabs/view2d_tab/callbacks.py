@@ -17,6 +17,7 @@ from utils.cache_utils import *
 import utils.viz.scatter_utils as scatter_gen
 import utils.viz.heatmap_utils as heatmap_gen
 import utils.viz.figure_utils as figure_utils
+import utils.viz.selection_utils as selection_utils
 from utils.data_utils import which_proj_type
 
 def register_callbacks(plogger):
@@ -167,7 +168,7 @@ def register_callbacks(plogger):
             
             selection_changed = (changed_id == 'selection_changed.children')
             if not selection_changed or (selection_changed and selection_infos['background_needs_update']):
-                logger.debug("#################### VIEW 2D GRAPH FULL UPDATE")
+                print("------------------------------------------- FFFFFFFFFUUUUUUUUUUUUUUUUL UPDATE")
                 if dh['data']['df_free'] is not None:
                     if(d2_viewmode=="scatter"):
                         fig = scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, xaxis_res, yaxis_res, view) 
@@ -186,7 +187,28 @@ def register_callbacks(plogger):
                         'figure': go.Figure(scatter_fig)
                     }
                 )
-            fig = scatter_gen.add_selection_to_scatter(fig, dh, selection_infos, xaxis_column_name, yaxis_column_name)
+            selection_utils.add_selection_as_scatterpoints(fig, dh, selection_infos, xaxis_column_name, yaxis_column_name)
+            selection_utils.add_selection_as_vertical_lines(
+                fig, dh, selection_infos, 
+                xaxis_column_name, '', 
+                minmax=[0, len(df.index)],
+                add_trace_args = {
+                    'row': 1,
+                    'col': 1
+                },
+                remove_previous_selections=False
+            )
+            selection_utils.add_selection_as_vertical_lines(
+                fig, dh, selection_infos, 
+                '', yaxis_column_name, 
+                minmax=[0, len(df.index)],
+                add_trace_args = {
+                    'row': 2,
+                    'col': 2
+                },
+                orientation = 'h',
+                remove_previous_selections=False
+            )
             return fig
         else:
             return go.Figure()

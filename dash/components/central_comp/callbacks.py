@@ -91,7 +91,7 @@ def register_callbacks(plogger):
         elif changed_id == 'selection-datatable.active_cell' and active_cell_ce is not None: # CE TABLE LINE CLICK
             selected_point_id = active_cell_ce['row_id']
         elif changed_id == 'view2d-graph.clickData' and view2d_clickData is not None: # 2D VIEW POINT CLICK
-            selected_point_id = handle_graph_click_data(view2d_clickData, df, graph, xaxis_column_name, yaxis_column_name)
+            selected_point_id = handle_graph_click_data(view2d_clickData, df, graph, view2d_xaxis, view2d_yaxis)
         elif changed_id == 'timetrace-graph.clickData' and timetrace_clickData is not None: # TIME TRACE VIEW POINT CLICK
             time_attribute = dh['time_infos']['time_attribute']
             selected_point_id = handle_graph_click_data(timetrace_clickData, df, graph, time_attribute, timetrace_yaxis)

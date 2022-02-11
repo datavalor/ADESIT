@@ -52,6 +52,7 @@ def add_basic_histograms(
     computed_histogram=None,
     add_trace_args={},
     bar_args={},
+    set_bar_minmax=True
 ):
     if computed_histogram is None:
         bins, bins_counts = compute_1d_histogram(session_infos, column_name, resolution, minmax=minmax, df=df, data_key=data_key)
@@ -63,7 +64,13 @@ def add_basic_histograms(
         go.Bar(x=bins, y=bins_counts, marker_color=marker_color, orientation=orientation, **bar_args), 
         **add_trace_args
     )
-    return fig
+
+    bars_heights = bins if orientation=='h' else bins_counts
+    if set_bar_minmax:    
+        if orientation=='v': fig.update_yaxes(range=[0, max(bars_heights)*1.1], **add_trace_args, fixedrange=True)
+        else: fig.update_xaxes(range=[0, max(bars_heights)*1.1], **add_trace_args, fixedrange=True)
+    
+    return bars_heights
 
 def add_advanced_histograms(
     fig,
@@ -75,14 +82,19 @@ def add_advanced_histograms(
     minmax=None
 ):
     if minmax is None: minmax=session_infos['user_columns'][column_name].get_minmax()
-    add_basic_histograms(
+    bh_free = add_basic_histograms(
         fig, session_infos, column_name, resolution, minmax=minmax, orientation=orientation, add_trace_args=add_trace_args,
         data_key='df_free',
-        marker_color=FREE_COLOR
+        marker_color=FREE_COLOR,
+        set_bar_minmax=False
     )
-    add_basic_histograms(
+    bh_prob = add_basic_histograms(
         fig, session_infos, column_name, resolution, minmax=minmax, orientation=orientation, add_trace_args=add_trace_args,
         data_key='df_prob',
-        marker_color=CE_COLOR
+        marker_color=CE_COLOR,
+        set_bar_minmax=False
     )
-    return fig
+
+    total_bh = [bh_free[i]+bh_prob[i] for i in range(len(bh_free))]
+    if orientation=='v': fig.update_yaxes(range=[0, max(total_bh)*1.1], **add_trace_args, fixedrange=True)
+    else: fig.update_xaxes(range=[0, max(total_bh)*1.1], **add_trace_args, fixedrange=True)

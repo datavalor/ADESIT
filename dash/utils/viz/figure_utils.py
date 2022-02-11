@@ -35,7 +35,6 @@ def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
         showlegend=False,
         barmode='stack'
     )
-    return fig
 
 def choose_selected_point_style(session_infos, selection_infos):
     if session_infos['data']['df_free'] is not None:
