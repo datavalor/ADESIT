@@ -1,4 +1,4 @@
-#viz_datatable button, #ceviz_datatable button {
+#main-datatable button, #selection-datatable button {
     font-size: 14px;
     padding: 6px 12px;
     margin-bottom: 0;
@@ -20,18 +20,18 @@
     margin-bottom: 5px;
     outline: none !important;
 }
-#viz_datatable button:focus, #ceviz_datatable  button:focus,
-#viz_datatable button, #ceviz_datatable  button {
+#main-datatable button:focus, #selection-datatable  button:focus,
+#main-datatable button, #selection-datatable  button {
     outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px;
 }
-#viz_datatable button:hover, #ceviz_datatable  button:hover,
-#viz_datatable button:focus, #ceviz_datatable  button:focus {
+#main-datatable button:hover, #selection-datatable  button:hover,
+#main-datatable button:focus, #selection-datatable  button:focus {
     color: #333;
     text-decoration: none;
 }
-#viz_datatable button:active, #ceviz_datatable  button:active {
+#main-datatable button:active, #selection-datatable  button:active {
     background-image: none;
     outline: 0;
     -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
@@ -40,7 +40,6 @@
 
 .ceviz_hover_anim {
     animation: backcolor 1s 1;
-    /* padding: 10px; */
 }
 
 @keyframes backcolor {

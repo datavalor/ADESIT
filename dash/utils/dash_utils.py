@@ -1,11 +1,9 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import html
 
 hr_tooltip = html.Hr(style={'border': 'none', 'height': '2px', 'backgroundColor': '#FFF', 'marginTop': '2px', 'marginBottom': '2px'})
 
 def Tooltip(**kwargs):
-    #style = kwargs.pop('style')
     style_with_defaults = {'fontSize': '14px'}
     return dbc.Tooltip(style=style_with_defaults, **kwargs)
 
@@ -13,14 +11,29 @@ def gen_modal(id, title="Modal header", content="This is content"):
     return dbc.Modal(
         [
             dbc.ModalHeader(title),
-            dbc.ModalBody(content),
+            dbc.ModalBody(content, style={'textAlign': 'justify'}),
             dbc.ModalFooter(
                 dbc.Button(
-                    "Close", id=f"{id}_close", className="ml-auto", n_clicks=0
+                    "Close", 
+                    id={
+                        'type': 'modal_close',
+                        'index': id
+                    }, 
+                    className="ml-auto", 
+                    n_clicks=0
                 )
             ),
         ],
-        id=id,
+        id={
+            'type': 'modal',
+            'index': id
+        },        
         is_open=False,
         size="xl",
     )
+
+def gen_help_tooltips(help_infos):
+    tooltips = []
+    for id, content in help_infos.items():
+        tooltips.append(Tooltip(children=content, target=id))
+    return tooltips

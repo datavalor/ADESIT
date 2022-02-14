@@ -15,10 +15,14 @@ import utils.cache_utils as cache_utils
 from components import banner as banner_component
 from components import fd_settings as fd_settings_component
 from components import indicators as indicators_component
-from components import table as table_component
-from components import ce_viz as ce_viz_component
+from components import selection_infos as selection_infos_component
+from components import computation_footer as computation_footer_component
+
 from components import central_comp as central_comp_component
-from components import scatter_view as scatter_view_component
+from components.central_comp.tabs import view2d_tab as view2d_tab_component
+from components.central_comp.tabs import time_trace_tab as time_trace_tab_component
+from components.central_comp.tabs import attributes_tab as attributes_tab_component
+from components.central_comp.tabs import table_tab as table_tab_component
 
 import constants
 
@@ -26,10 +30,13 @@ components = [
     banner_component,
     fd_settings_component,
     indicators_component,
-    table_component,
-    ce_viz_component,
+    table_tab_component,
+    selection_infos_component,
     central_comp_component,
-    scatter_view_component
+    view2d_tab_component,
+    attributes_tab_component,
+    computation_footer_component,
+    time_trace_tab_component
 ]
 
 if __name__ == '__main__':
@@ -62,7 +69,7 @@ if __name__ == '__main__':
     logger=logging.getLogger('adesit_callbacks')
     cache_utils.logger.setLevel(logging_level)
     logger.setLevel(logging_level)
-    for component in components: component.register_callbacks(app, plogger=logger)
+    for component in components: component.register_callbacks(plogger=logger)
 
     if args.debug: app.run_server(debug=True)
     else: app.run_server(debug=False, host='0.0.0.0')

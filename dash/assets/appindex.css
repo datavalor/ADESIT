@@ -1,0 +1,7 @@
+body {
+    overflow-y: scroll; /* Show vertical scrollbar */
+}
+
+/* *[data-dash-is-loading="true"]{
+    visibility: visible;
+} */
