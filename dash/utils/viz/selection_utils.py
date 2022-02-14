@@ -40,7 +40,9 @@ def add_selection_as_vertical_lines(
             y=yrange, 
             mode='lines', 
             line=dict(color=point_line_color, width=3),
-            name='selection'
+            name='selection',
+            yaxis='y'
+
         ),
         **add_trace_args
     )
@@ -53,7 +55,8 @@ def add_selection_as_vertical_lines(
                 y=yrange, 
                 mode='lines', 
                 line=dict(color=CE_COLOR, width=2),
-                name='selection'
+                name='selection',
+                yaxis='y'
             ),
             **add_trace_args
         )

@@ -10,39 +10,45 @@ import pandas as pd
 
 import random
 
-def rand_hexa():
-    random_number = random.randint(0,16777215)
-    hex_number = str(hex(random_number))
-    hex_number ='#'+ hex_number[2:]
-    return hex_number
-
 def add_basic_rangeslider(
         fig, 
         session_infos,
         yaxis_column_name,
-        show_markers=True
+        show_markers=True,
+        show_analysed_colors=True
 ):
-    # df_minmax = session_infos['df_minmax']
     time_infos = session_infos['time_infos']
+    time_attribute = time_infos['time_attribute']
 
-    dfs = []
+    dfs  = []
+    g3s, g3s_dates = [], []
     for i in range(len(time_infos['computation_cache'])):
-        if len(time_infos['computation_cache'][i]['df'].index)>0:
-            dfs.append(time_infos['computation_cache'][i]['df'])
-            # time_infos['computation_cache'][i]['df'].columns
+        period_df = time_infos['computation_cache'][i]['df']
+        if len(period_df.index)>0:
+            dfs.append(period_df)
+            indicators_dict = time_infos['computation_cache'][i]['indicators']
+            if indicators_dict is not None:
+                mean_period_date = period_df.iloc[0][time_attribute]+(period_df.iloc[-1][time_attribute]-period_df.iloc[0][time_attribute])/2
+                g3s_dates.append(mean_period_date)
+                if indicators_dict['g3_computation']=='exact':
+                    g3s.append(indicators_dict['g3'])
+                else:
+                    g3_lb, g3_up = indicators_dict['g3']
+                    g3s.append((g3_lb+g3_up)/2)
     df = pd.concat(dfs)
     
-    if G12_COLUMN_NAME in df.columns:
+    if G12_COLUMN_NAME in df.columns and show_analysed_colors:
         fig.add_trace(
             go.Scatter(
-                x=df[time_infos['time_attribute']].to_numpy(), 
+                x=df[time_attribute].to_numpy(), 
                 y=df[yaxis_column_name].to_numpy(),
                 mode='lines',
                 line = {
-                    'color': NON_ANALYSED_COLOR,
-                    'width': 1
+                    'color': MEDIUM_COLOR,
+                    'width': 2
 
-                }
+                },
+                yaxis='y'
             )
         )
         for i, g in df.groupby([(df[G12_COLUMN_NAME] != df[G12_COLUMN_NAME].shift()).cumsum()]):
@@ -50,24 +56,40 @@ def add_basic_rangeslider(
             fig.add_trace(
                 go.Scattergl(
                     mode='lines',
-                    x=g[time_infos['time_attribute']].to_numpy(), 
+                    x=g[time_attribute].to_numpy(), 
                     y=g[yaxis_column_name].to_numpy(),
                     line = {
                         'color': color,
                         'width': 2
-                    }
+                    },
+                    yaxis='y'
                 )
             )
     else:
         fig.add_trace(
             go.Scatter(
-                x=df[time_infos['time_attribute']].to_numpy(), 
+                x=df[time_attribute].to_numpy(), 
                 y=df[yaxis_column_name].to_numpy(),
                 mode="lines",
                 line = {
                     'color': NON_ANALYSED_COLOR,
                     'width': 2
-                }
+                },
+                yaxis='y'
+            )
+        )
+
+    if g3s:
+        fig.add_trace(
+            go.Scatter(
+                x=g3s_dates, 
+                y=g3s,
+                mode='markers+lines',
+                line = {
+                    'color': SELECTED_NON_ANALYSED_COLOR,
+                    'width': 2
+                },
+                yaxis='y2'
             )
         )
     
@@ -165,3 +187,29 @@ def update_rangeslider_layout(fig, session_infos, yaxis_column_name, show_cuts, 
         xaxis_title=ti['time_attribute'],
         yaxis_title=yaxis_column_name
     )
+    if session_infos['data']['df_free'] is not None:
+        fig.update_layout(
+            yaxis=dict(
+                anchor="x",
+                autorange=True,
+                domain=[0, 0.8],
+                linecolor="#000000",
+                showline=True,
+                tickmode="auto",
+                titlefont={"color": "#000000"},
+                zeroline=True
+            ),
+            yaxis2=dict(
+                anchor="x",
+                autorange=True,
+                domain=[0.8, 1],
+                linecolor=SELECTED_NON_ANALYSED_COLOR,
+                showline=True,
+                tickfont={"color": SELECTED_NON_ANALYSED_COLOR},
+                tickmode="auto",
+                title="g3",
+                titlefont={"color": SELECTED_NON_ANALYSED_COLOR},
+                type="linear",
+                zeroline=True
+            ),
+        )

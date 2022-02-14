@@ -28,6 +28,7 @@ SELECTED_COLOR_GOOD = '#008000'
 SELECTED_COLOR_GOOD_OUTLINE = '#FFFFFF'
 CE_COLOR = '#EF553B'
 FREE_COLOR = '#636EFA'
+MEDIUM_COLOR = '#A9629B'
 GRAPHS_BACKGROUND = '#E5ECF6'
 CATEGORICAL_AXIS_ORDER = 'category descending'
 
@@ -52,6 +53,11 @@ DEFAULT_TIME_CUTS = {
     'month': {
         "timedelta": pd.Timedelta(30,'d'),
         "freq_symbol": "MS",
+        "date_format": '%Y-%m'
+    },
+    'quarter': {
+        "timedelta": pd.Timedelta(91,'d'),
+        "freq_symbol": "QS",
         "date_format": '%Y-%m'
     },
     'year': {

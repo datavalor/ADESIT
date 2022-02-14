@@ -53,9 +53,9 @@ def render():
                                         }
                                     ),
                                     html.Br(),
-                                    html.Strong("Attribute period: "), html.Strong("N/A", id="time-range"),
+                                    html.Strong("Attribute period: "), html.Strong("N/A", id="time-range"), html.Strong('', id='time-range-nrows'),
                                     html.Br(),
-                                    html.Strong("Current period: "), html.Strong("N/A", id="current-time-range"),
+                                    html.Strong("Current period: "), html.Strong("N/A", id="current-time-range"), html.Strong('', id='current-time-range-nrows'),
                                     html.Br(),
                                     dbc.Button(
                                         "←", id="time-backward-button", className="me-2", n_clicks=0,

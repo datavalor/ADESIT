@@ -109,7 +109,11 @@ def register_callbacks(plogger):
             return dash.no_update, dash.no_update, indicators_stats, dash.no_update, True
 
     @dash.callback(
-        Output('data_updated', 'children'),
+        [
+            Output('data_updated', 'children'),
+            Output('time-range-nrows', 'children'),
+            Output('current-time-range-nrows', 'children'),
+        ],
         [
             Input({'type': 'minmax_changed', 'index': ALL}, 'children'),
             Input('time-period-dropdown', 'value'),
@@ -124,47 +128,44 @@ def register_callbacks(plogger):
         if session_data is None: raise PreventUpdate        
 
         dh = session_data['data_holder']
-        if dh is not None:
-            time_infos = dh['time_infos']
+        if dh is None: raise PreventUpdate  
 
-            if 'minmax_changed' in changed_id or dh['df_minmax'] is None:
-                if time_infos['time_attribute'] is not None:
-                    time_infos['computation_cache']=[None]*(len(time_infos['time_periods_list'])-1)
-
-                # computing minmax
-                query_lines = []
-                for (attr_name, attr) in dh['user_columns'].items():
-                    if attr.is_numerical():
-                        attr_range = attr.get_minmax()
-                        if attr_range!=attr.get_minmax(original=True):
-                            query_lines.append(f'{attr_range[0]} <= `{attr_name}` <= {attr_range[1]}')
-                if query_lines:
-                    query = " and ".join(query_lines)
-                    dh['df_minmax'] = dh['df_full'].query(query)
-                else:
-                    dh['df_minmax'] = dh['df_full'].copy()
-
-            # applying time filters
+        time_infos = dh['time_infos']
+        if 'minmax_changed' in changed_id or dh['df_minmax'] is None:
             if time_infos['time_attribute'] is not None:
-                time_attr, curr_index, periods_list = time_infos['time_attribute'], time_infos['current_time_period'], time_infos['time_periods_list']
-                if time_infos['computation_cache'][curr_index] is None:
-                    df_minmax = dh['df_minmax']
-                    for i in range(len(periods_list)-1):
-                        period_min, period_max = periods_list[i], periods_list[i+1]
-                        time_infos['computation_cache'][i] = default_data.copy()
-                        time_infos['computation_cache'][i]['df'] = df_minmax.loc[(df_minmax[time_attr]>period_min) & (df_minmax[time_attr]<period_max)]
-                data = time_infos['computation_cache'][curr_index]
+                time_infos['computation_cache']=[None]*(len(time_infos['time_periods_list'])-1)
+
+            # computing minmax
+            query_lines = []
+            for (attr_name, attr) in dh['user_columns'].items():
+                if attr.is_numerical():
+                    attr_range = attr.get_minmax()
+                    if attr_range!=attr.get_minmax(original=True):
+                        query_lines.append(f'{attr_range[0]} <= `{attr_name}` <= {attr_range[1]}')
+            if query_lines:
+                query = " and ".join(query_lines)
+                dh['df_minmax'] = dh['df_full'].query(query)
             else:
-                data = default_data.copy()
-                data['df'] = dh['df_minmax'].copy()
+                dh['df_minmax'] = dh['df_full'].copy()
 
-            dh['data'] = data
-            dh['time_infos'] = time_infos
-            overwrite_session_data_holder(session_id, dh, source='update_data')
-            return ""
+        # applying time filters
+        if time_infos['time_attribute'] is not None:
+            time_attr, curr_index, periods_list = time_infos['time_attribute'], time_infos['current_time_period'], time_infos['time_periods_list']
+            if time_infos['computation_cache'][curr_index] is None:
+                df_minmax = dh['df_minmax']
+                for i in range(len(periods_list)-1):
+                    period_min, period_max = periods_list[i], periods_list[i+1]
+                    time_infos['computation_cache'][i] = default_data.copy()
+                    time_infos['computation_cache'][i]['df'] = df_minmax.loc[(df_minmax[time_attr]>=period_min) & (df_minmax[time_attr]<=period_max)]
+            data = time_infos['computation_cache'][curr_index]
         else:
-            raise PreventUpdate       
+            data = default_data.copy()
+            data['df'] = dh['df_minmax'].copy()
 
+        dh['data'] = data
+        dh['time_infos'] = time_infos
+        overwrite_session_data_holder(session_id, dh, source='update_data')
+        return "", f' ({len(dh["df_minmax"].index)} rows)', f' ({len(data["df"].index)} rows)'
 
     # ==========================================================
     # ================= Time related callbacks =================
@@ -222,15 +223,15 @@ def register_callbacks(plogger):
             return period_options, 'nogroup', "Attribute period: N/A", True
         else:
             # finding max and min time and delttas
-            df = dh['df_full'].sort_values(by=time_attribute)
+            df = dh['df_full'].drop_duplicates(subset=[time_attribute]).sort_values(by=time_attribute)
             time_min, time_max = df[time_attribute].min(), df[time_attribute].max()
-            diff = df[time_attribute][1:]-df[time_attribute][:-1]
-            min_delta = min(diff[pd.notnull(diff)])
+            diff = df[time_attribute].iloc[1:].reset_index(drop=True)-df[time_attribute].iloc[:-1]
+            min_delta = min(diff)
 
             # finding viable cuts
             for time_cut in DEFAULT_TIME_CUTS:
                 td = DEFAULT_TIME_CUTS[time_cut]['timedelta']
-                if td>=10*min_delta:
+                if td>=20*min_delta:
                     period_options.append({'label': time_cut, 'value': time_cut})
 
             # storing time attribute and minmax 

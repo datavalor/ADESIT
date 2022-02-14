@@ -77,7 +77,7 @@ def register_callbacks(plogger):
             #[reload_figure, update_minmax]
             'timetrace-yaxis-dropdown.value': [True, False],
             'data_updated.children': [True, (1 in viz_switches)],
-            'selection_changed.children': [background_needs_update, True],
+            'selection_changed.children': [background_needs_update, background_needs_update],
             'time-trace-viz-switches.value': [True, False],
             'time-trace-center-button.n_clicks': [False, True]
         }
@@ -88,7 +88,7 @@ def register_callbacks(plogger):
         # reloading figure
         if actions[changed_id][0]:
             fig = go.Figure()
-            rangeslider_utils.add_basic_rangeslider(fig, dh, yaxis_name, show_markers=(2 in viz_switches))
+            rangeslider_utils.add_basic_rangeslider(fig, dh, yaxis_name, show_markers=(2 in viz_switches), show_analysed_colors=(3 in viz_switches))
         else:
             del time_trace_fig['layout']
             fig = go.Figure(time_trace_fig)
@@ -109,4 +109,29 @@ def register_callbacks(plogger):
         )
         rangeslider_utils.update_rangeslider_layout(fig, dh, yaxis_name, show_cuts=(0 in viz_switches), custom_xrange=custom_xrange, custom_yrange=custom_yrange)
         return fig
-            
+
+    @dash.callback(
+        Output('time-trace-viz-switches', 'options'),
+        [
+            Input('selection_changed', 'children'),
+        ],
+        [
+            State('time-trace-viz-switches', 'options'),
+            State('session-id', 'children')
+        ]
+    )
+    def update_timetrace_switches_options(selection_changed, switches_options, session_id):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        logger.debug(f'update_timetrace_switches_options callback because of {changed_id}')
+        session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+        
+        dh=session_data['data_holder']
+        if dh is None: raise PreventUpdate
+
+        new_switches_options = switches_options.copy()
+        disabled = True if dh['data']['df_free'] is None else False
+        for i in range(len(switches_options)):
+            if switches_options[i]['label'] == 'Show analysed colors':
+                new_switches_options[i]['disabled'] = disabled
+        return new_switches_options

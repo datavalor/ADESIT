@@ -168,7 +168,6 @@ def register_callbacks(plogger):
             
             selection_changed = (changed_id == 'selection_changed.children')
             if not selection_changed or (selection_changed and selection_infos['background_needs_update']):
-                print("------------------------------------------- FFFFFFFFFUUUUUUUUUUUUUUUUL UPDATE")
                 if dh['data']['df_free'] is not None:
                     if(d2_viewmode=="scatter"):
                         fig = scatter_gen.advanced_scatter(dh, xaxis_column_name, yaxis_column_name, xaxis_res, yaxis_res, view) 

@@ -35,9 +35,10 @@ def render():
                 options=[
                     {"label": "Show time cuts", "value": 0},
                     {"label": "Follow time period", "value": 1},
-                    {"label": "Show markers", "value": 2}
+                    {"label": "Show markers", "value": 2},
+                    {"label": "Show analysed colors", "value": 3, 'disabled': True}
                 ],
-                value=[1,2],
+                value=[1,3],
                 id="time-trace-viz-switches",
                 switch=True,
             ),

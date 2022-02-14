@@ -61,7 +61,7 @@ def register_callbacks(plogger):
         if indicators_dict['g3_computation']=='exact':
             g3 = indicators_dict['g3']
             lower_bound, upper_bound = 0, 0
-            if g3 is not None: value = 1-g3
+            if g3 is not None: value = (1-g3)*100
             else: value = 0
         else:
             g3_lb, g3_up = indicators_dict['g3']

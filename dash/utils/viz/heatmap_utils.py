@@ -56,7 +56,6 @@ def compute_2d_histogram(
 
 def add_basic_heatmap(fig, H, xbins, ybins, hue="#000000"):
     RBG_3digits_str = ",".join([str(round(n,2)) for n in matplotlib.colors.to_rgb(hue)])
-    print()
     colorscale=[
         [0.0, f'rgba({RBG_3digits_str},0)'],
         [1.0, f'rgba({RBG_3digits_str},1)'],
