@@ -103,7 +103,7 @@ def render():
                             {'label': 'approximation', 'value': 'approx'},
                             {'label': 'exact', 'value': 'exact'}
                         ],
-                        value='auto',
+                        value='approx',
                         disabled=True,
                         style={
                             'width' : '100%',
