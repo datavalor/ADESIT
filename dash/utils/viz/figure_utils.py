@@ -29,7 +29,7 @@ def adjust_layout(fig, session_infos, xaxis_column_name, yaxis_column_name):
     fig.update_yaxes(range=session_infos['user_columns'][yaxis_column_name].get_minmax(auto_margin=True), row=2, col=1)
     fig.update_traces(opacity=0.9)
     fig.update_layout(
-        margin={'l': 60, 'b': 50, 't': 10, 'r': 30}, 
+        margin={'l': 60, 'b': 50, 't': 10, 'r': 0}, 
         hovermode='closest', 
         height = 650,
         showlegend=False,

@@ -36,43 +36,28 @@ def add_basic_rangeslider(
                     g3_lb, g3_up = indicators_dict['g3']
                     g3s.append((g3_lb+g3_up)/2)
     df = pd.concat(dfs)
-    
-    if G12_COLUMN_NAME in df.columns and show_analysed_colors:
-        fig.add_trace(
-            go.Scatter(
-                x=df[time_attribute].to_numpy(), 
-                y=df[yaxis_column_name].to_numpy(),
-                mode='lines',
-                line = {
-                    'color': MEDIUM_COLOR,
-                    'width': 2
 
-                },
-                yaxis='y'
-            )
-        )
-        for i, g in df.groupby([(df[G12_COLUMN_NAME] != df[G12_COLUMN_NAME].shift()).cumsum()]):
-            color = CE_COLOR if g[G12_COLUMN_NAME].to_numpy()[0]==1 else FREE_COLOR
-            fig.add_trace(
-                go.Scattergl(
-                    mode='lines',
-                    x=g[time_attribute].to_numpy(), 
-                    y=g[yaxis_column_name].to_numpy(),
-                    line = {
-                        'color': color,
-                        'width': 2
-                    },
-                    yaxis='y'
-                )
-            )
+
+    if G12_COLUMN_NAME in df.columns and show_analysed_colors:
+        t = df[G12_COLUMN_NAME].copy()
+        involved_truth_table = (t==1)
+        transition_truth_table = ((2*t-t.shift(1)-t.shift(-1)).fillna(0)==0)
+        involved_col, free_col, transition_col = df[yaxis_column_name].copy(), df[yaxis_column_name].copy(), df[yaxis_column_name].copy()
+        involved_col[~involved_truth_table] = np.nan
+        free_col[involved_truth_table] = np.nan
+        transition_col[transition_truth_table] = np.nan
+        to_plot = [(CE_COLOR, involved_col), (FREE_COLOR, free_col), (MEDIUM_COLOR, transition_col)]
     else:
+        to_plot = [(NON_ANALYSED_COLOR, df[yaxis_column_name])]
+
+    for plot in to_plot:
         fig.add_trace(
             go.Scatter(
+                mode='lines',
                 x=df[time_attribute].to_numpy(), 
-                y=df[yaxis_column_name].to_numpy(),
-                mode="lines",
+                y=plot[1],
                 line = {
-                    'color': NON_ANALYSED_COLOR,
+                    'color': plot[0],
                     'width': 2
                 },
                 yaxis='y'
