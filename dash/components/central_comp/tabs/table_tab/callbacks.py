@@ -48,10 +48,6 @@ def register_callbacks(plogger):
 
         by_data_type = True if dh['data']['df_free'] is None else False
         columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, data_key=data_key, by_data_type=by_data_type)
-        print("_________________________")
-        print(table_data['pre_sdc'])
-        print(table_data['post_sdc'])
-        print("_________________________")
         overwrite_session_table_data(session_id, table_data)
 
         sdc, page = table_utils.generate_selection_sdc(dh, session_data['selection_infos'], table_data)
@@ -120,7 +116,5 @@ def register_callbacks(plogger):
 
         selection_infos = session_data['selection_infos']
         table_data = session_data['table_data']
-        print(table_data['pre_sdc'])
-        print(table_data['post_sdc'])
         return table_utils.generate_selection_sdc(dh, selection_infos, table_data)
             
