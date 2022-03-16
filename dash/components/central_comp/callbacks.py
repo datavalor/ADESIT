@@ -76,7 +76,10 @@ def register_callbacks(plogger):
         graph=dh['data']['graph']
         background_needs_update = False
         clear_selection_disabled = False
-        if changed_id == 'clear-selection-button.n_clicks' or changed_id == 'data_updated.children': 
+        if changed_id == 'clear-selection-button.n_clicks': 
+            selected_point_id = None
+        elif changed_id == 'data_updated.children': 
+            background_needs_update = True
             selected_point_id = None
         elif changed_id == 'data-analysed-prop.children':
             background_needs_update = True

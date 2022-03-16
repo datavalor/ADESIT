@@ -20,20 +20,25 @@ def register_callbacks(plogger):
     @dash.callback(
         Output('viz_table_container', 'children'),
         [
-            Input('data_updated', 'children'),
-            Input('data-analysed-prop', 'children'),
+            Input('selection_changed', 'children'),
             Input('view','value'),
             Input('mode','value'),
         ],
         [State('session-id', 'children')]
     )
-    def update_table(data_updated, data_analysed, view, mode, session_id):
+    def update_table(selection_changed, view, mode, session_id):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         logger.debug("update_table callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
         
-        dh=session_data['data_holder']
+        dh=session_data['data_holder'].copy()
         if dh is None or dh['data']['df'] is None: raise PreventUpdate
+
+        if changed_id == 'selection_changed.children':
+            if not session_data['selection_infos']['background_needs_update']: 
+                logger.debug("update_table callback ABORTED")
+                raise PreventUpdate
 
         # select_problematics/non problematics according to mode and view
         data_key = 'df'
@@ -43,6 +48,10 @@ def register_callbacks(plogger):
 
         by_data_type = True if dh['data']['df_free'] is None else False
         columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, data_key=data_key, by_data_type=by_data_type)
+        print("_________________________")
+        print(table_data['pre_sdc'])
+        print(table_data['post_sdc'])
+        print("_________________________")
         overwrite_session_table_data(session_id, table_data)
 
         sdc, page = table_utils.generate_selection_sdc(dh, session_data['selection_infos'], table_data)
@@ -65,13 +74,16 @@ def register_callbacks(plogger):
     
     @dash.callback(
         Output('main-datatable', 'data'),
-        Input('main-datatable', 'page_current'),
+        [
+            Input('main-datatable', 'page_current'),
+            Input('viz_table_container', 'children')
+        ],
         [
             State('main-datatable', 'page_size'),
             State('session-id', 'children')
         ]
     )
-    def update_table_records(page_current, page_size, session_id):
+    def update_table_records(page_current, viz_table_container, page_size, session_id):
         logger.debug("update_table_records callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
@@ -92,14 +104,23 @@ def register_callbacks(plogger):
         State('session-id', 'children')
     )
     def style_selected_rows(selection_changed, session_id):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         logger.debug("style_selected_rows callback")
         session_data = get_data(session_id)
         if session_data is None: raise PreventUpdate
+
+        if changed_id == 'selection_changed.children':
+            if session_data['selection_infos']['background_needs_update']: 
+                logger.debug("style_selected_rows callback ABORTED")
+                raise PreventUpdate
+        logger.debug("style_selected_rows callback CONTINUED")
 
         dh = session_data['data_holder']
         if dh is None: raise PreventUpdate
 
         selection_infos = session_data['selection_infos']
         table_data = session_data['table_data']
+        print(table_data['pre_sdc'])
+        print(table_data['post_sdc'])
         return table_utils.generate_selection_sdc(dh, selection_infos, table_data)
             

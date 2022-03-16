@@ -26,49 +26,51 @@ def register_callbacks(plogger):
     )
     def handle_selection_table(selection_changed, session_id):
         logger.debug("handle_selection_table callback")
-
         session_data = get_data(session_id)
+        if session_data is None: raise PreventUpdate
+
         dh = session_data['data_holder']
         point = session_data['selection_infos']['point']
         in_violation_with = session_data['selection_infos']['in_violation_with']
-        if dh is not None and dh['data']['df'] is not None:
-            if point is None:
-                return dash_table.DataTable(id="selection-datatable")
-            else:
-                tmp_df = pd.concat([pd.DataFrame([point]), in_violation_with])
-                by_data_type = True if dh['data']['df_free'] is None else False
-                columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, output_df=tmp_df, by_data_type=by_data_type)
-                
-                if dh['data']['df_free'] is not None:
-                    selection_color = (SELECTED_COLOR_BAD, SELECTED_COLOR_BAD_OUTLINE) if not in_violation_with.empty else (SELECTED_COLOR_GOOD, SELECTED_COLOR_GOOD_OUTLINE)
-                else:
-                    selection_color = (SELECTED_NON_ANALYSED_COLOR, SELECTED_NON_ANALYSED_COLOR_OUTLINE)
-                middle_sdc=[
-                    {
-                        'if': {
-                            'filter_query': f'{{id}} = {point.name}'
-                        }, 
-                        'backgroundColor': selection_color[0],
-                        'color': selection_color[1]
-                    }
-                ]
 
-            n_rows=len(table_data['df_table'].index)
-            table = dash_table.DataTable(
-                data=table_data['df_table'].to_dict('records'),
-                id="selection-datatable",
-                columns=columns,
-                page_current=0,
-                page_size=TABLE_MAX_ROWS,
-                hidden_columns = hidden_columns,
-                page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
-                style_data_conditional=table_data['pre_sdc']+middle_sdc+table_data['post_sdc'],
-                merge_duplicate_headers=True
-            )
-               
-            return table
+        if dh is None or dh['data']['df'] is None: raise PreventUpdate
+
+        if point is None:
+            return dash_table.DataTable(id="selection-datatable")
         else:
-            raise PreventUpdate
+            tmp_df = pd.concat([pd.DataFrame([point]), in_violation_with])
+            by_data_type = True if dh['data']['df_free'] is None else False
+            columns, hidden_columns, table_data = table_utils.data_preprocessing_for_table(dh, output_df=tmp_df, by_data_type=by_data_type)
+            
+            if dh['data']['df_free'] is not None:
+                selection_color = (SELECTED_COLOR_BAD, SELECTED_COLOR_BAD_OUTLINE) if not in_violation_with.empty else (SELECTED_COLOR_GOOD, SELECTED_COLOR_GOOD_OUTLINE)
+            else:
+                selection_color = (SELECTED_NON_ANALYSED_COLOR, SELECTED_NON_ANALYSED_COLOR_OUTLINE)
+            middle_sdc=[
+                {
+                    'if': {
+                        'filter_query': f'{{id}} = {point.name}'
+                    }, 
+                    'backgroundColor': selection_color[0],
+                    'color': selection_color[1]
+                }
+            ]
+
+        n_rows=len(table_data['df_table'].index)
+        table = dash_table.DataTable(
+            data=table_data['df_table'].to_dict('records'),
+            id="selection-datatable",
+            columns=columns,
+            page_current=0,
+            page_size=TABLE_MAX_ROWS,
+            hidden_columns = hidden_columns,
+            page_count=math.ceil(n_rows/TABLE_MAX_ROWS),
+            style_data_conditional=table_data['pre_sdc']+middle_sdc+table_data['post_sdc'],
+            merge_duplicate_headers=True
+        )
+            
+        return table
+            
 
     @dash.callback(
         Output('cyto_container', 'children'),

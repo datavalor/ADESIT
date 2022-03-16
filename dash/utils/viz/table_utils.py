@@ -30,8 +30,8 @@ default_style_data_conditional = [
             'filter_query': '{_violating_tuple} = 1' 
         },
         'backgroundColor': SELECTED_COLOR_BAD,
-        'color': 'white',
-        # 'border': '3px solid black'
+        'color': 'black',
+        'border': '3px solid black'
     }
 ]
 
@@ -50,14 +50,15 @@ def data_preprocessing_for_table(session_infos, data_key='df', by_data_type=True
             if column in session_infos['user_columns']:
                 columns.append({'name': [session_infos['user_columns'][column].get_type(), column], 'id': column, 'hideable':True})
         columns = sorted(columns, key=lambda x: "".join(x["name"][0]), reverse=False)
-        pre_sdc = default_style_data_conditional
+        pre_sdc = default_style_data_conditional.copy()
         post_sdc = [id_column_sdc]
     else:
+        Xs, Ys = session_infos["X"], session_infos["Y"]
         user_columns_names=list(session_infos['user_columns'].keys())
-        for c in session_infos["X"]+session_infos["Y"]: user_columns_names.remove(c)
+        for c in Xs+Ys: user_columns_names.remove(c)
         columns_other = [{"name": ["Other(s)", column], "id": column} for column in user_columns_names]
-        columns_X = [{"name": ["Feature(s)", column], "id": column} for column in session_infos["X"]]
-        columns_Y = [{"name": ["Target(s)", column], "id": column} for column in session_infos["Y"]]
+        columns_X = [{"name": ["Feature(s)", column], "id": column} for column in Xs]
+        columns_Y = [{"name": ["Target(s)", column], "id": column} for column in Ys]
         columns = columns_other+columns_X+columns_Y
 
         white_back = []
@@ -75,8 +76,8 @@ def data_preprocessing_for_table(session_infos, data_key='df', by_data_type=True
                     'border': '3px solid black'
                 })
 
-        pre_sdc = default_style_data_conditional
-        post_sdc = white_back+[id_column_sdc]
+        pre_sdc = default_style_data_conditional.copy()
+        post_sdc = white_back+[id_column_sdc.copy()]
 
 
     output_df[TABLE_ROWNUM_NAME] = output_df.reset_index(drop=True).index
