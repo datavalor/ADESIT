@@ -2,7 +2,7 @@ version: '3'
 services:
   back:
     restart: always
-    build: datavalor/adesit-back
+    image: datavalor/adesit-back
     container_name: adesit-back
     build:
       context: .
